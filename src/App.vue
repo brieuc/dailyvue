@@ -1,14 +1,15 @@
 <template>
   <ul v-for="date in dates" :key="date">
-    <one-day :date="date"></one-day>
+    <one-day :date="date" @on-change-entry="onChangeEntry"></one-day>
   </ul>
   <ul v-for="model in models" :key="model.id">
     <model-entry
       :label="model.label"
       :description="model.description"
-      :kcal="model.kcal"
-    ></model-entry>
+      :kcal="model.kcal">
+    </model-entry>
   </ul>
+
 </template>
 
 <script>
@@ -38,10 +39,13 @@ export default {
     }
   },
   methods: {
+    onChangeEntry(entry) {
+      console.log('parent entry ' + entry.description);
+    },
     initDates() {
       console.log('initDates');
       const today = new Date();
-      const endDate = new Date().setDate(today.getDate() - 2);
+      const endDate = new Date().setDate(today.getDate() - 10);
       // loop from start date to end date
       console.log('today : ' + today);
       console.log('endDate : ' + endDate);

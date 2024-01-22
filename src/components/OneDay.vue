@@ -1,8 +1,10 @@
 <template>
     <p>{{ date.toLocaleString() }}</p>
-    <p v-for="entry in entries" :key="entry.id">
-        {{ entry.description }} : {{ entry.quantity }}
-    </p>
+    <div v-for="entry in entries" :key="entry.id">
+        <section @click="activateEntry(entry)">
+            {{ entry.description }} : {{ entry.quantity }} : {{ entry.date.toLocaleString() }}
+        </section>
+    </div>
 </template>
 
 <script>
@@ -12,7 +14,8 @@ export default {
     },
     data() {
         return {
-            entries: []
+            entries: [],
+            selectedEntry: null
         }
     },
     mounted() {
@@ -20,6 +23,11 @@ export default {
         this.loadEntriesByDate();
     },
     methods: {
+        activateEntry(entry) {
+            console.log(entry.description);
+            this.selectedEntry = entry;
+            this.$emit('onChangeEntry', this.selectedEntry);
+        },
         loadEntriesByDate() {
             fetch('http://localhost:8080/entry/' + this.date.toISOString().split("T")[0])
             .then(response => {
@@ -40,5 +48,9 @@ export default {
 td {
     width: 100px;
     height: 100px;
+};
+div {
+    border-style: solid;
+    border-width: 10px;
 }
 </style>

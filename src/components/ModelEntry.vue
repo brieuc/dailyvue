@@ -17,8 +17,8 @@ export default {
 <style>
 .border-section {
     align-self: center;
-    border-style:solid;
-    border: 1cap;
+    border-style: solid;
+    border: 2px;
     width: fit-content;
 }
 </style>
