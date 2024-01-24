@@ -1,7 +1,12 @@
 <template>
-<li class="border-section">
-    {{ label }} {{ description ? description : "NoDesc"}} {{ kcal }}
-</li>
+<table>
+    <tr>
+      <td>{{ label }} </td>
+      <td>{{ description ? description : "NoDesc"}}</td>
+      <td>{{ kcal }}</td>
+      <td>{{ quantity }}</td>
+    </tr>
+</table>
 </template>
 
 <script>
@@ -9,7 +14,8 @@ export default {
     props: {
         label: String,
         description: String,
-        kcal: Number
+        kcal: Number,
+        quantity: Number
     }
 }
 </script>

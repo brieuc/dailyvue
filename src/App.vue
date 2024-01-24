@@ -1,12 +1,14 @@
 <template>
   <ul v-for="date in dates" :key="date">
-    <one-day :date="date" @on-change-entry="onChangeEntry"></one-day>
+    <one-day :date="date" @on-change-day="onChangeDay"></one-day>
   </ul>
-  <ul v-for="model in models" :key="model.id">
+  <!-- works but models in a map -->
+  <ul v-for="[, model] in modelMap" :key="model.id">
     <model-entry
       :label="model.label"
       :description="model.description"
-      :kcal="model.kcal">
+      :kcal="model.kcal"
+      :quantity="model.quantity">
     </model-entry>
   </ul>
 
@@ -24,10 +26,12 @@ export default {
   },
   data() {
     return {
-      dates: [
-
-      ],
-      models: [
+      dates: [],
+      selectedDay: null,
+      entryMap: new Map(),
+      modelMap: new Map(), 
+      selectedEntry: null,
+      model: [
         /*
         {
           id: 'a9671a7a-7206-42a3-a5b2-99c67abdcdec',
@@ -39,29 +43,52 @@ export default {
     }
   },
   methods: {
-    onChangeEntry(entry) {
-      console.log('parent entry ' + entry.description);
+    onChangeDay(date) {
+      console.log('onChangeDay');
+      this.entryMap.clear();
+      this.selectedDay = date;
+      fetch('http://localhost:8080/entry/' + this.selectedDay.toISOString().split("T")[0])
+      .then(response => {
+        if(response.ok) {
+          return response.json()
+        }
+      })
+      .then(json => {
+        json.forEach(entry => {
+          this.entryMap.set(entry.modelId, entry);
+          console.log('add to entryMap : ' + entry.modelId + ' ' + entry.description);
+        });
+        console.log('entryMap size ' + this.entryMap.size);
+        console.log('modelMap size ' + this.modelMap.size);
+        
+        this.modelMap.forEach((value, key) => {
+          console.log(key);
+          value.quantity = 0;
+        });
+        
+        this.entryMap.forEach((value, key) => {
+            console.log(key);
+            var currentModel = this.modelMap.get(value.modelId);
+            currentModel.quantity = value.quantity;
+          }
+        );
+        
+      })
     },
     initDates() {
-      console.log('initDates');
       const today = new Date();
       const endDate = new Date().setDate(today.getDate() - 10);
       // loop from start date to end date
-      console.log('today : ' + today);
-      console.log('endDate : ' + endDate);
       for (
             let date = today; 
             date > endDate; 
             date.setDate(date.getDate() - 1)
           )
       {
-        console.log('inside for' + date);
         this.dates.push(new Date(date));
       }
-      console.log('Nb dates ' + this.dates.length);
     },
     getModels() {
-      console.log('getModels');
       fetch('http://localhost:8080/model')
       .then(response => {
         if(response.ok) {
@@ -69,13 +96,38 @@ export default {
         }
       })
       .then(json => {
-        this.models = json;
+        console.log(json)
+        console.log('getModel size ' + this.entryMap.size);
+        json.forEach(model => {
+          this.modelMap.set(model.id, model);
+          //var entry = this.entryMap.get(model.id);
+          //console.log(entry.description);
+          //this.entryMap.forEach(
+          //  (value, key) => console.log(value.description + ' ' + key))
+        });
+        console.log('modelMap size ' + this.modelMap.size);
+
+          //model.quantity = entry.quantity;
+          //this.modelMap.set(entry.modelId, entry);
+         // Map.from(this.modelMap).forEach(test => console.log(test + ' ' + 1));
+          /*
+          const entry = this.entryMap.get(value.id);
+          value.quantity = entry.quantity;
+          console.log(key + ' ' + entry.quantity);
+          */
       })
     }
   },
   mounted() {
-    this.getModels();
+    // dates array creation then fill the one-day component
+    // which call the entry service for each date.
+    // the entryMap contains the entries for this specific day
     this.initDates();
+    // then the getModels should load the models (all of them) and 
+    // fill in the models with the number of entries for this day.
+    // Amongst the models, not all of them will be used for the selected
+    // day.
+    this.getModels();
   }
 }
 </script>

@@ -1,10 +1,12 @@
 <template>
-    <p>{{ date.toLocaleString() }}</p>
-    <div v-for="entry in entries" :key="entry.id">
-        <section @click="activateEntry(entry)">
-            {{ entry.description }} : {{ entry.quantity }} : {{ entry.date.toLocaleString() }}
-        </section>
-    </div>
+    <section @click="selectDay()">
+        <p>{{ date.toLocaleString() }}</p>
+        <div v-for="entry in entries" :key="entry.id">
+            <section>
+                {{ entry.description }} ({{ entry.quantity }})
+            </section>
+        </div>
+    </section>
 </template>
 
 <script>
@@ -23,21 +25,16 @@ export default {
         this.loadEntriesByDate();
     },
     methods: {
-        activateEntry(entry) {
-            console.log(entry.description);
-            this.selectedEntry = entry;
-            this.$emit('onChangeEntry', this.selectedEntry);
+        selectDay() {
+            this.$emit('onChangeDay', this.date);
         },
         loadEntriesByDate() {
             fetch('http://localhost:8080/entry/' + this.date.toISOString().split("T")[0])
             .then(response => {
-                console.log('response');
                 return response.json();
             })
             .then(data => {
-                console.log('affectation data dans entries');
                 this.entries = data;
-                console.log(this.entries)
             })
         }
     }
