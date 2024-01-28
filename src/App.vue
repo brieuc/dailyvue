@@ -4,11 +4,13 @@
   </ul>
   <!-- works but models in a map -->
   <ul v-for="[, model] in modelMap" :key="model.id">
-    <model-entry
+    <model-entry @on-update-entry="onUpdateEntry"
+      :modelId="model.id"
       :label="model.label"
       :description="model.description"
       :kcal="model.kcal"
-      :quantity="model.quantity">
+      :quantity="model.quantity"
+      :entryId="model.entryId">
     </model-entry>
   </ul>
 
@@ -43,6 +45,38 @@ export default {
     }
   },
   methods: {
+    onUpdateEntry(modelId, entryId, newQuantity) {
+      console.log('modelId' + modelId);
+      var fetchMethod = '';
+      var entry = this.entryMap.get(modelId);
+      console.log('entry : ' + entry);
+      // If there is no entry for this model Id, we need to POST
+      if (entry != null) {
+        fetchMethod = 'PUT';
+      }
+      else {
+        fetchMethod = 'POST';
+      }
+      console.log('new quantity :' + newQuantity);
+      fetch('http://localhost:8080/entry/' + entryId, {
+        method: fetchMethod,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          entryId: entry.id,
+          quantity: newQuantity,
+          description: entry.description,
+        }),
+      });
+      this.updateEntry(modelId, fetchMethod);
+
+    },
+    updateEntry(modelId, fetchMethod) {
+
+    },
     onChangeDay(date) {
       console.log('onChangeDay');
       this.entryMap.clear();
@@ -54,25 +88,24 @@ export default {
         }
       })
       .then(json => {
+        this.modelMap.forEach((model, key) => {
+          console.log(key);
+          model.quantity = 0;
+          model.entryId = 0;
+        });
+
         json.forEach(entry => {
           this.entryMap.set(entry.modelId, entry);
           console.log('add to entryMap : ' + entry.modelId + ' ' + entry.description);
-        });
-        console.log('entryMap size ' + this.entryMap.size);
-        console.log('modelMap size ' + this.modelMap.size);
-        
-        this.modelMap.forEach((value, key) => {
-          console.log(key);
-          value.quantity = 0;
-        });
-        
-        this.entryMap.forEach((value, key) => {
-            console.log(key);
-            var currentModel = this.modelMap.get(value.modelId);
-            currentModel.quantity = value.quantity;
+          var currentModel = this.modelMap.get(entry.modelId);
+          console.log(typeof entry.quantity);
+          var quantity = entry.quantity;
+          currentModel.quantity = quantity;
+          console.log(typeof currentModel.quantity);
+          currentModel.entryId = entry.id;
+          currentModel.entry = entry;
           }
-        );
-        
+        );     
       })
     },
     initDates() {
