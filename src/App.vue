@@ -48,28 +48,38 @@ export default {
     onUpdateEntry(modelId, entryId, newQuantity) {
       console.log('modelId' + modelId);
       var fetchMethod = '';
+      var url = '';
+      var bodyFetch = '';
       var entry = this.entryMap.get(modelId);
       console.log('entry : ' + entry);
       // If there is no entry for this model Id, we need to POST
       if (entry != null) {
         fetchMethod = 'PUT';
+        url = 'http://localhost:8080/entry/' + entryId;
+        bodyFetch = JSON.stringify({
+          entryId: entry.id,
+          quantity: newQuantity,
+          description: entry.description,
+        })
       }
       else {
         fetchMethod = 'POST';
+        url = 'http://localhost:8080/entry';
+        bodyFetch = JSON.stringify({
+          quantity: newQuantity,
+          modelId: modelId,
+          date: this.selectedDay.toISOString().split("T")[0]
+        });
       }
       console.log('new quantity :' + newQuantity);
-      fetch('http://localhost:8080/entry/' + entryId, {
+      fetch(url, {
         method: fetchMethod,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          entryId: entry.id,
-          quantity: newQuantity,
-          description: entry.description,
-        }),
+        body: bodyFetch,
       });
       this.updateEntry(modelId, fetchMethod);
 
