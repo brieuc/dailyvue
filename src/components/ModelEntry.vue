@@ -22,7 +22,8 @@ export default {
         kcal: Number,
         quantity: Number,
         entryId: String,
-        modelId: String
+        modelId: String,
+        entry: Object
     },
     data() {
         return {
@@ -31,6 +32,7 @@ export default {
             // newQuantity: this.quantity
             // We're trying something else.
             delta: 0,
+
         }
     },
     computed: {
@@ -40,6 +42,7 @@ export default {
     },
     methods: {
         onAdd() {
+            console.log('onAdd  ' + this.entryId);
             this.delta = this.delta + 1;
             this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
         },
@@ -49,6 +52,8 @@ export default {
         }
     },
     updated() {
+        this.delta = 0;
+        console.log('updated entryId ' + this.entryId + ' ');
     }
 }
 </script>

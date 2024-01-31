@@ -1,18 +1,19 @@
 <template>
-    <section @click="selectDay()">
+    <div class="border" @click="selectDay()">
         <p>{{ date.toLocaleString() }}</p>
         <div v-for="entry in entries" :key="entry.id">
             <section>
                 {{ entry.description }} ({{ entry.quantity }})
             </section>
         </div>
-    </section>
+    </div>
 </template>
 
 <script>
 export default {
     props: {
-        date: Date
+        date: Date,
+        reload: Boolean
     },
     data() {
         return {
@@ -37,11 +38,19 @@ export default {
                 this.entries = data;
             })
         }
+    },
+    updated() {
+        console.log('one day update');
     }
 }
 </script>
 
 <style>
+#border {
+    border-style: solid;
+    border: 2px;
+    border-color: black;
+}
 td {
     width: 100px;
     height: 100px;
