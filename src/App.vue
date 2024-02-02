@@ -1,6 +1,8 @@
 <template>
-  <ul v-for="date in dates" :key="date">
-    <one-day :date="date" @on-change-day="onChangeDay"></one-day>
+  <ul v-for="[date, entries] in entryMap" :key="date">
+    <one-day  :date="date"
+              :entries="entries"
+              @on-change-day="onChangeDay"></one-day>
   </ul>
   <div v-if="selectedDay">
   <!-- works but models in a map -->
@@ -31,7 +33,7 @@ export default {
     return {
       dates: [],
       selectedDay: null,
-      entryMapForSelectedDay: new Map(),
+      entryMap: new Map(),
       modelMap: new Map(), 
       selectedEntry: null,
       model: [
@@ -52,30 +54,26 @@ export default {
       let bodyFetch = '';
       console.log(' debut entry  id ' + entryId);
       console.log(' debut model id ' + modelId);
-      let entry = this.entryMapForSelectedDay.get(modelId);
-
-      if (entry != null) {
-        console.log('existing entry : ' + entry);
-        console.log('debut ' + entry.id);
-      }
+      let entriesForSelectedDay = this.entryMap.get(this.selectedDay);
+      let activeEntry = entriesForSelectedDay.get(modelId);
       // If there is no entry for this model Id, we need to POST
-      if (entry != null) {
+      if (activeEntry != null) {
+        activeEntry.quantity = newQuantity;
         fetchMethod = 'PUT';
         url = 'http://localhost:8080/entry/' + entryId;
         bodyFetch = JSON.stringify({
-          entryId: entry.id,
+          entryId: activeEntry.id,
           quantity: newQuantity,
-          description: entry.description,
-        })
+          description: activeEntry.description,
+        });
       }
       else {
-        let entry = new Object;
         fetchMethod = 'POST';
         url = 'http://localhost:8080/entry';
         bodyFetch = JSON.stringify({
           quantity: newQuantity,
           modelId: modelId,
-          date: this.selectedDay.toISOString().split("T")[0]
+          date: this.selectedDay
         });
       }
       console.log('new quantity :' + newQuantity);
@@ -96,10 +94,10 @@ export default {
         let newEntry = json;
         console.log('fin entryId ' + newEntry.id);
         console.log('fin model id ' + newEntry.modelId);
-        this.entryMapForSelectedDay.set(newEntry.modelId, newEntry);
-        let currentModel = this.modelMap.get(newEntry.modelId);
-        currentModel.quantity = newEntry.quantity;
-        currentModel.entryId = newEntry.id;
+        let activeModel = this.modelMap.get(newEntry.modelId);
+        activeModel.quantity = newEntry.quantity;
+        activeModel.entryId = newEntry.id;
+        entriesForSelectedDay.set(newEntry.modelId, newEntry);
       });
       this.updateEntry(modelId, fetchMethod);
 
@@ -109,9 +107,8 @@ export default {
     },
     onChangeDay(date) {
       console.log('onChangeDay');
-      this.entryMapForSelectedDay.clear();
       this.selectedDay = date;
-      fetch('http://localhost:8080/entry/' + this.selectedDay.toISOString().split("T")[0])
+      fetch('http://localhost:8080/entry/' + this.selectedDay)
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -121,13 +118,12 @@ export default {
         this.modelMap.forEach((model, key) => {
           console.log(key);
           model.quantity = 0;
-          model.entryId = 0;
+          model.entryId = '';
           model.entry = null;
         });
 
         json.forEach(entry => {
-          this.entryMapForSelectedDay.set(entry.modelId, entry);
-          console.log('add to entryMapForSelectedDay : ' + entry.modelId + ' ' + entry.description);
+
           var currentModel = this.modelMap.get(entry.modelId);
           console.log(typeof entry.quantity);
           var quantity = entry.quantity;
@@ -137,6 +133,21 @@ export default {
           }
         );     
       })
+    },
+    loadEntriesByDate(sDate) {
+        fetch('http://localhost:8080/entry/' + sDate)
+        .then(response => {
+            return response.json();
+        })
+        .then(entries => {
+          let entryMapForSelectedDay = new Map();
+          entries.forEach((entry, index) => {
+            entryMapForSelectedDay.set(entry.modelId, entry);
+          });
+          this.entryMap.set(sDate, entryMapForSelectedDay);
+          console.log('entryMap size ' + this.entryMap.size);
+
+        });
     },
     initDates() {
       const today = new Date();
@@ -148,7 +159,7 @@ export default {
             date.setDate(date.getDate() - 1)
           )
       {
-        this.dates.push(new Date(date));
+        this.loadEntriesByDate(date.toISOString().split("T")[0]);
       }
     },
     getModels() {
@@ -160,7 +171,6 @@ export default {
       })
       .then(json => {
         console.log(json)
-        console.log('getModel size ' + this.entryMapForSelectedDay.size);
         json.forEach(model => {
           this.modelMap.set(model.id, model);
           //var entry = this.entryMapForSelectedDay.get(model.id);

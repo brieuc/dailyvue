@@ -1,7 +1,7 @@
 <template>
     <div class="border" @click="selectDay()">
-        <p>{{ date.toLocaleString() }}</p>
-        <div v-for="entry in entries" :key="entry.id">
+        <p>{{ date }}</p>
+        <div v-for="[,entry] in updatedEntries" :key="entry.id">
             <section>
                 {{ entry.description }} ({{ entry.quantity }})
             </section>
@@ -12,35 +12,27 @@
 <script>
 export default {
     props: {
-        date: Date,
-        reload: Boolean
+        date: String,
+        entries: Map,
     },
     data() {
         return {
-            entries: [],
-            selectedEntry: null
+            selectedEntry: null,
+            updatedEntries: this.entries,
         }
     },
     mounted() {
         console.log('onMounted');
-        this.loadEntriesByDate();
+        console.log('mountend entries size ' + this.updatedEntries.size);
+        this.updatedEntries.forEach(entry => console.log(entry.id));
     },
     methods: {
         selectDay() {
             this.$emit('onChangeDay', this.date);
         },
-        loadEntriesByDate() {
-            fetch('http://localhost:8080/entry/' + this.date.toISOString().split("T")[0])
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                this.entries = data;
-            })
-        }
     },
     updated() {
-        console.log('one day update');
+        console.log('updated entries size ' + this.updatedEntries.size);
     }
 }
 </script>

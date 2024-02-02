@@ -22,8 +22,7 @@ export default {
         kcal: Number,
         quantity: Number,
         entryId: String,
-        modelId: String,
-        entry: Object
+        modelId: String
     },
     data() {
         return {
