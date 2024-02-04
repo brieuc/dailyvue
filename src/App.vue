@@ -52,8 +52,6 @@ export default {
       let fetchMethod = '';
       let url = '';
       let bodyFetch = '';
-      console.log(' debut entry  id ' + entryId);
-      console.log(' debut model id ' + modelId);
       let entriesForSelectedDay = this.entryMap.get(this.selectedDay);
       let activeEntry = entriesForSelectedDay.get(modelId);
       // If there is no entry for this model Id, we need to POST
@@ -76,7 +74,6 @@ export default {
           date: this.selectedDay
         });
       }
-      console.log('new quantity :' + newQuantity);
       fetch(url, {
         method: fetchMethod,
         headers: {
@@ -92,18 +89,11 @@ export default {
       })
       .then(json => {
         let newEntry = json;
-        console.log('fin entryId ' + newEntry.id);
-        console.log('fin model id ' + newEntry.modelId);
         let activeModel = this.modelMap.get(newEntry.modelId);
         activeModel.quantity = newEntry.quantity;
         activeModel.entryId = newEntry.id;
         entriesForSelectedDay.set(newEntry.modelId, newEntry);
       });
-      this.updateEntry(modelId, fetchMethod);
-
-    },
-    updateEntry(modelId, fetchMethod) {
-
     },
     onChangeDay(date) {
       console.log('onChangeDay');
@@ -149,16 +139,18 @@ export default {
 
         });
     },
-    initDates() {
+    async initDates() {
+      const startDate = await this.getMinDate();
+      console.log('startDate' + startDate);
       const today = new Date();
-      const endDate = new Date().setDate(today.getDate() - 10);
       // loop from start date to end date
       for (
-            let date = today; 
-            date > endDate; 
-            date.setDate(date.getDate() - 1)
+            let date = new Date(startDate); 
+            date <= today; 
+            date.setDate(date.getDate() + 1)
           )
       {
+        console.log(date.toISOString().split("T")[0]);
         this.loadEntriesByDate(date.toISOString().split("T")[0]);
       }
     },
@@ -170,7 +162,6 @@ export default {
         }
       })
       .then(json => {
-        console.log(json)
         json.forEach(model => {
           this.modelMap.set(model.id, model);
           //var entry = this.entryMapForSelectedDay.get(model.id);
@@ -178,7 +169,6 @@ export default {
           //this.entryMapForSelectedDay.forEach(
           //  (value, key) => console.log(value.description + ' ' + key))
         });
-        console.log('modelMap size ' + this.modelMap.size);
 
           //model.quantity = entry.quantity;
           //this.modelMap.set(entry.modelId, entry);
@@ -189,7 +179,14 @@ export default {
           console.log(key + ' ' + entry.quantity);
           */
       })
-    }
+    },
+    async getMinDate() {
+      let minDate = 0;
+      const response = await fetch('http://localhost:8080/entry/firstDate');
+      const data = await response.json();
+      console.log('data ' + data);
+      return data;
+      },
   },
   mounted() {
     // dates array creation then fill the one-day component

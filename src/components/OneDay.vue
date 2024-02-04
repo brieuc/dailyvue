@@ -1,5 +1,5 @@
 <template>
-    <div class="border" @click="selectDay()">
+    <div class="border" @click="selectDay()" style="align-content: center;">
         <p>{{ date }}</p>
         <div v-for="[,entry] in updatedEntries" :key="entry.id">
             <section>
@@ -38,17 +38,12 @@ export default {
 </script>
 
 <style>
-#border {
+.border {
+    align-content: center;
     border-style: solid;
-    border: 2px;
     border-color: black;
-}
-td {
-    width: 100px;
-    height: 100px;
-};
-div {
-    border-style: solid;
-    border-width: 10px;
+    width:fit-content;
+    height: fit-content;
+    border-radius: 2px;
 }
 </style>

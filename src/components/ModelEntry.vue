@@ -1,12 +1,10 @@
 <template>
-<table width="1000px" border="1px" border-style="solid">
+<table width="1000px" id="border-solid">
     <tr>
       <td>{{ label }} </td>
       <td>{{ description ? description : "NoDesc"}}</td>
       <td>{{ kcal }}</td>
       <td>{{ newQuantity }}</td>
-      <td>{{ modelId }}</td>
-      <td>{{ entryId }}</td>
       <td width="100px"><span id="border" @click="onAdd"> + </span></td>
       <td><span id="border" @click="onSub"> - </span></td>
     </tr>
@@ -58,16 +56,5 @@ export default {
 </script>
 
 <style>
-.border-section {
-    align-self: center;
-    border-style: solid;
-    border: 2px;
-    width: fit-content;
-}
-#border {
-    border:1px;
-    border-style: solid;
-    border-radius: 5px;
-    width:fit-content;
-}
+
 </style>
