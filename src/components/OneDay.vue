@@ -1,6 +1,6 @@
 <template>
-    <div class="border" @click="selectDay()" style="align-content: center;">
-        <p>{{ date }}</p>
+    <div id="border" @click="selectDay()">
+        <div style="background-color: palevioletred; color: aliceblue;">{{ date }}</div>
         <div v-for="[,entry] in updatedEntries" :key="entry.id">
             <section>
                 {{ entry.description }} ({{ entry.quantity }})
@@ -38,12 +38,14 @@ export default {
 </script>
 
 <style>
-.border {
-    align-content: center;
-    border-style: solid;
+#border {
+    border-radius: 5px;
     border-color: black;
-    width:fit-content;
-    height: fit-content;
-    border-radius: 2px;
+    border-style: solid;
+    cursor: pointer;
+    margin: 2rem auto;
+    max-width: 15rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+    --padding: 1rem;
 }
 </style>

@@ -1,14 +1,12 @@
 <template>
-<table width="1000px" id="border-solid">
-    <tr>
-      <td>{{ label }} </td>
-      <td>{{ description ? description : "NoDesc"}}</td>
-      <td>{{ kcal }}</td>
-      <td>{{ newQuantity }}</td>
-      <td width="100px"><span id="border" @click="onAdd"> + </span></td>
-      <td><span id="border" @click="onSub"> - </span></td>
-    </tr>
-</table>    
+<div style="display:flex; border-style: solid; border-color: black;">
+    {{ label }}
+    {{ description ? description : "NoDesc"}}
+    {{ kcal }}
+    {{ newQuantity }}
+    <button class="button" @click="onAdd"> + </button>
+    <button class="button" @click="onSub"> - </button>
+</div>    
 
 </template>
 
@@ -56,5 +54,19 @@ export default {
 </script>
 
 <style>
+tr {
+    width: max-contentnt;
+}
 
+.button {
+  background-color: #04AA6D; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-style: solid;
+}
 </style>
