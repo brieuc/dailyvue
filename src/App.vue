@@ -2,21 +2,24 @@
   <ul v-for="[date, entries] in entryMap" :key="date">
     <one-day  :date="date"
               :entries="entries"
-              @on-change-day="onChangeDay"></one-day>
+              @on-change-day="onChangeDay">
+            
+      <div v-if="selectedDay == date">
+        <!-- works but models in a map -->
+        <ul v-for="[, model] in modelMap" :key="model.id">
+          <model-entry @on-update-entry="onUpdateEntry"
+            :modelId="model.id"
+            :label="model.label"
+            :description="model.description"
+            :kcal="model.kcal"
+            :quantity="model.quantity"
+            :entryId="model.entryId">
+          </model-entry>
+        </ul>
+      </div>
+    </one-day>
   </ul>
-  <div v-if="selectedDay">
-  <!-- works but models in a map -->
-    <ul v-for="[, model] in modelMap" :key="model.id">
-      <model-entry @on-update-entry="onUpdateEntry"
-        :modelId="model.id"
-        :label="model.label"
-        :description="model.description"
-        :kcal="model.kcal"
-        :quantity="model.quantity"
-        :entryId="model.entryId">
-      </model-entry>
-    </ul>
-  </div>
+
 </template>
 
 <script>
@@ -91,8 +94,16 @@ export default {
         let newEntry = json;
         let activeModel = this.modelMap.get(newEntry.modelId);
         activeModel.quantity = newEntry.quantity;
-        activeModel.entryId = newEntry.id;
-        entriesForSelectedDay.set(newEntry.modelId, newEntry);
+
+        if (activeModel.quantity === 0) {
+          console.log('quantity : ' + activeModel.quantity);
+          entriesForSelectedDay.delete(newEntry.modelId)
+        }
+        else {
+          activeModel.entryId = newEntry.id;
+          entriesForSelectedDay.set(newEntry.modelId, newEntry);
+        }
+
       });
     },
     onChangeDay(date) {
@@ -115,10 +126,8 @@ export default {
         json.forEach(entry => {
 
           var currentModel = this.modelMap.get(entry.modelId);
-          console.log(typeof entry.quantity);
           var quantity = entry.quantity;
           currentModel.quantity = quantity;
-          console.log(typeof currentModel.quantity);
           currentModel.entryId = entry.id;
           }
         );     
@@ -132,9 +141,12 @@ export default {
         .then(entries => {
           let entryMapForSelectedDay = new Map();
           entries.forEach((entry, index) => {
-            entryMapForSelectedDay.set(entry.modelId, entry);
+            if (entry.quantity > 0)
+              entryMapForSelectedDay.set(entry.modelId, entry);
           });
           this.entryMap.set(sDate, entryMapForSelectedDay);
+          // TODO : Find another way
+          this.entryMap = new Map([...this.entryMap.entries()].sort());
           console.log('entryMap size ' + this.entryMap.size);
 
         });

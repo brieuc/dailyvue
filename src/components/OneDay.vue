@@ -7,10 +7,12 @@
             </section>
         </div>
     </div>
+    <slot></slot>
 </template>
 
 <script>
 export default {
+    emits: ["onChangeDay"],
     props: {
         date: String,
         entries: Map,
@@ -20,6 +22,8 @@ export default {
             selectedEntry: null,
             updatedEntries: this.entries,
         }
+    },
+    computed() {
     },
     mounted() {
         console.log('onMounted');

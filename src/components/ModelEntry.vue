@@ -1,17 +1,22 @@
 <template>
-<div style="display:flex; border-style: solid; border-color: black;">
-    {{ label }}
-    {{ description ? description : "NoDesc"}}
-    {{ kcal }}
-    {{ newQuantity }}
-    <button class="button" @click="onAdd"> + </button>
-    <button class="button" @click="onSub"> - </button>
-</div>    
+<div style="align-content: center;">
+    <div class="flex">
+        <p class="paragraph">{{ label }}</p>
+        <p class="paragraph">{{ description ? description : "NoDesc"}}</p>
+        <p class="paragraph">{{ kcal }}</p>
+        <p class="paragraph">{{ newQuantity }}</p>
+        <p><button class="button" @click="onAdd"> + </button></p>
+        <p><button class="button" @click="onSub"> - </button></p>
+    </div>  
+</div>
+  
 
 </template>
 
 <script>
 export default {
+    name: 'ModelEntry',
+    emits: ["onUpdateEntry"],
     props: {
         label: String,
         description: String,
@@ -42,8 +47,10 @@ export default {
             this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
         },
         onSub() {
-            this.delta = this.delta - 1;
-            this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
+            if (this.newQuantity > 0) {
+                this.delta = this.delta - 1;
+                this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
+            }
         }
     },
     updated() {
@@ -54,8 +61,18 @@ export default {
 </script>
 
 <style>
-tr {
-    width: max-contentnt;
+
+.paragraph {
+    --max-width: 10rem;
+    min-width: 5rem;
+}
+
+.flex {
+    display: flex;
+    flex-direction: row;
+    max-width: 20rem;
+    min-width: 15rem;
+    margin: auto;
 }
 
 .button {
@@ -68,5 +85,6 @@ tr {
   display: inline-block;
   font-size: 16px;
   border-style: solid;
+  
 }
 </style>
