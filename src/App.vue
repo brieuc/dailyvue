@@ -61,7 +61,7 @@ export default {
       if (activeEntry != null) {
         activeEntry.quantity = newQuantity;
         fetchMethod = 'PUT';
-        url = 'http://localhost:8080/entry/' + entryId;
+        url = 'http://vps-4ac2e447.vps.ovh.net:8080/entry/' + entryId;
         bodyFetch = JSON.stringify({
           entryId: activeEntry.id,
           quantity: newQuantity,
@@ -70,7 +70,7 @@ export default {
       }
       else {
         fetchMethod = 'POST';
-        url = 'http://localhost:8080/entry';
+        url = 'http://vps-4ac2e447.vps.ovh.net:8080/entry';
         bodyFetch = JSON.stringify({
           quantity: newQuantity,
           modelId: modelId,
@@ -109,7 +109,7 @@ export default {
     onChangeDay(date) {
       console.log('onChangeDay');
       this.selectedDay = date;
-      fetch('http://localhost:8080/entry/' + this.selectedDay)
+      fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/' + this.selectedDay)
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -134,7 +134,7 @@ export default {
       })
     },
     loadEntriesByDate(sDate) {
-        fetch('http://localhost:8080/entry/' + sDate)
+        fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/' + sDate)
         .then(response => {
             return response.json();
         })
@@ -167,7 +167,7 @@ export default {
       }
     },
     getModels() {
-      fetch('http://localhost:8080/model')
+      fetch('http://vps-4ac2e447.vps.ovh.net:8080/model')
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -194,7 +194,7 @@ export default {
     },
     async getMinDate() {
       let minDate = 0;
-      const response = await fetch('http://localhost:8080/entry/firstDate');
+      const response = await fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/firstDate');
       const data = await response.json();
       console.log('data ' + data);
       return data;
