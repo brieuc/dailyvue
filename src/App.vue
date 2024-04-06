@@ -39,6 +39,7 @@ export default {
       entryMap: new Map(),
       modelMap: new Map(), 
       selectedEntry: null,
+      serverUrl: process.env.VUE_APP_URL,
       model: [
         /*
         {
@@ -61,7 +62,7 @@ export default {
       if (activeEntry != null) {
         activeEntry.quantity = newQuantity;
         fetchMethod = 'PUT';
-        url = 'http://vps-4ac2e447.vps.ovh.net:8080/entry/' + entryId;
+        url = this.serverUrl + '/entry/' + entryId;
         bodyFetch = JSON.stringify({
           entryId: activeEntry.id,
           quantity: newQuantity,
@@ -70,7 +71,8 @@ export default {
       }
       else {
         fetchMethod = 'POST';
-        url = 'http://vps-4ac2e447.vps.ovh.net:8080/entry';
+        url = process.env.VUE_APP_URL + '/entry';
+        console.log(url);
         bodyFetch = JSON.stringify({
           quantity: newQuantity,
           modelId: modelId,
@@ -109,7 +111,7 @@ export default {
     onChangeDay(date) {
       console.log('onChangeDay');
       this.selectedDay = date;
-      fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/' + this.selectedDay)
+      fetch(this.serverUrl + '/entry/' + this.selectedDay)
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -134,7 +136,7 @@ export default {
       })
     },
     loadEntriesByDate(sDate) {
-        fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/' + sDate)
+        fetch(this.serverUrl + '/entry/' + sDate)
         .then(response => {
             return response.json();
         })
@@ -146,28 +148,38 @@ export default {
           });
           this.entryMap.set(sDate, entryMapForSelectedDay);
           // TODO : Find another way
-          this.entryMap = new Map([...this.entryMap.entries()].sort());
-          console.log('entryMap size ' + this.entryMap.size);
+          this.entryMap = new Map([...this.entryMap.entries()].sort((a, b) => b[0].localeCompare(a[0])));
+          //this.entryMap = new Map([...this.entryMap.entries()].sort());
+          console.info('entryMap size ' + this.entryMap.size);
 
         });
     },
-    async initDates() {
-      const startDate = await this.getMinDate();
-      console.log('startDate' + startDate);
-      const today = new Date();
-      // loop from start date to end date
-      for (
-            let date = new Date(startDate); 
-            date <= today; 
-            date.setDate(date.getDate() + 1)
-          )
-      {
-        console.log(date.toISOString().split("T")[0]);
-        this.loadEntriesByDate(date.toISOString().split("T")[0]);
-      }
+    initDates() {
+      console.log('inidtes');
+      fetch(this.serverUrl + '/entry/firstDate')
+      .then(response => response.json())
+      .then(entry => {
+        console.log('then2');
+        console.log('date ' + entry.date);
+        
+        const today = new Date();
+        let minDate = new Date(entry.date); 
+        // loop from start date to end date
+        console.log(minDate);
+        for (
+              let date = today;
+              minDate <= date; 
+              date.setDate(date.getDate() - 1)
+            )
+        {
+          console.log(date.toISOString().split("T")[0]);
+          this.loadEntriesByDate(date.toISOString().split("T")[0]);
+        }
+      })
+
     },
     getModels() {
-      fetch('http://vps-4ac2e447.vps.ovh.net:8080/model')
+      fetch(this.serverUrl + '/model')
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -191,16 +203,19 @@ export default {
           console.log(key + ' ' + entry.quantity);
           */
       })
-    },
+    }
+    /*, Remonté au dessus directement en utilisant le then juste après.
     async getMinDate() {
       let minDate = 0;
-      const response = await fetch('http://vps-4ac2e447.vps.ovh.net:8080/entry/firstDate');
+      const response = await fetch(this.serverUrl + '/entry/firstDate');
       const data = await response.json();
       console.log('data ' + data);
       return data;
       },
+      */
   },
   mounted() {
+    console.log('serveur ' + this.serverUrl);
     // dates array creation then fill the one-day component
     // which call the entry service for each date.
     // the entryMapForSelectedDay contains the entries for this specific day
