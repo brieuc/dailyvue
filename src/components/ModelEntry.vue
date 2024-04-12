@@ -1,16 +1,12 @@
 <template>
-<div style="align-content: center;">
-    <div class="flex">
-        <p class="paragraph">{{ label }}</p>
-        <p class="paragraph">{{ description ? description : "NoDesc"}}</p>
-        <p class="paragraph">{{ kcal }}</p>
-        <p class="paragraph">{{ newQuantity }}</p>
-        <p><button class="button" @click="onAdd"> + </button></p>
-        <p><button class="button" @click="onSub"> - </button></p>
-    </div>  
+<div class="flex">
+        <div class="paragraph">{{ label }}</div>
+        <!--<div class="paragraph">{{ description }}</div>-->
+        <div style="max-width: 3rem; min-width: 3rem;">{{ kcal }}</div>
+        <div style="max-width: 1rem; min-width: 1rem">{{ newQuantity }}</div>
+        <div class="button" @click="onAdd"> + </div>
+        <div class="button" @click="onSub"> - </div>
 </div>
-  
-
 </template>
 
 <script>
@@ -63,28 +59,34 @@ export default {
 <style>
 
 .paragraph {
-    --max-width: 10rem;
+    max-width: 10rem;
     min-width: 5rem;
 }
 
 .flex {
+    border-radius: 5px;
+    border-color: black;
+    border-style: solid;
     display: flex;
     flex-direction: row;
-    max-width: 20rem;
-    min-width: 15rem;
+    max-width:min-content;  
     margin: auto;
+    border-width: 1px;
 }
 
 .button {
-  background-color: #04AA6D; /* Green */
-  border: none;
+  background-color: #71a6af; /* Green */
+
   color: white;
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
+  --display: inline-block;
   font-size: 16px;
+  border-style: solid 1px;
+  border-radius: 2px;
   border-style: solid;
-  
+  border-color: rgb(57, 55, 55);
+  border-width: 1px;  
 }
 </style>

@@ -6,7 +6,7 @@
             
       <div v-if="selectedDay == date">
         <!-- works but models in a map -->
-        <ul v-for="[, model] in modelMap" :key="model.id">
+        <div v-for="[, model] in modelMap" :key="model.id">
           <model-entry @on-update-entry="onUpdateEntry"
             :modelId="model.id"
             :label="model.label"
@@ -15,11 +15,10 @@
             :quantity="model.quantity"
             :entryId="model.entryId">
           </model-entry>
-        </ul>
+        </div>
       </div>
     </one-day>
   </ul>
-
 </template>
 
 <script>
@@ -110,6 +109,10 @@ export default {
     },
     onChangeDay(date) {
       console.log('onChangeDay');
+      if (date === this.selectedDay) {
+        this.selectedDay = null;
+        return;
+      }
       this.selectedDay = date;
       fetch(this.serverUrl + '/entry/' + this.selectedDay)
       .then(response => {
