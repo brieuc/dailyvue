@@ -1,6 +1,7 @@
 <template>
+<p>food</p>
 <div class="flex">
-        <div class="paragraph">{{ label }}</div>
+        <div class="paragraph">{{ title }}</div>
         <!--<div class="paragraph">{{ description }}</div>-->
         <div style="max-width: 3rem; min-width: 3rem;">{{ kcal }}</div>
         <div style="max-width: 1rem; min-width: 1rem">{{ newQuantity }}</div>
@@ -11,10 +12,10 @@
 
 <script>
 export default {
-    name: 'ModelEntry',
+    name: 'ModelFood',
     emits: ["onUpdateEntry"],
     props: {
-        label: String,
+        title: String,
         description: String,
         kcal: Number,
         quantity: Number,
@@ -38,7 +39,6 @@ export default {
     },
     methods: {
         onAdd() {
-            console.log('onAdd  ' + this.entryId);
             this.delta = this.delta + 1;
             this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
         },

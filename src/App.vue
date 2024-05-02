@@ -5,16 +5,25 @@
               @on-change-day="onChangeDay">
             
       <div v-if="selectedDay == date">
-        <!-- works but models in a map -->
-        <div v-for="[, model] in modelMap" :key="model.id">
-          <model-entry @on-update-entry="onUpdateEntry"
-            :modelId="model.id"
-            :label="model.label"
-            :description="model.description"
-            :kcal="model.kcal"
-            :quantity="model.quantity"
-            :entryId="model.entryId">
-          </model-entry>
+        <model-selection @on-select-model="onSelectModel"></model-selection>  
+        <div v-if="selectedCategory === 'food'">
+          <!-- works but models in a map -->
+          <div v-for="[, model] in modelMap" :key="model.id">
+            <model-food @on-update-entry="onUpdateEntry"
+              :modelId="model.id"
+              :title="model.title"
+              :description="model.description"
+              :kcal="model.kcal"
+              :quantity="model.quantity"
+              :entryId="model.entryId">
+            </model-food>
+          </div> 
+        </div>
+        <div v-if="selectedCategory === 'sport'">
+          <model-sport :date="selectedDay" @on-add-sport-entry="onAddSportEntry"></model-sport>
+        </div>
+        <div v-if="selectedCategory === 'free'">
+          <model-free :date="selectedDay" @on-add-free-entry="onAddFreeEntry"></model-free>
         </div>
       </div>
     </one-day>
@@ -22,23 +31,29 @@
 </template>
 
 <script>
-import ModelEntry from './components/ModelEntry.vue';
+import ModelFood from './components/ModelFood.vue';
+import ModelSport from './components/ModelSport.vue';
+import ModelFree from './components/ModelFree.vue';
+import ModelSelection from './components/ModelSelection.vue';
 import OneDay from './components/OneDay.vue';
 
 export default {
   name: 'App',
   components: {
-    ModelEntry,
+    ModelFood,
+    ModelFree,
+    ModelSport,
+    ModelSelection,
     OneDay
   },
   data() {
     return {
       dates: [],
+      selectedCategory: null,
       selectedDay: null,
       entryMap: new Map(),
       modelMap: new Map(), 
       selectedEntry: null,
-      serverUrl: process.env.VUE_APP_URL,
       model: [
         /*
         {
@@ -51,6 +66,18 @@ export default {
     }
   },
   methods: {
+    onAddFreeEntry(freeEntry) {
+      console.log('onAddFreeEntry : ' + JSON.stringify(freeEntry));
+      this.selectedCategory = null;
+    },
+    onAddSportEntry(sportEntry) {
+      console.log('onAddSportEntry: ' + JSON.stringify(sportEntry));
+      this.selectedCategory = null;
+    },
+    onSelectModel(categoryName) {
+      console.log('onSelectModel ' + categoryName);
+      this.selectedCategory = categoryName;
+    },
     onUpdateEntry(modelId, entryId, newQuantity) {
       let fetchMethod = '';
       let url = '';
@@ -61,16 +88,16 @@ export default {
       if (activeEntry != null) {
         activeEntry.quantity = newQuantity;
         fetchMethod = 'PUT';
-        url = this.serverUrl + '/entry/' + entryId;
+        url = process.env.VUE_APP_URL + '/entry/' + entryId + '/food';
         bodyFetch = JSON.stringify({
-          entryId: activeEntry.id,
+          id: activeEntry.id,
           quantity: newQuantity,
           description: activeEntry.description,
         });
       }
       else {
         fetchMethod = 'POST';
-        url = process.env.VUE_APP_URL + '/entry';
+        url = process.env.VUE_APP_URL + '/entry/food';
         console.log(url);
         bodyFetch = JSON.stringify({
           quantity: newQuantity,
@@ -93,12 +120,13 @@ export default {
       })
       .then(json => {
         let newEntry = json;
+        console.log('new entry ' + JSON.stringify(newEntry));
         let activeModel = this.modelMap.get(newEntry.modelId);
         activeModel.quantity = newEntry.quantity;
 
         if (activeModel.quantity === 0) {
           console.log('quantity : ' + activeModel.quantity);
-          entriesForSelectedDay.delete(newEntry.modelId)
+          //entriesForSelectedDay.delete(newEntry.modelId)
         }
         else {
           activeModel.entryId = newEntry.id;
@@ -114,7 +142,7 @@ export default {
         return;
       }
       this.selectedDay = date;
-      fetch(this.serverUrl + '/entry/' + this.selectedDay)
+      fetch(process.env.VUE_APP_URL + '/entry/' + this.selectedDay)
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -129,7 +157,6 @@ export default {
         });
 
         json.forEach(entry => {
-
           var currentModel = this.modelMap.get(entry.modelId);
           var quantity = entry.quantity;
           currentModel.quantity = quantity;
@@ -139,7 +166,7 @@ export default {
       })
     },
     loadEntriesByDate(sDate) {
-        fetch(this.serverUrl + '/entry/' + sDate)
+        fetch(process.env.VUE_APP_URL + '/entry/' + sDate)
         .then(response => {
             return response.json();
         })
@@ -159,7 +186,7 @@ export default {
     },
     initDates() {
       console.log('inidtes');
-      fetch(this.serverUrl + '/entry/firstDate')
+      fetch(process.env.VUE_APP_URL+ '/entry/firstDate')
       .then(response => response.json())
       .then(entry => {
         console.log('then2');
@@ -182,7 +209,7 @@ export default {
 
     },
     getModels() {
-      fetch(this.serverUrl + '/model')
+      fetch(process.env.VUE_APP_URL + '/model/food')
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -218,7 +245,6 @@ export default {
       */
   },
   mounted() {
-    console.log('serveur ' + this.serverUrl);
     // dates array creation then fill the one-day component
     // which call the entry service for each date.
     // the entryMapForSelectedDay contains the entries for this specific day

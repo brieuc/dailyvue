@@ -1,12 +1,15 @@
-<template>
-    <div id="border" @click="selectDay()">
-        <div style="background-color: palevioletred; color: aliceblue;">{{ date }}</div>
+<template v-slot:category>
+    <div id="border">
+        <div @click="selectDay()" style="min-height: 30px; display: grid; align-items: center; background-color: palevioletred; color: aliceblue;">
+            <span>{{ date }}</span><span style="text-align: right;">+</span>
+        </div>
         <div v-for="[,entry] in updatedEntries" :key="entry.id">
             <section>
-                {{ entry.description }} ({{ entry.quantity }})
+                {{ entry.title }} ({{ entry.quantity }})
             </section>
         </div>
     </div>
+    <slot name="category"></slot>
     <slot></slot>
 </template>
 
