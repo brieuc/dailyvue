@@ -1,4 +1,4 @@
-<template>
+<template v-slot:category>
     <div class="flexRow">
         <div @click="selectCategory('food')">Food</div>
         <div @click="selectCategory('sport')">Sport</div>

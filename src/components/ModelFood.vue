@@ -1,92 +1,131 @@
 <template>
-<p>food</p>
-<div class="flex">
-        <div class="paragraph">{{ title }}</div>
-        <!--<div class="paragraph">{{ description }}</div>-->
-        <div style="max-width: 3rem; min-width: 3rem;">{{ kcal }}</div>
-        <div style="max-width: 1rem; min-width: 1rem">{{ newQuantity }}</div>
-        <div class="button" @click="onAdd"> + </div>
-        <div class="button" @click="onSub"> - </div>
-</div>
+    <p>model food</p>
+    <div>
+        <div v-for="model in models" :key="model.id">
+            <model-food-single @on-add-food-entry="onAddFoodEntry" @on-sub-food-entry="onSubFoodEntry" 
+                  :title="model.title"
+                  :description="model.description"
+                  :kcal="model.kcal"
+                  :model="model">
+            </model-food-single>
+        </div>
+    </div>
 </template>
-
+    
 <script>
-export default {
-    name: 'ModelFood',
-    emits: ["onUpdateEntry"],
-    props: {
-        title: String,
-        description: String,
-        kcal: Number,
-        quantity: Number,
-        entryId: String,
-        modelId: String
-    },
-    data() {
-        return {
-            // impossible to do that, the newQuantity isn't diplayed.
-            // isn't set either.
-            // newQuantity: this.quantity
-            // We're trying something else.
-            delta: 0,
-
-        }
-    },
-    computed: {
-        newQuantity() {
-            return this.quantity + this.delta;
-        }
-    },
-    methods: {
-        onAdd() {
-            this.delta = this.delta + 1;
-            this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
+    import ModelFoodSingle from './ModelFoodSingle.vue';
+    export default {
+        name: 'ModelFood',
+        emits: ["onUpdateFoodEntry"],
+        components: {
+            ModelFoodSingle
         },
-        onSub() {
-            if (this.newQuantity > 0) {
-                this.delta = this.delta - 1;
-                this.$emit("onUpdateEntry", this.modelId, this.entryId, this.newQuantity);
+        props: {
+            date: String
+        },
+        data() {
+            return {
+                selectedDay: this.date,
+                models: new Array(),
+                entriesByModelId: new Map(),
             }
+        },
+        methods: {
+            onAddFoodEntry(model) {
+                console.log("onAddFoodEntry : " + model.id);
+                let activeEntry = this.entriesByModelId.get(model.id);
+                let quantity = 1;
+                if (activeEntry != null) {
+                    quantity = activeEntry.quantity + 1;
+                }
+                console.log("onAddFoodEntry " + JSON.stringify(activeEntry));
+                this.updateFoodEntry(activeEntry, model, quantity);
+            },
+            onSubFoodEntry(model) {
+                console.log("onSubFoodEntry : " + model.id);
+                let activeEntry = this.entriesByModelId.get(model.id);
+                // If there is no entry, so there is nothing to substract
+                if (activeEntry != null) {
+                    console.log("onSubFoodEntry " + JSON.stringify(activeEntry));
+                    this.updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
+                }
+            },
+            updateFoodEntry(activeEntry, model, newQuantity) {
+                let fetchMethod = '';
+                let url = '';
+                let bodyFetch = '';
+                // If there is no entry for this model Id, we need to POST
+                if (activeEntry != null) {
+                    activeEntry.quantity = newQuantity;
+                    fetchMethod = 'PUT';
+                    url = process.env.VUE_APP_URL + '/entry/' + activeEntry.id + '/food';
+                    bodyFetch = JSON.stringify({
+                        id: activeEntry.id,
+                        quantity: newQuantity,
+                    });
+                }
+                else {
+                    fetchMethod = 'POST';
+                    url = process.env.VUE_APP_URL + '/entry/food';
+                    console.log(url);
+                    bodyFetch = JSON.stringify({
+                        quantity: newQuantity,
+                        modelId: model.id,
+                        date: this.selectedDay,
+                        title: model.title,
+                        description: model.description
+                    });
+                }
+                fetch(url, {
+                    method: fetchMethod,
+                    headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    },
+                    body: bodyFetch,
+                })
+                .then(response => {
+                    if (response.ok)
+                        return response.json();
+                })
+                .then(json => {
+                    console.log("entry json : " + JSON.stringify(json));
+                    const newEntry = json;
+                    this.entriesByModelId.set(newEntry.modelId, newEntry);
+                    this.$emit("onUpdateFoodEntry", newEntry);
+                });
+            },
+            getModels() {
+                fetch(process.env.VUE_APP_URL + '/model/food')
+                .then(response => {
+                    if(response.ok) {
+                    return response.json()
+                    }
+                })
+                .then(json => {
+                    json.forEach(model => {
+                        this.models.push(model);
+                    });
+                    this.getEntries();
+                })
+            },
+            getEntries() {
+                fetch(process.env.VUE_APP_URL + '/entry/' + this.selectedDay + '/food')
+                .then(response => {
+                    if(response.ok) {
+                        return response.json(); 
+                    }
+                })
+                .then(json => {
+                    json.forEach(entry => {
+                        this.entriesByModelId.set(entry.modelId, entry)
+                    });   
+                })
+            }
+        },
+        mounted() {
+            this.getModels();
         }
-    },
-    updated() {
-        this.delta = 0;
-        console.log('updated entryId ' + this.entryId + ' ');
     }
-}
 </script>
-
-<style>
-
-.paragraph {
-    max-width: 10rem;
-    min-width: 5rem;
-}
-
-.flex {
-    border-radius: 5px;
-    border-color: black;
-    border-style: solid;
-    display: flex;
-    flex-direction: row;
-    max-width:min-content;  
-    margin: auto;
-    border-width: 1px;
-}
-
-.button {
-  background-color: #71a6af; /* Green */
-
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  --display: inline-block;
-  font-size: 16px;
-  border-style: solid 1px;
-  border-radius: 2px;
-  border-style: solid;
-  border-color: rgb(57, 55, 55);
-  border-width: 1px;  
-}
-</style>

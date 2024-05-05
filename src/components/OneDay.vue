@@ -1,11 +1,12 @@
-<template v-slot:category>
+<template>
     <div id="border">
         <div @click="selectDay()" style="min-height: 30px; display: grid; align-items: center; background-color: palevioletred; color: aliceblue;">
             <span>{{ date }}</span><span style="text-align: right;">+</span>
         </div>
-        <div v-for="[,entry] in updatedEntries" :key="entry.id">
+        <div v-for="entry in entries" :key="entry.id">
             <section>
-                {{ entry.title }} ({{ entry.quantity }})
+                {{ entry.title }} {{ entry.quantity ? "(" + entry.quantity +")":"" }}
+
             </section>
         </div>
     </div>
@@ -18,28 +19,21 @@ export default {
     emits: ["onChangeDay"],
     props: {
         date: String,
-        entries: Map,
+        entries: null,
     },
     data() {
         return {
-            selectedEntry: null,
-            updatedEntries: this.entries,
         }
     },
     computed() {
     },
     mounted() {
-        console.log('onMounted');
-        console.log('mountend entries size ' + this.updatedEntries.size);
-        this.updatedEntries.forEach(entry => console.log(entry.id));
+        console.log("on mounted oneday");
     },
     methods: {
         selectDay() {
             this.$emit('onChangeDay', this.date);
         },
-    },
-    updated() {
-        console.log('updated entries size ' + this.updatedEntries.size);
     }
 }
 </script>
