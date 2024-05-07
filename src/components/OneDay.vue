@@ -3,7 +3,7 @@
         <div @click="selectDay()" style="min-height: 30px; display: grid; align-items: center; background-color: palevioletred; color: aliceblue;">
             <span>{{ date }}</span><span style="text-align: right;">+</span>
         </div>
-        <div v-for="entry in entries" :key="entry.id">
+        <div v-for="entry in entries" :key="entry.id" @click="displayDay()">
             <section>
                 {{ entry.title }} {{ entry.quantity ? "(" + entry.quantity +")":"" }}
 
@@ -16,7 +16,7 @@
 
 <script>
 export default {
-    emits: ["onChangeDay"],
+    emits: ["onChangeDay", "onDisplayDay"],
     props: {
         date: String,
         entries: null,
@@ -33,6 +33,9 @@ export default {
     methods: {
         selectDay() {
             this.$emit('onChangeDay', this.date);
+        },
+        displayDay() {
+            this.$emit('onDisplayDay', this.date);
         },
     }
 }

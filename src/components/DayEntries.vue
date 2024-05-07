@@ -1,24 +1,36 @@
 <template>
-      <h1>Entries</h1>
-      <div v-for="entry in entries" :key="entry.id">
-            <p>{{ entry.title }}</p>
+      <div v-if="refresh">
+            <div v-for="entry in entries" :key="entry.id">
+                  <div>{{ entry.title }}</div>
+                  <div>{{ entry.description }}</div>
+                  <p v-if="entry.type === 'FOOD'">
+                        {{ entry.quantity }}
+                  </p>
+                  
+                  Model {{ entry.model.title }}
+            </div>
       </div>
-      1
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted, defineProps } from 'vue'
+import { ref, defineEmits, onMouonUpdatednted, defineProps, onUpdated, onMounted } from 'vue'
 
-const props = defineProps(["date", "entries"]);
+const props = defineProps(["date", "entries", "refresh"]);
 
-onMounted(() => {
-	console.log('onMounted : ' + props.date);
-      console.log('onMounted : ' + props.entries);
-      props.entries.forEach(element => {
-            console.log("element " + JSON.stringify(element));
+onUpdated(() => {
+      console.log("onUpdated refreshEntries : " + props.refresh);
+      props.entries.forEach(entry => {
+            //getModel(entry);
       });
 });
 
-function loadEntriesByDate(sDate) {
+function getModel(entry) {
+      console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
+      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId)
+      .then(response => response.json())
+      .then(model => {
+            console.log("title model " + model.title);
+            entry.model = model
+      });
 }
 </script>

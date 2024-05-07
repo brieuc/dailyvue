@@ -2,12 +2,14 @@
   <ul v-for="[date, entries] in entryMap" :key="date">
     <one-day  :date="date"
               :entries="entries"
-              @on-change-day="onChangeDay">
+              @on-change-day="onChangeDay"
+              @on-display-day="onDisplayDay">
             
+      <div v-if="displayedDay == date">
+          <day-entries :date="date" :entries="entries" :refresh="refreshEntries"></day-entries>
+      </div>
+
       <div v-if="selectedDay == date">
-        <div>
-          <day-entries :date="date" :entries="entries"></day-entries>
-        </div>
         <model-selection @on-select-model="onSelectModel"></model-selection>  
         <div v-if="selectedCategory === 'food'">
             <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
@@ -44,9 +46,11 @@ export default {
   },
   data() {
     return {
-      refreshOneDay: false,
+      refreshEntries: false,
+      nbTreatedEntries: 0,
       selectedCategory: null,
       selectedDay: null,
+      displayedDay: null,
       entryMap: new Map(),
       modelMap: new Map(), 
       selectedEntry: null,
@@ -80,8 +84,18 @@ export default {
       console.log('onSelectModel ' + categoryName);
       this.selectedCategory = categoryName;
     },
-
+    onDisplayDay(date) {
+      this.selectedDay = null;
+      console.log('onDisplayDay');
+      if (date === this.displayedDay) {
+        this.displayedDay = null;
+        return;
+      }
+      this.displayedDay = date;
+      this.loadEntriesByDate(this.displayedDay);
+    },
     onChangeDay(date) {
+      this.displayedDay = null;
       console.log('onChangeDay');
       if (date === this.selectedDay) {
         this.selectedDay = null;
@@ -91,16 +105,37 @@ export default {
       this.loadEntriesByDate(this.selectedDay);
     },
     loadEntriesByDate(sDate) {
+        this.refreshEntries = false;
+        this.nbTreatedEntries = 0;
         fetch(process.env.VUE_APP_URL + '/entry/' + sDate)
         .then(response => {
             return response.json();
         })
         .then(entries => {
+          entries.forEach(entry => {
+            this.getModel(entry, entries.length);
+          });
           this.entryMap.set(sDate, entries);
           // TODO : Find another way
           this.entryMap = new Map([...this.entryMap.entries()].sort((a, b) => b[0].localeCompare(a[0])));
           console.info('entryMap size ' + this.entryMap.size);
         });
+    },
+    getModel(entry, nbEntries) {
+      console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
+      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId)
+      .then(response => response.json())
+      .then(model => {
+            console.log("title model " + JSON.stringify(model));
+            entry.model = model;
+            this.nbTreatedEntries++;
+            console.log("nb treated entries :" + this.nbTreatedEntries);
+            console.log("nb entries :" + nbEntries);
+            if (this.nbTreatedEntries === nbEntries) {
+              this.refreshEntries = true;
+              console.log("refreshEntries : " + this.refreshEntries);
+            }
+      });
     },
     initDates() {
       fetch(process.env.VUE_APP_URL+ '/entry/firstDate')
