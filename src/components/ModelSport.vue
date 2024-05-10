@@ -1,23 +1,23 @@
 <template>
-  <p>sport</p>
-  <select v-model="sportModelId">
+  Sport Model
+  <select v-model="rSportModelId">
     <option v-for="[modelId, sportTitle] in sportsMap" :key="modelId" :value="modelId">{{ sportTitle }}</option>
   </select>
-  <p><input type="text" v-model="title"></p>
-  <p><textarea v-model="description"></textarea></p>
-  <p>Calories<input type="text" v-model="kcal"></p>
-  <p>Duration<input type="text" v-model="duration"></p>
+  <p>Title<input type="text" v-model="rTitle"></p>
+  <p>Description<textarea v-model="rDescription"></textarea></p>
+  <p>Calories<input type="text" v-model="rKcal"></p>
+  <p>Duration<input type="text" v-model="rDuration"></p>
   Aerobic
-  <select v-model="aerobic">
+  <select v-model="rAerobic">
     <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
   </select>
   Aaerobic
-  <select v-model="anaerobic">
+  <select v-model="rAnaerobic">
     <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
   </select>
   <p>
     benefit
-    <select v-model="benefit">
+    <select v-model="rBenefit">
       <option v-for="possibleBenefit in benefits" :key="possibleBenefit" :value="possibleBenefit">{{ possibleBenefit }}
       </option>
     </select>
@@ -30,22 +30,32 @@ import { ref } from 'vue'
 
 export default {
   props: {
-    date: Date
+    entryId: null,
+    date: Date,
+    title: String,
+    description: String,
+    kcal: Number,
+    duration: Number,
+    aerobic: Number,
+    anaerobic: Number,
+    benefit: String,
+    sportModelId: null
+
   },
   emits: ["onAddSportEntry"],
   setup(props, { emit }) {
 
     let sportsMap = ref(new Map());
-    const sportModelId = ref();
     const benefits = ['base', 'anaerobie', 'sprint', 'tempo'];
 
-    const title = ref();
-    const description = ref();
-    const kcal = ref();
-    const duration = ref();
-    const aerobic = ref();
-    const anaerobic = ref();
-    const benefit = ref();
+    const rTitle = ref(props.title);
+    const rDescription = ref(props.description);
+    const rKcal = ref(props.kcal);
+    const rDuration = ref(props.duration);
+    const rAerobic = ref(props.aerobic);
+    const rAnaerobic = ref(props.anaerobic);
+    const rBenefit = ref(props.benefit);
+    const rSportModelId = ref(props.sportModelId);
     const selectValues = ref([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
       1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
       2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9,
@@ -66,23 +76,46 @@ export default {
     }
 
     function addSportEntry() {
+      console.log("entry Id " + props.entryId);
+      let fetchMethod = "";
+      let fetchURL = "";
+      let bodyToAdd = {};
 
-      const bodyToAdd = {
-        title: title.value,
-        description: description.value,
-        kcal: kcal.value,
-        duration: duration.value,
-        aerobic: aerobic.value,
-        anaerobic: anaerobic.value,
-        benefit: benefit.value,
-        modelId: sportModelId.value,
-        date: props.date
-      };
+      if (props.entryId) {
+        fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/sport'
+        console.log(fetchURL);
+        fetchMethod = 'PUT';
+        bodyToAdd = {
+          id: props.entryId,
+          title: rTitle.value,
+          description: rDescription.value,
+          kcal: rKcal.value,
+          duration: rDuration.value,
+          aerobic: rAerobic.value,
+          anaerobic: rAnaerobic.value,
+          benefit: rBenefit.value,
+        };
+      }
+      else {
+        fetchURL = process.env.VUE_APP_URL + '/entry/sport';
+        fetchMethod = "POST";
+        bodyToAdd = {
+          title: rTitle.value,
+          description: rDescription.value,
+          kcal: rKcal.value,
+          duration: rDuration.value,
+          aerobic: rAerobic.value,
+          anaerobic: rAnaerobic.value,
+          benefit: rBenefit.value,
+          modelId: rSportModelId.value,
+          date: props.date
+        };
+      }
 
       console.log(JSON.stringify(bodyToAdd));
 
-      fetch(process.env.VUE_APP_URL + '/entry/sport', {
-        method: 'POST',
+      fetch(fetchURL, {
+        method: fetchMethod,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
@@ -97,20 +130,20 @@ export default {
     }
 
     return {
-      title,
-      description,
-      kcal,
-      duration,
-      aerobic,
-      anaerobic,
-      benefit,
+      rTitle,
+      rDescription,
+      rKcal,
+      rDuration,
+      rAerobic,
+      rAnaerobic,
+      rBenefit,
+      rSportModelId,
       selectValues,
 
       addSportEntry,
       getModels,
 
       sportsMap,
-      sportModelId,
       benefits
     }
   },

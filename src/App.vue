@@ -6,7 +6,9 @@
               @on-display-day="onDisplayDay">
             
       <div v-if="displayedDay == date">
-          <day-entries :date="date" :entries="entries" :refresh="refreshEntries"></day-entries>
+          <day-entries :date="date" :entries="entries" :shouldBeDisplayed="entriesShouldBeDisplayed"
+                       v-on:on-update-free-entry="onUpdateFreeEntry"
+                       @on-update-sport-entry="onUpdateSportEntry"></day-entries>
       </div>
 
       <div v-if="selectedDay == date">
@@ -46,7 +48,7 @@ export default {
   },
   data() {
     return {
-      refreshEntries: false,
+      entriesShouldBeDisplayed: false,
       nbTreatedEntries: 0,
       selectedCategory: null,
       selectedDay: null,
@@ -67,14 +69,24 @@ export default {
   },
   methods: {
     onAddFreeEntry(freeEntry) {
-      console.log('onAddFreeEntry : ' + JSON.stringify(freeEntry));
+      console.log('App.vue onAddFreeEntry : ' + JSON.stringify(freeEntry));
       this.selectedCategory = null;
       this.loadEntriesByDate(this.selectedDay);
+    },
+    onUpdateFreeEntry(freeEntry) {
+      console.log('App.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
+      this.selectedCategory = null;
+      this.loadEntriesByDate(this.displayedDay);
     },
     onAddSportEntry(sportEntry) {
       console.log('onAddSportEntry: ' + JSON.stringify(sportEntry));
       this.selectedCategory = null;
       this.loadEntriesByDate(this.selectedDay);
+    },
+    onUpdateSportEntry(sportEntry) {
+      console.log('App.vue onUpdateSportEntry: ' + JSON.stringify(sportEntry));
+      this.selectedCategory = null;
+      this.loadEntriesByDate(this.displayedDay);
     },
     onUpdateFoodEntry(foodEntry) {
       console.log('onUpdateFoodEntry: ' + JSON.stringify(foodEntry));
@@ -105,7 +117,7 @@ export default {
       this.loadEntriesByDate(this.selectedDay);
     },
     loadEntriesByDate(sDate) {
-        this.refreshEntries = false;
+        this.entriesShouldBeDisplayed = false;
         this.nbTreatedEntries = 0;
         fetch(process.env.VUE_APP_URL + '/entry/' + sDate)
         .then(response => {
@@ -132,8 +144,8 @@ export default {
             console.log("nb treated entries :" + this.nbTreatedEntries);
             console.log("nb entries :" + nbEntries);
             if (this.nbTreatedEntries === nbEntries) {
-              this.refreshEntries = true;
-              console.log("refreshEntries : " + this.refreshEntries);
+              this.entriesShouldBeDisplayed = true;
+              console.log("entriesShouldBeDisplayed : " + this.entriesShouldBeDisplayed);
             }
       });
     },

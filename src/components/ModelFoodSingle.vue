@@ -1,5 +1,4 @@
 <template>
-<p>food single</p>
 <div class="flex">
     <div class="paragraph">{{ title }}</div>
     <!--<div class="paragraph">{{ description }}</div>-->

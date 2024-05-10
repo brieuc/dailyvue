@@ -1,5 +1,4 @@
 <template>
-    <p>model food</p>
     <div>
         <div v-for="model in models" :key="model.id">
             <model-food-single @on-add-food-entry="onAddFoodEntry" @on-sub-food-entry="onSubFoodEntry" 
