@@ -117,6 +117,7 @@ export default {
       this.loadEntriesByDate(this.selectedDay);
     },
     loadEntriesByDate(sDate) {
+        console.log(sDate);
         this.entriesShouldBeDisplayed = false;
         this.nbTreatedEntries = 0;
         fetch(process.env.VUE_APP_URL + '/entry/' + sDate)
@@ -156,12 +157,15 @@ export default {
         const today = new Date();
         let minDate = new Date(entry.date); 
         // loop from start date to end date
+        console.log("today . " + today);
+        console.log("minDate . " + minDate);
         for (
               let date = today;
               minDate <= date; 
               date.setDate(date.getDate() - 1)
             )
         {
+          console.log("load");
           this.loadEntriesByDate(date.toISOString().split("T")[0]);
         }
       })
