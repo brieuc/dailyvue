@@ -7,14 +7,18 @@
   <p>Description<textarea v-model="rDescription"></textarea></p>
   <p>Calories<input type="text" v-model="rKcal"></p>
   <p>Duration<input type="text" v-model="rDuration"></p>
-  Aerobic
-  <select v-model="rAerobic">
-    <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
-  </select>
-  Aaerobic
-  <select v-model="rAnaerobic">
-    <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
-  </select>
+  <p>
+    Aerobic
+    <select v-model="rAerobic">
+      <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
+    </select>
+  </p>
+  <p>
+    Aaerobic
+    <select v-model="rAnaerobic">
+      <option v-for="val in selectValues" :key="val" :value="val">{{ val }}</option>
+    </select>
+  </p>
   <p>
     benefit
     <select v-model="rBenefit">
@@ -22,7 +26,7 @@
       </option>
     </select>
   </p>
-  <p><button @click="addSportEntry()">Add Entry</button></p>
+  <p><button @click="addSportEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry" }}</button></p>
 </template>
 
 <script>
@@ -30,6 +34,7 @@ import { ref } from 'vue'
 
 export default {
   props: {
+    mode: null,
     entryId: null,
     date: Date,
     title: String,

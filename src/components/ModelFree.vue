@@ -1,14 +1,14 @@
 <template>
 	<p>Title<input type="text" v-model="title"></p>
 	<p>Description<textarea v-model="description"></textarea></p>
-	<p><button @click="addFreeEntry()">Add Entry</button></p>
+	<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
 </template>
 
 <script setup>
 import { ref, defineEmits, onMounted, defineProps } from 'vue'
 
 const emit = defineEmits(['onAddFreeEntry']);
-const props = defineProps(["date", "title", "description", "entryId"]);
+const props = defineProps(["date", "title", "description", "entryId", "mode"]);
 
 const title = ref(props.title);
 const description = ref(props.description);

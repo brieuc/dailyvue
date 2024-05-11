@@ -76,7 +76,13 @@ export default {
     onUpdateFreeEntry(freeEntry) {
       console.log('App.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
       this.selectedCategory = null;
+      
+      //let entries = this.entryMap.get(this.displayedDay);
+      //entries.push(freeEntry);
+
       this.loadEntriesByDate(this.displayedDay);
+      this.displayedDay = null;
+      
     },
     onAddSportEntry(sportEntry) {
       console.log('onAddSportEntry: ' + JSON.stringify(sportEntry));
