@@ -52,4 +52,16 @@ export default {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
     --padding: 1rem;
 }
+
+@media only screen and (max-width: 393px) {
+  #border {
+    border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    cursor: pointer;
+    margin: auto;
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  }
+}
 </style>
