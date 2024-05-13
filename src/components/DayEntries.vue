@@ -102,9 +102,6 @@ function onEditEntry(entry) {
 
 <style>
 .div-entry-center {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 200px;
   border: 1px;
   border-color: black;
   border-style: solid;

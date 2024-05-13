@@ -1,6 +1,6 @@
 <template>
     <div id="border">
-        <div @click="selectDay()" style="min-height: 30px; display: grid; align-items: center; background-color: palevioletred; color: aliceblue;">
+        <div @click="selectDay()" style="min-height: 30px; background-color: palevioletred; color: aliceblue;">
             <span>{{ date }}</span><span style="text-align: right;">+</span>
         </div>
         <div v-for="entry in entries" :key="entry.id" @click="displayDay()">
@@ -48,7 +48,7 @@ export default {
     border-style: solid;
     cursor: pointer;
     margin: auto;
-    max-width: 200px;
+    width: 200px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
     --padding: 1rem;
 }
@@ -59,9 +59,8 @@ export default {
     border-color: black;
     border-style: solid;
     cursor: pointer;
-    margin: auto;
-    max-width: 100%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
   }
 }
 </style>

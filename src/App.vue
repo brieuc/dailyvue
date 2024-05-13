@@ -1,31 +1,32 @@
 <template>
-  <ul v-for="[date, entries] in entryMap" :key="date">
-    <one-day  :date="date"
-              :entries="entries"
-              @on-change-day="onChangeDay"
-              @on-display-day="onDisplayDay">
-            
-      <div v-if="displayedDay == date">
-          <day-entries :date="date" :entries="entries" :shouldBeDisplayed="entriesShouldBeDisplayed"
-                       v-on:on-update-free-entry="onUpdateFreeEntry"
-                       @on-update-sport-entry="onUpdateSportEntry"></day-entries>
-      </div>
+<div v-for="[date, entries] in entryMap" :key="date">
+  <one-day  :date="date"
+            :entries="entries"
+            @on-change-day="onChangeDay"
+            @on-display-day="onDisplayDay">
+          
+    <div v-if="displayedDay == date">
+        <day-entries :date="date" :entries="entries" :shouldBeDisplayed="entriesShouldBeDisplayed"
+                      v-on:on-update-free-entry="onUpdateFreeEntry"
+                      @on-update-sport-entry="onUpdateSportEntry"></day-entries>
+    </div>
 
-      <div v-if="selectedDay == date">
-        <model-selection @on-select-model="onSelectModel"></model-selection>  
-        <div v-if="selectedCategory === 'food'">
-            <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
-        </div>
-        <div v-if="selectedCategory === 'sport'">
-          <model-sport :date="selectedDay" @on-add-sport-entry="onAddSportEntry"></model-sport>
-        </div>
-        <div v-if="selectedCategory === 'free'">
-          <model-free :date="selectedDay" @on-add-free-entry="onAddFreeEntry"></model-free>
-        </div>
+    <div v-if="selectedDay == date">
+      <model-selection @on-select-model="onSelectModel"></model-selection>  
+      <div v-if="selectedCategory === 'food'">
+          <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
       </div>
+      <div v-if="selectedCategory === 'sport'">
+        <model-sport :date="selectedDay" @on-add-sport-entry="onAddSportEntry"></model-sport>
+      </div>
+      <div v-if="selectedCategory === 'free'">
+        <model-free :date="selectedDay" @on-add-free-entry="onAddFreeEntry"></model-free>
+      </div>
+    </div>
 
-    </one-day>
-  </ul>
+  </one-day>
+  <p></p>
+</div>
 </template>
 
 <script>
@@ -202,6 +203,15 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  width: 200px;
+  max-width: 400px;
+  margin: auto;
+}
+
+@media only screen and (max-width: 393px) {
+  #app {
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>
