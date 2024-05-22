@@ -38,6 +38,7 @@ export default {
 <style>
 
 .flexRow {
+    border: 1px;
     align-items: center;
     text-align: center;
     border-style: solid;
@@ -48,6 +49,7 @@ export default {
     background-color:cornflowerblue;
     color: beige;
     cursor: pointer;
+    width: 200px;
     max-width: 300px;
     margin: auto;
 }

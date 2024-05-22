@@ -102,6 +102,7 @@ function onEditEntry(entry) {
 
 <style>
 .div-entry-center {
+  width: 200px;
   border: 1px;
   border-color: black;
   border-style: solid;

@@ -199,6 +199,7 @@ export default {
 
 <style>
 #app {
+  border: 1px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -210,6 +211,7 @@ export default {
 
 @media only screen and (max-width: 393px) {
   #app {
+    border: 1px;
     width: 100%;
     text-align: center;
   }

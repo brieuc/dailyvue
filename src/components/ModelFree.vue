@@ -1,7 +1,9 @@
 <template>
-	<p>Title<input type="text" v-model="title"></p>
-	<p>Description<textarea v-model="description"></textarea></p>
-	<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
+	<div id="border">
+		<p>Title<input type="text" v-model="title"></p>
+		<p>Description<textarea v-model="description"></textarea></p>
+		<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
+	</div>
 </template>
 
 <script setup>
@@ -72,3 +74,29 @@ function addFreeEntry() {
 	});
 }
 </script>
+
+<style>
+#border {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    cursor: pointer;
+    margin: auto;
+    width: 200px;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+    --padding: 1rem;
+}
+
+@media only screen and (max-width: 393px) {
+  #border {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    cursor: pointer;
+    width: 100%;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+  }
+}
+</style>

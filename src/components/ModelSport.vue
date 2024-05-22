@@ -1,4 +1,5 @@
 <template>
+  <div id="border">
   Sport Model
   <select v-model="rSportModelId">
     <option v-for="[modelId, sportTitle] in sportsMap" :key="modelId" :value="modelId">{{ sportTitle }}</option>
@@ -27,6 +28,7 @@
     </select>
   </p>
   <p><button @click="addSportEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry" }}</button></p>
+  </div>
 </template>
 
 <script>
@@ -160,3 +162,28 @@ export default {
 }
 
 </script>
+<style>
+#border {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    cursor: pointer;
+    margin: auto;
+    width: 200px;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+    --padding: 1rem;
+}
+
+@media only screen and (max-width: 393px) {
+  #border {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    cursor: pointer;
+    width: 100%;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+  }
+}
+</style>

@@ -47,7 +47,7 @@ export default {
 }
 
 .flex {
-    border-radius: 5px;
+    --border-radius: 5px;
     border-color: black;
     border-style: solid;
     display: flex;
@@ -58,16 +58,16 @@ export default {
 }
 
 .button {
-  background-color: #71a6af; /* Green */
+  background-color: #655263; /* Green */
   cursor: pointer;
   color: white;
-  padding: 15px 32px;
+  padding: 14px 13px;
   text-align: center;
   text-decoration: none;
   --display: inline-block;
   font-size: 16px;
   border-style: solid 1px;
-  border-radius: 2px;
+  --border-radius: 2px;
   border-style: solid;
   border-color: rgb(57, 55, 55);
   border-width: 1px;  
