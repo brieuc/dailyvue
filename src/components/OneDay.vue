@@ -1,7 +1,7 @@
 <template>
     <div id="border">
         <div @click="selectDay()" style="min-height: 30px; background-color: palevioletred; color: aliceblue;">
-            <span>{{ day }}</span><span>{{ date }}</span><span style="text-align: right;">+</span>
+            <span>{{ day }}</span> <span>{{ date }}</span><span style="text-align: right;">+</span>
         </div>
         <div v-for="entry in entries" :key="entry.id" @click="displayDay()">
             <section>
@@ -27,7 +27,9 @@ export default {
     },
     computed: {
         day() {
-            return "lundi"
+            const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+            let now = new Date(this.date);
+            return days[now.getDay()];
         },
 
         
