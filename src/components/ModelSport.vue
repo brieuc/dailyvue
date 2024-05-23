@@ -53,7 +53,7 @@ export default {
   setup(props, { emit }) {
 
     let sportsMap = ref(new Map());
-    const benefits = ['base', 'anaerobie', 'sprint', 'tempo'];
+    const benefits = ['base', 'anaerobie', 'sprint', 'tempo', 'vo2max'];
 
     const rTitle = ref(props.title);
     const rDescription = ref(props.description);

@@ -17,11 +17,11 @@
                                     @on-add-sport-entry="onAddSportEntry">
                               </model-sport>
                         </div>
-                        <div v-else>
+                        <div style="background-color: beige;">
                               <div>{{ entry.title }}</div>
                               <div>{{ entry.description }}</div>
                               <table class="center">
-                                    <tr><td>Modèle</td><td>{{ entry.model.title }}</td></tr>
+                                    <tr><td>Modèle</td><td><b>{{ entry.model.title }}</b></td></tr>
                                     <tr><td>Sport</td><td>{{ entry.model.sport }}</td></tr>
                                     <tr><td>Duration</td><td>{{ entry.duration }}</td></tr>
                                     <tr><td>Calories</td><td>{{ entry.kcal }}</td></tr>
@@ -52,6 +52,7 @@
                         <div>Calories {{ entry.quantity * entry.model.kcal }}</div>
                   </div>
                   <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button>
+                  <button class="button-color" v-if="entry.editMode !== true" @click="onDeleteEntry(entry)">Delete</button>
             </div>
       </div>
 </template>
@@ -61,7 +62,7 @@ import ModelFree from './ModelFree.vue';
 import ModelSport from './ModelSport.vue';
 import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 
-const emit = defineEmits(['onUpdateFreeEntry']);
+const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
 
@@ -97,6 +98,12 @@ function onEditEntry(entry) {
       console.log("onEditEntry : " + JSON.stringify(entry));
       entry.editMode = true;
       editMode = true;
+}
+
+function onDeleteEntry(entry) {
+      console.log("onDeleteEntry : " + JSON.stringify(entry));
+      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {method: "DELETE"})
+      .then(_ => emit('onDeleteEntry', entry));
 }
 </script>
 

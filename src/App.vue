@@ -8,7 +8,9 @@
     <div v-if="displayedDay == date">
         <day-entries :date="date" :entries="entries" :shouldBeDisplayed="entriesShouldBeDisplayed"
                       v-on:on-update-free-entry="onUpdateFreeEntry"
-                      @on-update-sport-entry="onUpdateSportEntry"></day-entries>
+                      @on-update-sport-entry="onUpdateSportEntry"
+                      @on-delete-entry="onDeleteEntry">
+                    </day-entries>
     </div>
 
     <div v-if="selectedDay == date">
@@ -69,6 +71,10 @@ export default {
     }
   },
   methods: {
+    onDeleteEntry(entry) {
+      console.log('App.vue onDeleteEntry : ' + JSON.stringify(entry.id));
+      this.loadEntriesByDate(this.displayedDay);
+    },
     onAddFreeEntry(freeEntry) {
       console.log('App.vue onAddFreeEntry : ' + JSON.stringify(freeEntry));
       this.selectedCategory = null;
