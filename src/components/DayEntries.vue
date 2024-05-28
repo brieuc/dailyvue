@@ -1,5 +1,5 @@
 <template>
-      <div v-if="shouldBeDisplayed">
+      <div v-if="shouldBeDisplayed" style="background-color:azure;">
             <div v-for="entry in entries" :key="entry.id" class="div-entry-center">
                   <div v-if="entry.type === 'SPORT'">
                         <div v-if="entry.editMode">
@@ -17,7 +17,7 @@
                                     @on-add-sport-entry="onAddSportEntry">
                               </model-sport>
                         </div>
-                        <div style="background-color: beige;">
+                        <div>
                               <div>{{ entry.title }}</div>
                               <div>{{ entry.description }}</div>
                               <table class="center">
@@ -51,7 +51,8 @@
                         <div>{{ entry.title }}</div>
                         <div>Calories {{ entry.quantity * entry.model.kcal }}</div>
                   </div>
-                  <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button>
+                  <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button> 
+                  &nbsp;
                   <button class="button-color" v-if="entry.editMode !== true" @click="onDeleteEntry(entry)">Delete</button>
             </div>
       </div>
@@ -108,14 +109,31 @@ function onDeleteEntry(entry) {
 </script>
 
 <style>
-.div-entry-center {
-  width: 200px;
-  border: 1px;
-  border-color: black;
-  border-style: solid;
+.center {
+      margin: auto;
 }
 
-.button-color {
+.div-entry-center {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    margin: auto;
+    width: 200px;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+    --padding: 1rem;
+}
 
+@media only screen and (max-width: 393px) {
+  .div-entry-center {
+    border: 1px;
+    --border-radius: 5px;
+    border-color: black;
+    border-style: solid;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+  }
 }
 </style>

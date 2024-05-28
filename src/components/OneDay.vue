@@ -1,12 +1,11 @@
 <template>
     <div id="border">
-        <div @click="selectDay()" style="min-height: 30px; background-color: palevioletred; color: aliceblue;">
-            <span>{{ day }}</span> <span>{{ date }}</span><span style="text-align: right;">+</span>
+        <div @click="selectDay()" style="min-height: 30px; background-color:darkslategray; color: white;">
+            <span>{{ day }}</span> <span>{{ date }}</span>
         </div>
         <div v-for="entry in entries" :key="entry.id" @click="displayDay()">
             <section>
                 {{ entry.title }} {{ entry.quantity ? "(" + entry.quantity +")":"" }}
-
             </section>
         </div>
     </div>
