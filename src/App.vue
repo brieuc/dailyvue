@@ -22,10 +22,15 @@ export default {
     }
   },
   methods: {
-    initDates() {
+    async initDates() {
+
+      let minDate = await this.getMinDate();
+      //console.log(minDate);
+      
+      let minDateStr = minDate;
       let d = null;
       //fetch(process.env.VUE_APP_URL+ '/entry/get/2024-05-11?numberOfDays=7')
-      fetch(process.env.VUE_APP_URL+ '/entry/get/2024-06-03?numberOfDays=7')
+      fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7')
       .then(response => response.json())
       .then(entries => {
         entries.forEach(element => {
@@ -34,15 +39,14 @@ export default {
         });
       });
     },
-    /*, Remonté au dessus directement en utilisant le then juste après.
+    //Remonté au dessus directement en utilisant le then juste après.
     async getMinDate() {
-      let minDate = 0;
-      const response = await fetch(this.serverUrl + '/entry/firstDate');
+      const response = await fetch(process.env.VUE_APP_URL + '/entry/firstDate');
       const data = await response.json();
-      console.log('data ' + data);
-      return data;
+      let minDate = data.pop();
+      console.log('data ' + minDate);
+      return minDate;
       },
-      */
   },
   mounted() {
     // dates array creation then fill the one-day component

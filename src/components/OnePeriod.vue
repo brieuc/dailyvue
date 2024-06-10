@@ -1,15 +1,18 @@
 <template>
 
-<summary-info     :fromDate="fomDate"
-                  :toDate="toDate">
+<summary-info     :fromDate="fromDate"
+                  :toDate="toDate"
+                  :ingestedKcal="ingestedKcal"
+                  :spentKcal="spentKcal"
+                  :sportDuration="sportDuration">
 </summary-info>
 
 <div v-for="[date, entries] in entryMap" :key="date">
 
       <one-day    :date="date"
                   :entries="entries"
-                  @on-change-day="onChangeDay"
-                  @on-display-day="onDisplayDay">
+                  :shouldBeDisplayed="entriesShouldBeDisplayed"
+                  v-on:onLoadEntry="onLoadEntry">
       </one-day>
 
 </div>
@@ -20,24 +23,24 @@ import OneDay from './OneDay.vue';
 import SummaryInfo from './SummaryInfo.vue'
 import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 
-const fromDate = "2022-01-01";
-const toDate = "2022-12-01";
+let fromDate = ref("");
+let toDate = ref("");
 
 
 let entriesShouldBeDisplayed = ref(false);
 let nbTreatedEntries = ref(0);
 
-let entryMap = reactive(new Map());
+let ingestedKcal = ref(0);
+let spentKcal = ref(0);
+let sportDuration = ref(0);
+
+let entryMap = ref(new Map());
 
 const props = defineProps(["initialDate", "numberOfDays"]);
 
-
-function onChangeDay() {
-      console.log('onChangeDay');
-}
-
-function onDisplayDay() {
-      console.log('onDisplayDay');
+function onLoadEntry(sDate) {
+      console.log("onLoadEntry");
+      loadEntriesByDate(sDate);
 }
 
 function loadEntriesByDate(sDate) {
@@ -54,10 +57,12 @@ function loadEntriesByDate(sDate) {
                   getModel(entry, entries.length);
             });
             
-            entryMap.set(sDate, entries);
+            entryMap.value.set(sDate, entries);
             // TODO : Find another way
-            entryMap = new Map([...entryMap.entries()].sort((a, b) => b[0].localeCompare(a[0])));
-            console.info('entryMap size ' + entryMap.get(sDate).length + ' for day ' + sDate);
+            entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
+            //entryMap.value = new Map([...entryMap.entries()].sort());
+            console.info('entries size ' + entryMap.value.get(sDate).length + ' for day ' + sDate);
+            console.info('map size ' + entryMap.value.size + ' for initial day ' + props.initialDate);
       });
 }
 
@@ -66,14 +71,10 @@ function getModel(entry, nbEntries) {
       fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId)
       .then(response => response.json())
       .then(model => {
-            console.log("title model " + JSON.stringify(model));
             entry.model = model;
             nbTreatedEntries.value++;
-            console.log("nb treated entries :" + nbTreatedEntries.value);
-            console.log("nb entries :" + nbEntries);
             if (nbTreatedEntries.value === nbEntries) {
                   entriesShouldBeDisplayed.value = true;
-                  console.log("entriesShouldBeDisplayed : " + entriesShouldBeDisplayed.value);
             }
       });
 }
@@ -82,18 +83,30 @@ function initDates() {
       
       let initialDate = props.initialDate;
       let date = null;
-      for (let days = 0; days <= props.numberOfDays; days++) {
+      for (let days = 0; days < props.numberOfDays; days++) {
             date = new Date(initialDate.valueOf());
             date.setDate(date.getDate() + days);
-            console.log('init date : ' + date.toISOString().split("T")[0] + " for weeks " + props.initialDate);
             loadEntriesByDate(date.toISOString().split("T")[0]);
       }
+      fromDate.value = initialDate.toISOString().split("T")[0];
+      toDate.value = date.toISOString().split("T")[0];
+}
+
+function getSummaryInfo() {
+      fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + fromDate.value + '&toDate=' + toDate.value)
+      .then(response => response.json())
+      .then(summaryInfo => {
+            console.log('summary info ' + JSON.stringify(summaryInfo));
+            spentKcal.value = summaryInfo.spentKcal;
+            ingestedKcal.value = summaryInfo.ingestedKcal;
+            sportDuration.value = summaryInfo.sportDuration;
+      });
+
 }
 
 onMounted(() => {
-      console.log('props.initialDate : ' + props.initialDate);
-      console.log('props.numberOfDays : ' + props.numberOfDays);
       initDates();
+      getSummaryInfo();
 });
 
 </script>

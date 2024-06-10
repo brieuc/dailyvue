@@ -41,6 +41,11 @@ export default {
 
 <style>
 
+.flex {
+    display:contents
+}
+
+/*
 .paragraph {
     max-width: 10rem;
     min-width: 5rem;
@@ -56,7 +61,7 @@ export default {
     margin: auto;
     border-width: 1px;
 }
-
+*/
 .button {
   background-color: #655263; /* Green */
   cursor: pointer;

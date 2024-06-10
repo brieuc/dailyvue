@@ -13,10 +13,11 @@
     <slot></slot>
 
     <div v-if="displayedDay == date">
-        <day-entries :date="date" :entries="entries" :shouldBeDisplayed="entriesShouldBeDisplayed"
-                      v-on:on-update-free-entry="onUpdateFreeEntry"
-                      @on-update-sport-entry="onUpdateSportEntry"
-                      @on-delete-entry="onDeleteEntry">
+        <day-entries :date="date" :entries="entries" 
+                     :shouldBeDisplayed="shouldBeDisplayed"
+                     v-on:on-update-free-entry="onUpdateFreeEntry"
+                     @on-update-sport-entry="onUpdateSportEntry"
+                     @on-delete-entry="onDeleteEntry">
         </day-entries>
     </div>
 
@@ -43,13 +44,24 @@ import ModelFree from './ModelFree.vue';
 import ModelSelection from './ModelSelection.vue';
 import DayEntries from './DayEntries.vue';
 export default {
-    emits: ["onChangeDay", "onDisplayDay"],
+    components: {
+        ModelFood,
+        ModelFree,
+        ModelSport,
+        ModelSelection,
+        DayEntries
+    },
+    emits: ["onChangeDay", "onDisplayDay", "onLoadEntry"],
     props: {
+        shouldBeDisplayed: null,
         date: String,
         entries: null,
     },
     data() {
         return {
+            selectedDay: null,
+            displayedDay: null,
+            selectedCategory: null
         }
     },
     computed: {
@@ -62,17 +74,31 @@ export default {
         
     },
     mounted() {
-        console.log("on mounted oneday");
+        console.log("on mounted oneday with entries " + this.entries.length);
     },
     methods: {
-        /*
+        
         selectDay() {
-            this.$emit('onChangeDay', this.date);
+            this.displayedDay = null;
+            if (this.date === this.selectedDay) {
+                    this.selectedDay = null;
+                    return;
+            }
+            this.selectedDay = this.date;
+            console.log('onChangeDay ' + this.date + ' ' + this.selectedDay);
+            this.loadEntriesByDate(this.selectedDay);
         },
         displayDay() {
-            this.$emit('onDisplayDay', this.date);
+            this.selectedDay = null;
+            
+            if (this.date === this.displayedDay) {
+                this.displayedDay = null;
+                return;
+            }
+            this.displayedDay = this.date;
+            console.log('onDisplayDay ' + this.date + ' ' + this.displayedDay);
+            this.loadEntriesByDate(this.displayedDay);
         },
-        */
         onDeleteEntry(entry) {
             console.log('App.vue onDeleteEntry : ' + JSON.stringify(entry.id));
             this.loadEntriesByDate(this.displayedDay);
@@ -106,26 +132,10 @@ export default {
             console.log('onSelectModel ' + categoryName);
             this.selectedCategory = categoryName;
         },
-        onDisplayDay(date) {
-            this.selectedDay = null;
-            console.log('onDisplayDay');
-            if (date === this.displayedDay) {
-                this.displayedDay = null;
-                return;
-            }
-            this.displayedDay = date;
-            this.loadEntriesByDate(this.displayedDay);
-        },
-        onChangeDay(date) {
-            this.displayedDay = null;
-            console.log('onChangeDay');
-            if (date === this.selectedDay) {
-                this.selectedDay = null;
-                return;
-            }
-            this.selectedDay = date;
-            this.loadEntriesByDate(this.selectedDay);
-        },
+        loadEntriesByDate(sDate) {
+            console.log("loadEntriesByDate " + sDate);
+            this.$emit("onLoadEntry", sDate);
+        }
     }
 }
 </script>
