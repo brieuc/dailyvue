@@ -1,4 +1,4 @@
-<template v-slot:category>
+<template>
     <div class="flexRow">
         <div @click="selectCategory('food')">Food</div>
         <div @click="selectCategory('sport')">Sport</div>
@@ -50,8 +50,14 @@ export default {
     color: beige;
     cursor: pointer;
     width: 200px;
-    max-width: 300px;
+    --max-width: 300px;
     margin: auto;
+}
+
+@media only screen and (max-width: 393px) {
+    .flexRow {
+        width: 100%;
+    }
 }
 
 </style>
