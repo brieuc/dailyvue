@@ -60,6 +60,8 @@
                     url = process.env.VUE_APP_URL + '/entry/' + activeEntry.id + '/food';
                     bodyFetch = JSON.stringify({
                         id: activeEntry.id,
+                        title: activeEntry.title,
+                        description: activeEntry.description,
                         quantity: newQuantity,
                     });
                 }
