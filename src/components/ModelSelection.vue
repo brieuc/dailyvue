@@ -46,8 +46,8 @@ export default {
     background-color:cornflowerblue;
     color: beige;
     cursor: pointer;
-    width: 302px;
-    --max-width: 300px;
+    width: 400px;
+    --max-width: 400px;
 }
 
 @media only screen and (max-width: 393px) {

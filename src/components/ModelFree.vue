@@ -1,7 +1,7 @@
 <template>
 <div id="border">
 	<p>Title<input type="text" v-model="title"></p>
-	<p>Description<textarea v-model="description"></textarea></p>
+	<p>Description<textarea rows="5" cols="33" v-model="description"></textarea></p>
 	<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
 </div>
 </template>

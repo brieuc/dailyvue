@@ -119,7 +119,7 @@ function onDeleteEntry(entry) {
     border-color: black;
     border-style: solid;
     margin: auto;
-    width: 300px;
+    width: 400px;
     --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
     --padding: 1rem;
 }

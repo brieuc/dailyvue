@@ -59,13 +59,20 @@ export default {
 </script>
 
 <style>
+input[type="text"] {
+  font-size: 16px;
+}
+textarea {
+  font-size: 16px;
+}
+
 #app {
   border: 1px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  width: 300px;
+  width: 400px;
   max-width: 400px;
   margin: auto;
 }

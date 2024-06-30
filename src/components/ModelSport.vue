@@ -5,7 +5,7 @@
     <option v-for="[modelId, sportTitle] in sportsMap" :key="modelId" :value="modelId">{{ sportTitle }}</option>
   </select>
   <p>Title<input type="text" v-model="rTitle"></p>
-  <p>Description<textarea v-model="rDescription"></textarea></p>
+  <p>Description<textarea rows="5" cols="33" v-model="rDescription"></textarea></p>
   <p>Calories<input type="text" v-model="rKcal"></p>
   <p>Duration<input type="text" v-model="rDuration"></p>
   <p>
