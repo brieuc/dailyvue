@@ -108,8 +108,8 @@ function onEditEntry(entry) {
 
 function onDeleteEntry(entry) {
       console.log("onDeleteEntry : " + JSON.stringify(entry));
-      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {method: "DELETE"}, {
-          method: 'GET',
+      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {
+          method: 'DELETE',
           headers: {
             'Authorization' : 'Bearer ' + localStorage.getItem("token"),
           }
