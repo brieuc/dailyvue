@@ -87,7 +87,12 @@ function onAddSportEntry(entry) {
 
 function getModel(entry) {
       console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
-      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId)
+      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
+          method: 'GET',
+          headers: {
+            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+          }
+      })
       .then(response => response.json())
       .then(model => {
             console.log("title model " + model.title);
@@ -103,7 +108,12 @@ function onEditEntry(entry) {
 
 function onDeleteEntry(entry) {
       console.log("onDeleteEntry : " + JSON.stringify(entry));
-      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {method: "DELETE"})
+      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {method: "DELETE"}, {
+          method: 'GET',
+          headers: {
+            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+          }
+      })
       .then(_ => emit('onDeleteEntry', entry));
 }
 </script>

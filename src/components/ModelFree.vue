@@ -22,14 +22,19 @@ onMounted(() => {
 });
 
 function getModels() {
-	fetch(process.env.VUE_APP_URL + '/model/free')
-		.then(response => response.json())
-		.then(json => {
-			console.log(JSON.stringify(json));
-			const model = json.at(0);
-			console.log(model.id);
-			modelId = model.id;
-		})
+	fetch(process.env.VUE_APP_URL + '/model/free', {
+		method: 'GET',
+		headers: {
+			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+		}
+	})
+	.then(response => response.json())
+	.then(json => {
+		console.log(JSON.stringify(json));
+		const model = json.at(0);
+		console.log(model.id);
+		modelId = model.id;
+	})
 }
 
 function addFreeEntry() {
@@ -65,6 +70,7 @@ function addFreeEntry() {
 			'Access-Control-Allow-Origin': '*',
 			'Content-Type': 'application/json',
 			'Accept': 'application/json',
+			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
 		},
 		body: JSON.stringify(bodyToAdd),
 	})

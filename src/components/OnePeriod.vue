@@ -47,7 +47,12 @@ function loadEntriesByDate(sDate) {
       console.log('loadEntriesByDate ' + sDate);
       entriesShouldBeDisplayed.value = false;
       nbTreatedEntries.value = 0;
-      fetch(process.env.VUE_APP_URL + '/entry/' + sDate)
+      fetch(process.env.VUE_APP_URL + '/entry/' + sDate, {
+		method: 'GET',
+		headers: {
+			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+		}
+	})
       .then(response => {
             return response.json();
       })
@@ -68,7 +73,12 @@ function loadEntriesByDate(sDate) {
 
 function getModel(entry, nbEntries) {
       console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
-      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId)
+      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
+		method: 'GET',
+		headers: {
+			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+		}
+	})
       .then(response => response.json())
       .then(model => {
             entry.model = model;
@@ -96,7 +106,12 @@ function initDates() {
 }
 
 function getSummaryInfo() {
-      fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + fromDate.value + '&toDate=' + toDate.value)
+      fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + fromDate.value + '&toDate=' + toDate.value, {
+		method: 'GET',
+		headers: {
+			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+		}
+	})
       .then(response => response.json())
       .then(summaryInfo => {
             console.log('summary info ' + JSON.stringify(summaryInfo));
