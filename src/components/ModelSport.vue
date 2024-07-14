@@ -72,7 +72,12 @@ export default {
 
     function getModels() {
       console.log('getModels sport');
-      fetch(process.env.VUE_APP_URL + '/model/sport')
+      fetch(process.env.VUE_APP_URL + '/model/sport', {
+          method: 'GET',
+          headers: {
+            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+          }
+        })
         .then(response => response.json())
         .then(json => {
           json.forEach(sport => {
@@ -127,6 +132,7 @@ export default {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
         },
         body: JSON.stringify(bodyToAdd),
       })

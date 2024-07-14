@@ -5,7 +5,7 @@
                   <tr><td>username</td><td><input type="text" v-model="username"></td></tr>
                   <tr><td>password</td><td><input type="text" v-model="password"></td></tr>
             </table>
-            <button @click="login()">Login</button>
+            <input type="submit" @click="login()" value="Login">
       </div>
 </template>
 
@@ -25,6 +25,7 @@ function login() {
                   'Acces-Control-Allow-Origin': '*',
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
+                  //'Authorization' : 'Bearer ' + localStorage.getItem("token"), no need
             },
             body: JSON.stringify({
                   username: username.value,
@@ -32,10 +33,12 @@ function login() {
             }),
       })
       .then(response => {
+            console.log(response);
             if (response.ok)
                   return response.json();
       })
       .then(json => {
+            console.log(json.token);
             emit("onGeneratedToken", json.token);
       });
 }

@@ -37,46 +37,29 @@ export default {
 
     async initDates() {
 
-      let minDate = await this.getMinDate();
-      //console.log(minDate);
-      if (minDate == 403) {
-        this.error403 = true;
+      if (localStorage.getItem("token") == null) {
         return;
       }
 
-      /*
-            fetch(process.env.VUE_APP_URL + '/auth/login', {
-            method: 'POST',
+      let minDate = await this.getMinDate();
+      if (minDate != -1) {
+        let minDateStr = minDate;
+        let d = null;
+        fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7', {
+            method: 'GET',
             headers: {
-                  'Acces-Control-Allow-Origin': '*',
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                  username: username.value,
-                  password: password.value
-            }),
-      })
-            */
-        
-
-      let minDateStr = minDate;
-      let d = null;
-      //fetch(process.env.VUE_APP_URL+ '/entry/get/2024-05-11?numberOfDays=7')
-      fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7', {
-          method: 'GET',
-          headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+              'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+            }
           }
-        }
-      )
-      .then(response => response.json())
-      .then(entries => {
-        entries.forEach(element => {
-          d = new Date(element);
-          this.dates.push(d);
+        )
+        .then(response => response.json())
+        .then(entries => {
+          entries.forEach(element => {
+            d = new Date(element);
+            this.dates.push(d);
+          });
         });
-      });
+      }
     },
     //Remonté au dessus directement en utilisant le then juste après.
     async getMinDate() {
@@ -88,13 +71,17 @@ export default {
         }
       );
       if (response.status == 403) {
-        return 403;
+        this.error403 = true;
+        return -1;
       }
-      const data = await response.json();
-      let minDate = data.pop();
-      console.log('data ' + minDate);
-      return minDate;
-      },
+      else if (response.ok) {
+        this.error403 = false;
+        const data = await response.json();
+        let minDate = data.pop();
+        console.log('data ' + minDate);
+        return minDate;
+      }
+    },
   },
   mounted() {
     // dates array creation then fill the one-day component
