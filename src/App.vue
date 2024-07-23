@@ -1,4 +1,5 @@
 <template>
+<error-view></error-view>
 <login-entry  :display-login="error403"
               v-on:on-generated-token="onGeneratedToken"></login-entry>
 <div v-for="date in dates" :key="date">
@@ -10,21 +11,34 @@
 </template>
 
 <script>
+import ErrorView from './components/ErrorView.vue'
 import LoginEntry from './components/LoginEntry.vue'
-import OnePeriod from './components/OnePeriod.vue';
+import OnePeriod from './components/OnePeriod.vue'
 
 export default {
   name: 'App',
   components: {
     OnePeriod,
     LoginEntry,
+    ErrorView,
   },
   data() {
     return {
       dates: new Array(),
       error403: Boolean,
       token: String,
+      machin: 'truc'
     }
+  },
+  computed: {
+    errorMessage() {
+      console.log('computed : ' + this.error)
+      return this.error
+    }
+
+  },
+  provide: {
+    error: 'test error from parent',
   },
   methods: {
     onGeneratedToken(token) {
@@ -34,7 +48,6 @@ export default {
       this.error403 = false;
       this.initDates();
     },
-
     async initDates() {
 
       if (localStorage.getItem("token") == null) {
@@ -58,7 +71,7 @@ export default {
             d = new Date(element);
             this.dates.push(d);
           });
-        });
+        })
       }
     },
     //Remonté au dessus directement en utilisant le then juste après.

@@ -8,7 +8,9 @@
 
 <script setup>
 import { ref, defineEmits, onMounted, defineProps } from 'vue'
+import { useDailyStore } from '@/dailyStore';
 
+const dailyStore = useDailyStore();
 const emit = defineEmits(['onAddFreeEntry']);
 const props = defineProps(["date", "title", "description", "entryId", "mode"]);
 
@@ -63,6 +65,7 @@ function addFreeEntry() {
 		};
 	}
 	
+	let statusCode = 0;
 	console.log('body ' + JSON.stringify(bodyToAdd));
 	fetch(fetchURL, {
 		method: fetchMethod,
@@ -74,8 +77,14 @@ function addFreeEntry() {
 		},
 		body: JSON.stringify(bodyToAdd),
 	})
-	.then(response => response.json())
+	.then(response => {
+		statusCode = response.status;
+		return response.json()
+	})
 	.then(json => {
+		console.log('DEBUT');
+		dailyStore.errorMessage = json.message;
+		console.log('dailyStore.errorMessage ' + dailyStore.errorMessage);
 		emit('onAddFreeEntry', json);
 	});
 }

@@ -68,8 +68,6 @@ export default {
             let now = new Date(this.date);
             return days[now.getDay()];
         },
-
-        
     },
     mounted() {
         console.log("on mounted oneday with entries " + this.entries.length);
@@ -98,40 +96,41 @@ export default {
             this.loadEntriesByDate(this.displayedDay);
         },
         onDeleteEntry(entry) {
-            console.log('App.vue onDeleteEntry : ' + JSON.stringify(entry.id));
+            console.log('OneDay.vue onDeleteEntry : ' + JSON.stringify(entry.id));
             this.loadEntriesByDate(this.displayedDay);
         },
         onAddFreeEntry(freeEntry) {
-            console.log('App.vue onAddFreeEntry : ' + JSON.stringify(freeEntry));
+            console.log('OneDay.vue onAddFreeEntry : ' + JSON.stringify(freeEntry));
             this.selectedCategory = null;
             this.loadEntriesByDate(this.selectedDay);
+
         },
         onUpdateFreeEntry(freeEntry) {
-            console.log('App.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
+            console.log('OneDay.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
             this.selectedCategory = null;
             this.loadEntriesByDate(this.displayedDay);
             this.displayedDay = null;
         },
         onAddSportEntry(sportEntry) {
-            console.log('onAddSportEntry: ' + JSON.stringify(sportEntry));
+            console.log('OneDay.vue onAddSportEntry: ' + JSON.stringify(sportEntry));
             this.selectedCategory = null;
             this.loadEntriesByDate(this.selectedDay);
         },
         onUpdateSportEntry(sportEntry) {
-            console.log('App.vue onUpdateSportEntry: ' + JSON.stringify(sportEntry));
+            console.log('OneDay.vue onUpdateSportEntry: ' + JSON.stringify(sportEntry));
             this.selectedCategory = null;
             this.loadEntriesByDate(this.displayedDay);
         },
         onUpdateFoodEntry(foodEntry) {
-            console.log('onUpdateFoodEntry: ' + JSON.stringify(foodEntry));
+            console.log('OneDay.vue onUpdateFoodEntry: ' + JSON.stringify(foodEntry));
             this.loadEntriesByDate(this.selectedDay);
         },
         onSelectModel(categoryName) {
-            console.log('onSelectModel ' + categoryName);
+            console.log('OneDay.vue onSelectModel ' + categoryName);
             this.selectedCategory = categoryName;
         },
         loadEntriesByDate(sDate) {
-            console.log("loadEntriesByDate " + sDate);
+            console.log("OneDay.vue loadEntriesByDate " + sDate);
             this.$emit("onLoadEntry", sDate);
         }
     }
