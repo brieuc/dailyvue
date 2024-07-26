@@ -4,7 +4,10 @@
                   :toDate="toDate"
                   :ingestedKcal="ingestedKcal"
                   :spentKcal="spentKcal"
-                  :sportDuration="sportDuration">
+                  :sportDuration="sportDuration"
+                  :aerobic="aerobic"
+                  :anaerobic="anaerobic"
+                  :drinking-beer="drinkingBeer">
 </summary-info>
 
 <div v-for="[date, entries] in entryMap" :key="date">
@@ -30,9 +33,12 @@ let toDate = ref("");
 let entriesShouldBeDisplayed = ref(false);
 let nbTreatedEntries = ref(0);
 
-let ingestedKcal = ref(0);
-let spentKcal = ref(0);
-let sportDuration = ref(0);
+let ingestedKcal = ref(0.0);
+let spentKcal = ref(0.0);
+let sportDuration = ref(0.0);
+let drinkingBeer = ref(0.0);
+let anaerobic = ref(0.0);
+let aerobic = ref(0.0);
 
 let entryMap = ref(new Map());
 
@@ -103,6 +109,8 @@ function initDates() {
       }
       fromDate.value = initialDate.toISOString().split("T")[0];
       toDate.value = date.toISOString().split("T")[0];
+      //fromDate.value = "2024-07-12";
+      //toDate.value = "2024-07-26";
 }
 
 function getSummaryInfo() {
@@ -112,12 +120,20 @@ function getSummaryInfo() {
 			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
 		}
 	})
-      .then(response => response.json())
+      .then(response => {
+            console.log(response.status);
+            if (response.ok) {
+                  return response.json();
+            }
+      })
       .then(summaryInfo => {
             console.log('summary info ' + JSON.stringify(summaryInfo));
             spentKcal.value = summaryInfo.spentKcal;
             ingestedKcal.value = summaryInfo.ingestedKcal;
             sportDuration.value = summaryInfo.sportDuration;
+            drinkingBeer.value = summaryInfo.drinkingBeer;
+            anaerobic.value = summaryInfo.anaerobic;
+            aerobic.value = summaryInfo.aerobic;
       });
 
 }
