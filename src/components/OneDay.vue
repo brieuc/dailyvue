@@ -5,7 +5,7 @@
     </div>
     <div class="flex" @click="displayDay()">
         <div v-for="entry in entries" :key="entry.id" >
-            {{ entry.title }} {{ entry.quantity ? "(" + entry.quantity +")":"" }}
+            {{ entry.title }} {{ getQuantity(entry) }}
         </div>  
     </div>
 </div>
@@ -73,7 +73,12 @@ export default {
         console.log("on mounted oneday with entries " + this.entries.length);
     },
     methods: {
-        
+        getQuantity(entry) {
+            if (entry.quantity > 1)
+                return "(" + entry.quantity + ")";
+            else
+                return "";
+        },
         selectDay() {
             this.displayedDay = null;
             if (this.date === this.selectedDay) {
