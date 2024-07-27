@@ -1,6 +1,6 @@
 <template>
 <h4 style="color: blueviolet;">Du {{ fromDate }} au {{ toDate }}</h4>
-<div class="flex">
+<div class="flex-summary">
       <div>Activités sportives {{ sportDuration }} min</div>
       <div>Calories dépensées {{ spentKcal }} kcal</div>
       <div>Calories ingérées {{ ingestedKcal }} kcal</div>
@@ -18,7 +18,7 @@ const props = defineProps(["fromDate", "toDate", "ingestedKcal", "spentKcal", "s
 </script>
 
 <style>
-.flex {
+.flex-summary {
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
