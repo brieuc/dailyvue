@@ -107,6 +107,19 @@ export default {
 </script>
 
 <style>
+
+body {
+  /*
+  --background-image: linear-gradient(to top, #dad4ec 0%, #dad4ec 1%, #f3e7e9 100%);
+  --background: url("../../public/images/burger1.jpg") no-repeat center center fixed;
+  /Users/brieuc/Documents/vue/dailymon/src/assets/
+  */
+  background-image: url("./assets/pexels-padrinan-255379.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+}
+
 input[type="text"] {
   font-size: 16px;
 }

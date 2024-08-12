@@ -1,5 +1,5 @@
 <template>
-      <div style="background-color: crimson; color: antiquewhite;">
+      <div class="formatted" style="background-color: crimson; color: antiquewhite;">
             {{ dailyStore.errorMessage }}
       </div>
 </template>
@@ -8,3 +8,9 @@
 import { useDailyStore } from '@/dailyStore';
 const dailyStore = useDailyStore();
 </script>
+
+<style>
+.formatted {
+    white-space:pre-wrap;
+}
+</style>

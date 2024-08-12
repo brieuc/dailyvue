@@ -1,6 +1,6 @@
 <template>
 <div id="border">
-	<p>Title<input type="text" v-model="title"></p>
+	<p>Title &nbsp;<input type="text" v-model="title"></p>
 	<p>Description<textarea rows="5" cols="33" v-model="description"></textarea></p>
 	<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
 </div>
@@ -83,6 +83,7 @@ function addFreeEntry() {
 	})
 	.then(json => {
 		console.log('DEBUT');
+		console.log(json.message);
 		dailyStore.errorMessage = json.message;
 		console.log('dailyStore.errorMessage ' + dailyStore.errorMessage);
 		emit('onAddFreeEntry', json);
