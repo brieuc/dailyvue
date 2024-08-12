@@ -4,10 +4,10 @@
   <select v-model="rSportModelId">
     <option v-for="[modelId, sportTitle] in sportsMap" :key="modelId" :value="modelId">{{ sportTitle }}</option>
   </select>
-  <p>Title<input type="text" v-model="rTitle"></p>
+  <p>Title &nbsp;<input type="text" v-model="rTitle"></p>
   <p>Description<textarea rows="5" cols="33" v-model="rDescription"></textarea></p>
-  <p>Calories<input type="text" v-model="rKcal"></p>
-  <p>Duration<input type="text" v-model="rDuration"></p>
+  <p>Calories &nbsp;<input type="text" v-model="rKcal"></p>
+  <p>Duration &nbsp;<input type="text" v-model="rDuration"></p>
   <p>
     Aerobic
     <select v-model="rAerobic">
@@ -33,6 +33,7 @@
 
 <script>
 import { ref } from 'vue'
+import { useDailyStore } from '@/dailyStore';
 
 export default {
   props: {
@@ -51,6 +52,8 @@ export default {
   },
   emits: ["onAddSportEntry"],
   setup(props, { emit }) {
+
+    const dailyStore = useDailyStore();
 
     let sportsMap = ref(new Map());
     const benefits = ['base', 'anaerobie', 'sprint', 'tempo', 'vo2max'];
@@ -138,6 +141,7 @@ export default {
       })
         .then(response => response.json())
         .then(json => {
+          dailyStore.errorMessage = json.message;
           emit('onAddSportEntry', bodyToAdd);
         });
     }

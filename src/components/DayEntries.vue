@@ -19,7 +19,7 @@
                   </div>
                   <div>
                         <div>{{ entry.title }}</div>
-                        <div>{{ entry.description }}</div>
+                        <div class="formatted">{{ entry.description }}</div>
                         <table class="center">
                               <tr><td>Modèle</td><td><b>{{ entry.model.title }}</b></td></tr>
                               <tr><td>Sport</td><td>{{ entry.model.sport }}</td></tr>
@@ -119,6 +119,10 @@ function onDeleteEntry(entry) {
 </script>
 
 <style>
+.formatted {
+    white-space:pre-wrap;
+}
+
 .center {
       margin: auto;
 }
