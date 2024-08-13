@@ -115,9 +115,15 @@ body {
   /Users/brieuc/Documents/vue/dailymon/src/assets/
   */
   background-image: url("./assets/pexels-padrinan-255379.jpg");
-  background-repeat: no-repeat;
   background-attachment: fixed;
+}
 
+@media only screen and (max-width: 393px) {
+  body {
+    background-image: url("./assets/pexels-padrinan-255379.jpg");
+    background-repeat: repeat;
+    /*background-attachment: fixed;*/
+  }
 }
 
 input[type="text"] {
