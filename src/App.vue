@@ -121,8 +121,8 @@ body {
 @media only screen and (max-width: 393px) {
   body {
     background-image: url("./assets/pexels-padrinan-255379.jpg");
-    background-repeat: repeat;
-    /*background-attachment: fixed;*/
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
 }
 
