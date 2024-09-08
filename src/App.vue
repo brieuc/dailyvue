@@ -2,119 +2,117 @@
 <error-view></error-view>
 <login-entry  :display-login="error403"
               v-on:on-generated-token="onGeneratedToken"></login-entry>
-<div v-for="date in dates" :key="date">
-  <one-period :initial-date=date
+<button hidden="true" @click="loadEntries()">Charger toutes les entrées</button>
+<div v-for="period in periods" :key="period.startDate">
+  <one-period :initial-date="period.startDate"
+              :has-loaded-entries="period.hasBeenLoaded"
               :number-of-days=7>
   </one-period>
   <p></p>
 </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 import ErrorView from './components/ErrorView.vue'
 import LoginEntry from './components/LoginEntry.vue'
 import OnePeriod from './components/OnePeriod.vue'
+import { useOnePeriodItem } from './oneperiod';
 
-export default {
-  name: 'App',
-  components: {
-    OnePeriod,
-    LoginEntry,
-    ErrorView,
-  },
-  data() {
-    return {
-      dates: new Array(),
-      error403: Boolean,
-      token: String,
-      machin: 'truc'
-    }
-  },
-  computed: {
-    errorMessage() {
-      console.log('computed : ' + this.error)
-      return this.error
-    }
 
-  },
-  provide: {
-    error: 'test error from parent',
-  },
-  methods: {
-    onGeneratedToken(token) {
-      console.log("onGeneratedToken " + token);
-      this.token = token;
-      localStorage.setItem("token", token);
-      this.error403 = false;
-      this.initDates();
-    },
-    async initDates() {
+const periods = ref([]);
+const error403 = ref(false);
+const token = ref(""); 
 
-      if (localStorage.getItem("token") == null) {
-        return;
-      }
+const errorMessage = computed(()=> {
+  return "ERROR MSG PB";
+});
+      
 
-      let minDate = await this.getMinDate();
-      if (minDate != -1) {
-        let minDateStr = minDate;
-        let d = null;
-        fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7', {
-            method: 'GET',
-            headers: {
-              'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-            }
-          }
-        )
-        .then(response => response.json())
-        .then(entries => {
-          entries.forEach(element => {
-            d = new Date(element);
-            this.dates.push(d);
-          });
-        })
-      }
-    },
-    //Remonté au dessus directement en utilisant le then juste après.
-    async getMinDate() {
-      const response = await fetch(process.env.VUE_APP_URL + '/entry/firstDate', {
-          method: 'GET',
-          headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-          }
+function loadEntries() {
+  console.log("has been loaded");
+  periods.value.forEach(p => {
+    const {date, isLoaded} = p;
+    console.log("period " + JSON.stringify(p));
+    console.log("hasBeenLoaded " + isLoaded.value);
+    //p.hasBeenLoaded.value = true;
+  });
+}
+
+function onGeneratedToken(tokenRing) {
+  token.value = tokenRing;
+  localStorage.setItem("token", token);
+  error403.value = false;
+  initDates();
+}
+
+async function initDates() {
+
+  let i = 0;
+  if (localStorage.getItem("token") == null) {
+    return;
+  }
+
+  let minDate = await getMinDate();
+  if (minDate != -1) {
+    let minDateStr = minDate;
+    let d = null;
+    fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7', {
+        method: 'GET',
+        headers: {
+          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
         }
-      );
-      if (response.status == 403) {
-        this.error403 = true;
-        return -1;
       }
-      else if (response.ok) {
-        this.error403 = false;
-        const data = await response.json();
-        let minDate = data.pop();
-        console.log('data ' + minDate);
-        return minDate;
-      }
-    },
-  },
-  mounted() {
-    // dates array creation then fill the one-day component
-    // which call the entry service for each date.
-    // the entryMapForSelectedDay contains the entries for this specific day
-    this.initDates();
-
+    )
+    .then(response => response.json())
+    .then(entries => {
+      entries.forEach(date => {
+        //d = new Date(element);
+        //this.dates.push(d);
+        //console.log("d : " + d);
+        if (i < 4)
+          periods.value.push(useOnePeriodItem(date, true));
+        else
+          periods.value.push(useOnePeriodItem(date, false));
+        i++;
+        //console.log("period " + period.startDate);
+      });
+    })
   }
 }
+
+//Remonté au dessus directement en utilisant le then juste après.
+async function getMinDate() {
+  const response = await fetch(process.env.VUE_APP_URL + '/entry/firstDate', {
+      method: 'GET',
+      headers: {
+        'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+      }
+    }
+  );
+  if (response.status == 403) {
+    error403.value = true;
+    return -1;
+  }
+  else if (response.ok) {
+    error403.value = false;
+    const data = await response.json();
+    let minDate = data.pop();
+    return minDate;
+  }
+}
+
+onMounted(() => {
+  initDates();
+});
 </script>
 
 <style>
 
 body {
-  /*
-  --background-image: linear-gradient(to top, #dad4ec 0%, #dad4ec 1%, #f3e7e9 100%);
-  --background: url("../../public/images/burger1.jpg") no-repeat center center fixed;
-  /Users/brieuc/Documents/vue/dailymon/src/assets/
-  */
-  background-image: url("./assets/pexels-padrinan-255379.jpg");
+  background-image: linear-gradient(to right bottom, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+  /*background-image: url("./assets/pexels-padrinan-255379.jpg");*/
+
   background-attachment: fixed;
 }
 
