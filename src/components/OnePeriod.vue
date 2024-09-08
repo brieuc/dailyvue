@@ -11,14 +11,14 @@
 </summary-info>
 
 <div v-if="!shouldLoadEntries">
-      <button class="button-10" @click="loadEntries()">Charger les données</button>
+      <button class="button-10" @click="loadThenDisplayEntries()">Charger les données</button>
 </div>
 <div v-else>
       <div v-for="[date, oneDayItem] in entryMap" :key="date">
             <one-day    :date="oneDayItem.date"
                         :entries="oneDayItem.entries"
                         :shouldBeDisplayed="entriesShouldBeDisplayed"
-                        v-on:on-load-entry="onLoadEntry"
+                        v-on:on-load-entry-by-date="onLoadEntryByDate"
                         @on-select-day="onSelectDay"
                         v-model:isEnteringItems="oneDayItem.isEnteringItems"
                         v-model:isDisplayingItems="oneDayItem.isDisplayingItems">
@@ -55,18 +55,18 @@ const lastSelectedDate = ref();
 
 const props = defineProps(["initialDate", "numberOfDays", "hasLoadedEntries"]);
 
-function loadEntries() {
+function loadThenDisplayEntries() {
       shouldLoadEntries.value = true;
       loadPeriodEntries();
 }
 
-function onLoadEntry(sDate) {
+// Called after an update from OneDay to load the new value
+function onLoadEntryByDate(sDate) {
       loadEntriesByDate(sDate);
 }
 
-function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
+function onSelectDay(sDate, _isEnteringItems, _isDisplayingItems) {
 
-      
       if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
              
             const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
@@ -93,7 +93,7 @@ function loadEntriesByDate(sDate) {
 	})
       .then(response => response.json())
       .then(entries => {
-            
+            console.log("entries" + entries);
             entries.forEach(entry => {
                   getModel(entry, entries.length);
             });
@@ -171,6 +171,15 @@ onMounted(() => {
       loadPeriodEntries();
       getSummaryInfo();
 });
+
+/*
+onUpdated(() => {
+      if (props.hasLoadedEntries != shouldLoadEntries.value) {
+            shouldLoadEntries.value = props.hasLoadedEntries;
+            loadPeriodEntries();
+      }
+});
+*/
 
 </script>
 

@@ -1,8 +1,10 @@
 <template>
 <error-view></error-view>
-<login-entry  :display-login="error403"
-              v-on:on-generated-token="onGeneratedToken"></login-entry>
-<button hidden="true" @click="loadEntries()">Charger toutes les entrées</button>
+<div v-if="error403">
+  <login-entry v-on:on-generated-token="onGeneratedToken"></login-entry>
+</div>
+<div v-else>
+  <button @click="loadEntries()">Charger toutes les entrées</button>
 <div v-for="period in periods" :key="period.startDate">
   <one-period :initial-date="period.startDate"
               :has-loaded-entries="period.hasBeenLoaded"
@@ -10,10 +12,13 @@
   </one-period>
   <p></p>
 </div>
+</div>
+
+
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import ErrorView from './components/ErrorView.vue'
 import LoginEntry from './components/LoginEntry.vue'
 import OnePeriod from './components/OnePeriod.vue'
@@ -34,14 +39,15 @@ function loadEntries() {
   periods.value.forEach(p => {
     const {date, isLoaded} = p;
     console.log("period " + JSON.stringify(p));
-    console.log("hasBeenLoaded " + isLoaded.value);
-    //p.hasBeenLoaded.value = true;
+    p.hasBeenLoaded = true;
+    console.log("period after " + JSON.stringify(p));
   });
 }
 
 function onGeneratedToken(tokenRing) {
   token.value = tokenRing;
-  localStorage.setItem("token", token);
+  console.log("tokenRing " + tokenRing);
+  localStorage.setItem("token", token.value);
   error403.value = false;
   initDates();
 }
@@ -50,6 +56,7 @@ async function initDates() {
 
   let i = 0;
   if (localStorage.getItem("token") == null) {
+    error403.value = true;
     return;
   }
 
@@ -71,9 +78,9 @@ async function initDates() {
         //this.dates.push(d);
         //console.log("d : " + d);
         if (i < 4)
-          periods.value.push(useOnePeriodItem(date, true));
+          periods.value.push(reactive(useOnePeriodItem(date, true)));
         else
-          periods.value.push(useOnePeriodItem(date, false));
+          periods.value.push(reactive(useOnePeriodItem(date, false)));
         i++;
         //console.log("period " + period.startDate);
       });
