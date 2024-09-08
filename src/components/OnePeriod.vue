@@ -10,21 +10,29 @@
                   :drinking-beer="drinkingBeer">
 </summary-info>
 
-<div v-for="[date, entries] in entryMap" :key="date">
-
-      <one-day    :date="date"
-                  :entries="entries"
-                  :shouldBeDisplayed="entriesShouldBeDisplayed"
-                  v-on:onLoadEntry="onLoadEntry">
-      </one-day>
-
+<div v-if="!shouldLoadEntries">
+      <button class="button-10" @click="loadEntries()">Charger les données</button>
 </div>
+<div v-else>
+      <div v-for="[date, oneDayItem] in entryMap" :key="date">
+            <one-day    :date="oneDayItem.date"
+                        :entries="oneDayItem.entries"
+                        :shouldBeDisplayed="entriesShouldBeDisplayed"
+                        v-on:on-load-entry="onLoadEntry"
+                        @on-select-day="onSelectDay"
+                        v-model:isEnteringItems="oneDayItem.isEnteringItems"
+                        v-model:isDisplayingItems="oneDayItem.isDisplayingItems">
+            </one-day>
+      </div>
+</div>
+
 </template>
 
 <script setup>
 import OneDay from './OneDay.vue';
 import SummaryInfo from './SummaryInfo.vue'
-import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
+import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted, isReactive } from 'vue'
+import { createOneDayItem } from '@/oneday';
 
 let fromDate = ref("");
 let toDate = ref("");
@@ -40,17 +48,41 @@ let drinkingBeer = ref(0.0);
 let anaerobic = ref(0.0);
 let aerobic = ref(0.0);
 
-let entryMap = ref(new Map());
+const shouldLoadEntries = ref();
 
-const props = defineProps(["initialDate", "numberOfDays"]);
+let entryMap = ref(new Map());
+const lastSelectedDate = ref();
+
+const props = defineProps(["initialDate", "numberOfDays", "hasLoadedEntries"]);
+
+function loadEntries() {
+      shouldLoadEntries.value = true;
+      loadPeriodEntries();
+}
 
 function onLoadEntry(sDate) {
-      console.log("onLoadEntry");
       loadEntriesByDate(sDate);
 }
 
+function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
+
+      
+      if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
+             
+            const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
+            lastSelectedItem.isDisplayingItems = false;
+            lastSelectedItem.isEnteringItems = false;
+      }
+
+      //No need to update oneDayItem because of the defineModel
+      //value has already been changed in the OneDay.
+      //const oneDayItem = entryMap.value.get(sDate);
+      //oneDayItem.isDisplayingItems = isDisplayingItems;
+      //oneDayItem.isEnteringItems = isEnteringItems;
+      lastSelectedDate.value = sDate;      
+}
+
 function loadEntriesByDate(sDate) {
-      console.log('loadEntriesByDate ' + sDate);
       entriesShouldBeDisplayed.value = false;
       nbTreatedEntries.value = 0;
       fetch(process.env.VUE_APP_URL + '/entry/' + sDate, {
@@ -59,26 +91,21 @@ function loadEntriesByDate(sDate) {
 			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
 		}
 	})
-      .then(response => {
-            return response.json();
-      })
+      .then(response => response.json())
       .then(entries => {
             
             entries.forEach(entry => {
                   getModel(entry, entries.length);
             });
-            
-            entryMap.value.set(sDate, entries);
+            const oneDayItem = reactive(createOneDayItem(entries, sDate, false, false));
+            entryMap.value.set(sDate, oneDayItem);
             // TODO : Find another way
             entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
             //entryMap.value = new Map([...entryMap.entries()].sort());
-            console.info('entries size ' + entryMap.value.get(sDate).length + ' for day ' + sDate);
-            console.info('map size ' + entryMap.value.size + ' for initial day ' + props.initialDate);
       });
 }
 
 function getModel(entry, nbEntries) {
-      console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
       fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
 		method: 'GET',
 		headers: {
@@ -95,16 +122,18 @@ function getModel(entry, nbEntries) {
       });
 }
 
-function initDates() {
+function loadPeriodEntries() {
+      console.log("load entries " +  shouldLoadEntries.value + " " + props.numberOfDays);
       
       let initialDate = props.initialDate;
       let date = null;
       for (let days = 0; days < props.numberOfDays; days++) {
             date = new Date(initialDate.valueOf());
             date.setDate(date.getDate() + days);
-            // We don't want to load the day after today
-            if (date <= Date.now()) {
-                  loadEntriesByDate(date.toISOString().split("T")[0]);
+            if (shouldLoadEntries.value) {
+                  if (date <= Date.now()) {
+                        loadEntriesByDate(date.toISOString().split("T")[0]);
+                  }
             }
       }
       fromDate.value = initialDate.toISOString().split("T")[0];
@@ -127,7 +156,6 @@ function getSummaryInfo() {
             }
       })
       .then(summaryInfo => {
-            console.log('summary info ' + JSON.stringify(summaryInfo));
             spentKcal.value = summaryInfo.spentKcal;
             ingestedKcal.value = summaryInfo.ingestedKcal;
             sportDuration.value = summaryInfo.sportDuration;
@@ -139,8 +167,35 @@ function getSummaryInfo() {
 }
 
 onMounted(() => {
-      initDates();
+      shouldLoadEntries.value = props.hasLoadedEntries;
+      loadPeriodEntries();
       getSummaryInfo();
 });
 
 </script>
+
+<style>
+/* CSS */
+.button-10 {
+      margin: auto;
+      display: flex;
+      justify-content: space-evenly;
+      padding: 6px 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      border-radius: 6px;
+      border: none;
+
+      color: #fff;
+      background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+      background-origin: border-box;
+      box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+}
+
+.button-10:focus {
+      box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+      outline: 0;
+}
+</style>

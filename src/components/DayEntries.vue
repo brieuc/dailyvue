@@ -69,24 +69,20 @@ let editMode = ref(false);
 
 onUpdated(() => {
       editMode = false;
-      console.log("onUpdated refreshEntries : " + props.shouldBeDisplayed);
       props.entries.forEach(entry => {
             //getModel(entry);
       });
 });
 
 function onAddFreeEntry(entry) {
-      console.log("DayEntries.vue onAddFreeEntry " + JSON.stringify(entry));
       emit('onUpdateFreeEntry', entry);
 }
 
 function onAddSportEntry(entry) {
-      console.log("DayEntries.vue onAddSportEntry " + JSON.stringify(entry));
       emit('onUpdateSportEntry', entry);
 }
 
 function getModel(entry) {
-      console.log("entry id " + process.env.VUE_APP_URL + '/model/' + entry.modelId);
       fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
           method: 'GET',
           headers: {
@@ -95,19 +91,16 @@ function getModel(entry) {
       })
       .then(response => response.json())
       .then(model => {
-            console.log("title model " + model.title);
             entry.model = model
       });
 }
 
 function onEditEntry(entry) {
-      console.log("onEditEntry : " + JSON.stringify(entry));
       entry.editMode = true;
       editMode = true;
 }
 
 function onDeleteEntry(entry) {
-      console.log("onDeleteEntry : " + JSON.stringify(entry));
       fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {
           method: 'DELETE',
           headers: {

@@ -19,7 +19,6 @@ const description = ref(props.description);
 let modelId;
 
 onMounted(() => {
-	console.log('onMounted');
 	getModels();
 });
 
@@ -32,21 +31,17 @@ function getModels() {
 	})
 	.then(response => response.json())
 	.then(json => {
-		console.log(JSON.stringify(json));
 		const model = json.at(0);
-		console.log(model.id);
 		modelId = model.id;
 	})
 }
 
 function addFreeEntry() {
-	console.log("entry Id " + props.entryId);
 	let fetchMethod = "";
 	let fetchURL = "";
 	let bodyToAdd = {};
 	if (props.entryId) {
 		fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free'
-		console.log(fetchURL);
 		fetchMethod = 'PUT';
 		bodyToAdd = {
 			id: props.entryId,
@@ -66,7 +61,6 @@ function addFreeEntry() {
 	}
 	
 	let statusCode = 0;
-	console.log('body ' + JSON.stringify(bodyToAdd));
 	fetch(fetchURL, {
 		method: fetchMethod,
 		headers: {
@@ -82,10 +76,7 @@ function addFreeEntry() {
 		return response.json()
 	})
 	.then(json => {
-		console.log('DEBUT');
-		console.log(json.message);
 		dailyStore.errorMessage = json.message;
-		console.log('dailyStore.errorMessage ' + dailyStore.errorMessage);
 		emit('onAddFreeEntry', json);
 	});
 }

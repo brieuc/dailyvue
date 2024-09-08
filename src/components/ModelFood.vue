@@ -1,6 +1,6 @@
 <template>
 <div>
-    <div v-for="model in models" :key="model.id">
+    <div class="div-margin" v-for="model in models" :key="model.id">
         <model-food-single @on-add-food-entry="onAddFoodEntry" @on-sub-food-entry="onSubFoodEntry" 
                 :title="model.title"
                 :description="model.description"
@@ -31,21 +31,17 @@
         },
         methods: {
             onAddFoodEntry(model) {
-                console.log("onAddFoodEntry : " + model.id);
                 let activeEntry = this.entriesByModelId.get(model.id);
                 let quantity = 1;
                 if (activeEntry != null) {
                     quantity = activeEntry.quantity + 1;
                 }
-                console.log("onAddFoodEntry " + JSON.stringify(activeEntry));
                 this.updateFoodEntry(activeEntry, model, quantity);
             },
             onSubFoodEntry(model) {
-                console.log("onSubFoodEntry : " + model.id);
                 let activeEntry = this.entriesByModelId.get(model.id);
                 // If there is no entry, so there is nothing to substract
                 if (activeEntry != null) {
-                    console.log("onSubFoodEntry " + JSON.stringify(activeEntry));
                     this.updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
                 }
             },
@@ -92,7 +88,6 @@
                         return response.json();
                 })
                 .then(json => {
-                    console.log("entry json : " + JSON.stringify(json));
                     const newEntry = json;
                     this.entriesByModelId.set(newEntry.modelId, newEntry);
                     this.$emit("onUpdateFoodEntry", newEntry);
@@ -144,4 +139,7 @@
 </script>
 
 <style>
+.div-margin {
+    padding-top: 8px;
+}
 </style>

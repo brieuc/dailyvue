@@ -16,8 +16,6 @@ export default {
         const selectedCategory = ref("");
 
         function selectCategory(categoryName) {
-            console.log(categoryName);
-            console.log(selectCategory.value);
             if (categoryName == selectedCategory.value) {
                 selectedCategory.value = null;
             }
