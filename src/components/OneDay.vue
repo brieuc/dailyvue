@@ -47,7 +47,7 @@ import DayEntries from './DayEntries.vue';
 
 import { defineEmits, defineProps, defineModel, onUpdated, ref, computed } from 'vue';
 
-const emit = defineEmits(["onSelectDay", "onLoadEntry"]);
+const emit = defineEmits(["onSelectDay", "onLoadEntryByDate"]);
 const props = defineProps([ "shouldBeDisplayed", "date", "entries",
                             "isEnteringItems", "isDisplayingItems"]);
 
@@ -59,7 +59,7 @@ const isEnteringItems = defineModel("isEnteringItems");
 
 const day = computed( () => {
     const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-    let now = new Date(props.date.value);
+    let now = new Date(props.date);
     return days[now.getDay()];
 })
 
@@ -129,7 +129,7 @@ function onAddSportEntry(sportEntry) {
 function onUpdateSportEntry(sportEntry) {
     console.log('OneDay.vue onUpdateSportEntry: ' + JSON.stringify(sportEntry));
     selectedCategory.value = null;
-    loadEntriesByDate(displayedDay);
+    loadEntriesByDate(displayedDay.value);
 }
 
 function onUpdateFoodEntry(foodEntry) {
@@ -144,7 +144,7 @@ function onSelectModel(categoryName) {
 
 function loadEntriesByDate(sDate) {
     console.log("OneDay.vue loadEntriesByDate " + sDate);
-    emit("onLoadEntry", sDate);
+    emit("onLoadEntryByDate", sDate);
 }
 
 </script>
