@@ -48,8 +48,7 @@ import DayEntries from './DayEntries.vue';
 import { defineEmits, defineProps, defineModel, onUpdated, ref, computed } from 'vue';
 
 const emit = defineEmits(["onSelectDay", "onLoadEntryByDate"]);
-const props = defineProps([ "shouldBeDisplayed", "date", "entries",
-                            "isEnteringItems", "isDisplayingItems"]);
+const props = defineProps([ "shouldBeDisplayed", "date", "entries"]);
 
 const selectedDay = ref();
 const displayedDay = ref();
@@ -65,7 +64,7 @@ const day = computed( () => {
 
 onUpdated(() => {
     //console.log("oneday updated " + this.date + " " + this.enteringItems + " " + this.displayingItems);
-    console.log("props oneday updated " + props.date + " " + props.isEnteringItems + " " + props.isDisplayingItems);
+    console.log("props oneday updated " + props.date + " " + isEnteringItems.value + " " + isDisplayingItems.value);
 })
 
 function getQuantity(entry) {
@@ -76,6 +75,7 @@ function getQuantity(entry) {
 }
     
 function selectDay() {
+    console.log("select day");
     displayedDay.value = null;
     if (isEnteringItems.value) {
         isEnteringItems.value = false;
@@ -85,13 +85,13 @@ function selectDay() {
     }
     isDisplayingItems.value = false;
     selectedDay.value = props.date;
-    emit("onSelectDay", props.date, true, false);
+    emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
     //this.loadEntriesByDate(this.selectedDay);
 }
     
 function displayDay() {
+    console.log("display day");
     selectedDay.value = null;
-    
     if (isDisplayingItems.value) {
         isDisplayingItems.value = false;
     }
@@ -100,7 +100,7 @@ function displayDay() {
     }
     isEnteringItems.value = false;
     displayedDay.value = props.date;
-    emit("onSelectDay", props.date, false, true);
+    emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
     //this.loadEntriesByDate(this.displayedDay);
 }
 

@@ -69,9 +69,6 @@ let editMode = ref(false);
 
 onUpdated(() => {
       editMode = false;
-      props.entries.forEach(entry => {
-            //getModel(entry);
-      });
 });
 
 function onAddFreeEntry(entry) {
