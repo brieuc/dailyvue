@@ -4,7 +4,7 @@
   <login-entry v-on:on-generated-token="onGeneratedToken"></login-entry>
 </div>
 <div v-else>
-  <button @click="loadEntries()">Charger toutes les entrées</button>
+  <button class="button-10" @click="loadEntries()">Charger toutes les entrées</button>
 <div v-for="period in periods" :key="period.startDate">
   <one-period :initial-date="period.startDate"
               :has-loaded-entries="period.hasBeenLoaded"
@@ -35,7 +35,6 @@ const errorMessage = computed(()=> {
       
 
 function loadEntries() {
-  console.log("has been loaded");
   periods.value.forEach(p => {
     const {date, isLoaded} = p;
     console.log("period " + JSON.stringify(p));
@@ -115,6 +114,28 @@ onMounted(() => {
 </script>
 
 <style>
+.button-10 {
+      margin: auto;
+      display: flex;
+      justify-content: space-evenly;
+      padding: 6px 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      border-radius: 6px;
+      border: none;
+
+      color: #fff;
+      background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+      background-origin: border-box;
+      box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+}
+
+.button-10:focus {
+      box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+      outline: 0;
+}
 
 body {
   background-image: linear-gradient(to right bottom, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);

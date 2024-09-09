@@ -17,7 +17,7 @@
       <div v-for="[date, oneDayItem] in entryMap" :key="date">
             <one-day    :date="oneDayItem.date"
                         :entries="oneDayItem.entries"
-                        :shouldBeDisplayed="entriesShouldBeDisplayed"
+                        :shouldBeDisplayed="true"
                         v-on:on-load-entry-by-date="onLoadEntryByDate"
                         @on-select-day="onSelectDay"
                         v-model:isEnteringItems="oneDayItem.isEnteringItems"
@@ -38,7 +38,7 @@ let fromDate = ref("");
 let toDate = ref("");
 
 
-let entriesShouldBeDisplayed = ref(false);
+//let entriesShouldBeDisplayed = ref(true);
 let nbTreatedEntries = ref(0);
 
 let ingestedKcal = ref(0.0);
@@ -65,10 +65,13 @@ function onLoadEntryByDate(sDate) {
       loadEntriesByDate(sDate);
 }
 
-function onSelectDay(sDate, _isEnteringItems, _isDisplayingItems) {
+function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
 
+      const oneDayItem = entryMap.value.get(sDate);
+      console.log("onePeriod oneDayItem.isDisplayingItems ", oneDayItem.isDisplayingItems, isDisplayingItems);
+      console.log("onePeriod oneDayItem.isEnteringItems", oneDayItem.isEnteringItems, isEnteringItems);
+      
       if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
-             
             const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
             lastSelectedItem.isDisplayingItems = false;
             lastSelectedItem.isEnteringItems = false;
@@ -83,7 +86,7 @@ function onSelectDay(sDate, _isEnteringItems, _isDisplayingItems) {
 }
 
 function loadEntriesByDate(sDate) {
-      entriesShouldBeDisplayed.value = false;
+      //entriesShouldBeDisplayed.value = false;
       nbTreatedEntries.value = 0;
       fetch(process.env.VUE_APP_URL + '/entry/' + sDate, {
 		method: 'GET',
@@ -117,14 +120,12 @@ function getModel(entry, nbEntries) {
             entry.model = model;
             nbTreatedEntries.value++;
             if (nbTreatedEntries.value === nbEntries) {
-                  entriesShouldBeDisplayed.value = true;
+                  //entriesShouldBeDisplayed.value = true;
             }
       });
 }
 
-function loadPeriodEntries() {
-      console.log("load entries " +  shouldLoadEntries.value + " " + props.numberOfDays);
-      
+function loadPeriodEntries() {     
       let initialDate = props.initialDate;
       let date = null;
       for (let days = 0; days < props.numberOfDays; days++) {
@@ -172,14 +173,12 @@ onMounted(() => {
       getSummaryInfo();
 });
 
-/*
 onUpdated(() => {
-      if (props.hasLoadedEntries != shouldLoadEntries.value) {
-            shouldLoadEntries.value = props.hasLoadedEntries;
+      if (shouldLoadEntries.value != true && shouldLoadEntries.value != props.hasLoadedEntries) {
+            shouldLoadEntries.value = true;
             loadPeriodEntries();
       }
 });
-*/
 
 </script>
 
