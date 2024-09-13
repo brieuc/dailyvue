@@ -17,7 +17,7 @@
       <div v-for="[date, oneDayItem] in entryMap" :key="date">
             <one-day    :date="oneDayItem.date"
                         :entries="oneDayItem.entries"
-                        :shouldBeDisplayed="true"
+                        :shouldBeDisplayed="entriesShouldBeDisplayed"
                         v-on:on-load-entry-by-date="onLoadEntryByDate"
                         @on-select-day="onSelectDay"
                         v-model:isEnteringItems="oneDayItem.isEnteringItems"
@@ -38,7 +38,7 @@ let fromDate = ref("");
 let toDate = ref("");
 
 
-//let entriesShouldBeDisplayed = ref(true);
+let entriesShouldBeDisplayed = ref(true);
 let nbTreatedEntries = ref(0);
 
 let ingestedKcal = ref(0.0);
@@ -100,7 +100,18 @@ function loadEntriesByDate(sDate) {
             entries.forEach(entry => {
                   getModel(entry, entries.length);
             });
-            const oneDayItem = reactive(createOneDayItem(entries, sDate, false, false));
+            // Keep the entering and displaying boolean even after reloading
+            // means we keep the food selection opened after clicking. otherwise, we 
+            // reset to false and hide the food selection which is really annoying.
+            const formerOneDayItem = entryMap.value.get(sDate);
+            let isEnteringItems = false;
+            let isDisplayingItems = false;
+            if (isReactive(formerOneDayItem)) {
+                  isEnteringItems = formerOneDayItem.isEnteringItems;
+                  isDisplayingItems = formerOneDayItem.isDisplayingItems;
+            }
+            
+            const oneDayItem = reactive(createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems));
             entryMap.value.set(sDate, oneDayItem);
             // TODO : Find another way
             entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
@@ -120,7 +131,7 @@ function getModel(entry, nbEntries) {
             entry.model = model;
             nbTreatedEntries.value++;
             if (nbTreatedEntries.value === nbEntries) {
-                  //entriesShouldBeDisplayed.value = true;
+                  entriesShouldBeDisplayed.value = true;
             }
       });
 }

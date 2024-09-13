@@ -126,6 +126,7 @@
                     }
                 })
                 .then(json => {
+                    console.log("json for each " + JSON.stringify(json));
                     json.forEach(entry => {
                         this.entriesByModelId.set(entry.modelId, entry)
                     });   

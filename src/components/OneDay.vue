@@ -105,7 +105,8 @@ function displayDay() {
 }
 
 function onDeleteEntry(entry) {
-    loadEntriesByDate(displayedDay);
+    console.log("deleting entry : " + JSON.stringify(entry));
+    loadEntriesByDate(displayedDay.value);
 }
 
 function onAddFreeEntry(freeEntry) {
@@ -143,7 +144,6 @@ function onSelectModel(categoryName) {
 }
 
 function loadEntriesByDate(sDate) {
-    console.log("OneDay.vue loadEntriesByDate " + sDate);
     emit("onLoadEntryByDate", sDate);
 }
 
