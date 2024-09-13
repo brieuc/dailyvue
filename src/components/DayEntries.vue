@@ -21,8 +21,13 @@
                         <div>{{ entry.title }}</div>
                         <div class="formatted">{{ entry.description }}</div>
                         <table class="center">
-                              <tr><td>Modèle</td><td><b>{{ entry.model.title }}</b></td></tr>
-                              <tr><td>Sport</td><td>{{ entry.model.sport }}</td></tr>
+                              
+                              <tr><td>Modèle</td>
+                                    <td v-if="entry.model"><b>{{ entry.model.title }}</b></td>
+                              </tr>
+                              <tr><td>Sport</td>
+                                    <td v-if="entry.model">{{ entry.model.sport }}</td>
+                              </tr>
                               <tr><td>Duration</td><td>{{ entry.duration }}</td></tr>
                               <tr><td>Calories</td><td>{{ entry.kcal }}</td></tr>
                               <tr><td>Aerobic</td><td>{{ entry.aerobic }}</td></tr>
@@ -45,11 +50,16 @@
                   <div v-else>
                         <div>{{ entry.title }}</div>
                         <div>{{ entry.description }}</div>
+                        <div v-if="entry.foodType">{{ entry.foodType }}</div>
+                        <div v-if="entry.kcal">{{ entry.kcal }}</div>
                   </div>
             </div>
             <div v-if="entry.type === 'FOOD'">
                   <div>{{ entry.title }}</div>
-                  <div>Calories {{ entry.quantity * entry.model.kcal }}</div>
+                  <div v-if="entry.model">
+                        <div>Calories {{ entry.quantity * entry.model.kcal }}</div>
+                  </div>
+
             </div>
             <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button> 
             &nbsp;
@@ -69,7 +79,11 @@ let editMode = ref(false);
 
 onUpdated(() => {
       editMode = false;
+      props.entries.forEach(entry => {
+            getModel(entry);
+      });
 });
+
 
 function onAddFreeEntry(entry) {
       emit('onUpdateFreeEntry', entry);
