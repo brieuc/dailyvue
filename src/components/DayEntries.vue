@@ -44,6 +44,9 @@
                                     :title="entry.title"
                                     :description="entry.description"
                                     :entryId="entry.id"
+                                    :foodType="entry.foodType"
+                                    :kcal="entry.kcal"
+                                    :model="entry.model"
                                     @on-add-free-entry="onAddFreeEntry(entry)">
                         </model-free>
                   </div>

@@ -46,7 +46,7 @@ export default {
 .modelFlex {
     display: flex;
     gap: 10px;
-    height: 30px;
+    height: 40px;
 }
 
 
