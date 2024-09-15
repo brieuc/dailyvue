@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted, defineProps, isRef } from 'vue'
+import { ref, defineEmits, onMounted, defineProps, isRef, onUpdated } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 
 const models = ref([]);
@@ -36,13 +36,14 @@ const title = ref(props.title);
 const description = ref(props.description);
 const foodType = ref(props.foodType);
 const kcal = ref(props.kcal);
-const selectedModel = ref();
+const selectedModel = ref(props.model);
 
 onMounted(() => {
 	getModels();
 });
 
 function isModelIsFreeFood() {
+	console.log("isModelIsFreeFood " + selectedModel.value);
 	if(!selectedModel.value)
 		return false;
 	if(selectedModel.value.title == "Free Food") {
@@ -63,7 +64,12 @@ function getModels() {
 		//const model = json.at(0);
 		//modelId = model.id;
 		models.value = json;
-		selectedModel.value = models.value.at(0);
+		if (selectedModel.value == null) {
+			selectedModel.value = models.value.at(0);
+		}
+		else {
+			selectedModel.value = props.model;
+		}
 		console.log("models " + JSON.stringify(models.value));
 	})
 }
@@ -81,6 +87,7 @@ function onUpdateFreeEntry() {
 			title: title.value,
 			description: description.value,
 		};
+		console.log("selectedModel " + JSON.stringify(selectedModel.value));
 		if (selectedModel.value.title === 'Free Food') {
 			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free/food'
 			bodyToAdd.foodType = foodType.value;
@@ -99,6 +106,7 @@ function onUpdateFreeEntry() {
 			date: props.date,
 			modelId: selectedModel.value.id
 		};
+		console.log("selectedModel " + JSON.stringify(selectedModel.value));
 		if (selectedModel.value.title === 'Free Food') {
 			fetchURL = process.env.VUE_APP_URL + '/entry/free/food';
 			bodyToAdd.foodType = foodType.value;
