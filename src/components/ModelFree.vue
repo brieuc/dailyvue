@@ -15,7 +15,7 @@
 	</select>
 	</p>
 	<p v-if="isModelIsFreeFood()">Calories &nbsp;<input type="text" v-model="kcal"></p>
-	<p><button @click="addFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
+	<p><button @click="onUpdateFreeEntry()">{{ mode == 'update' ? "Upate Entry" : "Add Entry"}}</button></p>
 </div>
 </template>
 
@@ -28,7 +28,7 @@ const foodTypeArray = ref(["ALCOHOL"]);
 
 
 const dailyStore = useDailyStore();
-const emit = defineEmits(['onAddFreeEntry']);
+const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry']);
 const props = defineProps(["date", "title", "description", "entryId", "mode",
 					"foodType", "kcal", "model"]);
 
@@ -68,12 +68,14 @@ function getModels() {
 	})
 }
 
-function addFreeEntry() {
+function onUpdateFreeEntry() {
+	let emitMethod = "";
 	let fetchMethod = "";
 	let fetchURL = "";
 	let bodyToAdd = {};
 	if (props.entryId) {
 		fetchMethod = 'PUT';
+		emitMethod = "onUpdateFreeEntry";
 		bodyToAdd = {
 			id: props.entryId,
 			title: title.value,
@@ -90,6 +92,7 @@ function addFreeEntry() {
 	}
 	else {
 		fetchMethod = "POST";
+		emitMethod = "onAddFreeEntry";
 		bodyToAdd = {
 			title: title.value,
 			description: description.value,
@@ -123,7 +126,7 @@ function addFreeEntry() {
 	})
 	.then(json => {
 		dailyStore.errorMessage = json.message;
-		emit('onAddFreeEntry', json);
+		emit(emitMethod, json);
 	});
 }
 </script>
