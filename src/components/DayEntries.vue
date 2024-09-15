@@ -79,14 +79,14 @@ import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
-
+/*
 onUpdated(() => {
       editMode = false;
       props.entries.forEach(entry => {
             getModel(entry);
       });
 });
-
+*/
 
 function onAddFreeEntry(entry) {
       console.log("Day Entries onAddFreeEntry");
