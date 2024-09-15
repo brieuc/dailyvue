@@ -46,7 +46,8 @@
                                     :entryId="entry.id"
                                     :foodType="entry.foodType"
                                     :kcal="entry.kcal"
-                                    @on-add-free-entry="onAddFreeEntry(entry)">
+                                    @on-add-free-entry="onAddFreeEntry(entry)"
+                                    @on-update-free-entry="onUpdateFreeEntry(entry)">
                         </model-free>
                   </div>
                   <div v-else>
@@ -88,6 +89,12 @@ onUpdated(() => {
 
 
 function onAddFreeEntry(entry) {
+      console.log("Day Entries onAddFreeEntry");
+      emit('onAddFreeEntry', entry);
+}
+
+function onUpdateFreeEntry(entry) {
+      console.log("Day Entries onUpdateFreeEntry");
       emit('onUpdateFreeEntry', entry);
 }
 
