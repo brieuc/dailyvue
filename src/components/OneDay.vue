@@ -1,11 +1,11 @@
 <template>
 <div>
 <div id="border">
-    <div @click="selectDay()" style="min-height: 30px; background-color:rebeccapurple; color: white;">
+    <div @click="selectDay()" style="min-height: 35px; align-content: cen;background-color:rebeccapurple; color: white;">
         <span>{{ day }}</span> <span>{{ date }}</span>
     </div>
     <div v-if="isEnteringItems">
-        <model-selection @on-select-model="onSelectModel"></model-selection>  
+        <model-selection style="height: 35px;" @on-select-model="onSelectModel"></model-selection>  
         <div v-if="selectedCategory === 'food'">
             <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
         </div>
@@ -118,7 +118,7 @@ function onUpdateFreeEntry(freeEntry) {
     console.log('OneDay.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
     selectedCategory.value = null;
     loadEntriesByDate(displayedDay.value);
-    displayedDay.value = null;
+    //displayedDay.value = null;
 }
 
 function onAddSportEntry(sportEntry) {

@@ -25,17 +25,18 @@ import { useDailyStore } from '@/dailyStore';
 
 const models = ref([]);
 const foodTypeArray = ref(["ALCOHOL"]);
-const foodType = ref();
-const kcal = ref();
-const selectedModel = ref();
+
 
 const dailyStore = useDailyStore();
 const emit = defineEmits(['onAddFreeEntry']);
-const props = defineProps(["date", "title", "description", "entryId", "mode"]);
+const props = defineProps(["date", "title", "description", "entryId", "mode",
+					"foodType", "kcal", "model"]);
 
 const title = ref(props.title);
 const description = ref(props.description);
-let modelId;
+const foodType = ref(props.foodType);
+const kcal = ref(props.kcal);
+const selectedModel = ref();
 
 onMounted(() => {
 	getModels();
@@ -62,6 +63,7 @@ function getModels() {
 		//const model = json.at(0);
 		//modelId = model.id;
 		models.value = json;
+		selectedModel.value = models.value.at(0);
 		console.log("models " + JSON.stringify(models.value));
 	})
 }
@@ -71,13 +73,20 @@ function addFreeEntry() {
 	let fetchURL = "";
 	let bodyToAdd = {};
 	if (props.entryId) {
-		fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free'
 		fetchMethod = 'PUT';
 		bodyToAdd = {
 			id: props.entryId,
 			title: title.value,
 			description: description.value,
 		};
+		if (selectedModel.value.title === 'Free Food') {
+			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free/food'
+			bodyToAdd.foodType = foodType.value;
+			bodyToAdd.kcal = kcal.value;
+		}
+		else {
+			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free'
+		}
 	}
 	else {
 		fetchMethod = "POST";
@@ -89,8 +98,8 @@ function addFreeEntry() {
 		};
 		if (selectedModel.value.title === 'Free Food') {
 			fetchURL = process.env.VUE_APP_URL + '/entry/free/food';
-			bodyToAdd.kcal = kcal.value;
 			bodyToAdd.foodType = foodType.value;
+			bodyToAdd.kcal = kcal.value;
 		}
 		else {
 			fetchURL = process.env.VUE_APP_URL + '/entry/free';
