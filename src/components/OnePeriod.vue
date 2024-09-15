@@ -184,6 +184,7 @@ onMounted(() => {
       getSummaryInfo();
 });
 
+
 onUpdated(() => {
       if (shouldLoadEntries.value != true && shouldLoadEntries.value != props.hasLoadedEntries) {
             shouldLoadEntries.value = true;
