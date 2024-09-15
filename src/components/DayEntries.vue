@@ -46,6 +46,7 @@
                                     :entryId="entry.id"
                                     :foodType="entry.foodType"
                                     :kcal="entry.kcal"
+                                    :model="entry.model"
                                     @on-add-free-entry="onAddFreeEntry(entry)"
                                     @on-update-free-entry="onUpdateFreeEntry(entry)">
                         </model-free>
@@ -79,11 +80,14 @@ import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
+
 /*
 onUpdated(() => {
       editMode = false;
       props.entries.forEach(entry => {
-            getModel(entry);
+            //console.log(entry.title);
+            console.log(entry.model.title);
+            //getModel(entry);
       });
 });
 */
@@ -102,6 +106,7 @@ function onAddSportEntry(entry) {
       emit('onUpdateSportEntry', entry);
 }
 
+/*
 function getModel(entry) {
       fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
           method: 'GET',
@@ -111,10 +116,11 @@ function getModel(entry) {
       })
       .then(response => response.json())
       .then(model => {
+            console.log("model " + model.title);
             entry.model = model
       });
 }
-
+*/
 function onEditEntry(entry) {
       entry.editMode = true;
       editMode = true;
