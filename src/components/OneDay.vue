@@ -1,7 +1,8 @@
 <template>
 <div>
 <div id="border">
-    <one-day-header :day="day" :date="date"
+    <one-day-header @on-click-header-day="selectDay()"
+                    :day="day" :date="date"
                     :spent-kcal="spentKcal"
                     :drinking-beer="drinkingBeer"
                     :ingested-kcal="ingestedKcal"
@@ -48,7 +49,7 @@ import ModelFree from './ModelFree.vue';
 import ModelSelection from './ModelSelection.vue';
 import DayEntries from './DayEntries.vue';
 
-import { defineEmits, defineProps, defineModel, onUpdated, ref, computed } from 'vue';
+import { defineEmits, defineProps, defineModel, onUpdated, ref, computed, onMounted } from 'vue';
 
 const emit = defineEmits(["onSelectDay", "onLoadEntryByDate"]);
 const props = defineProps([ "shouldBeDisplayed", "date", "entries"]);
@@ -70,6 +71,10 @@ const day = computed( () => {
     const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
     let now = new Date(props.date);
     return days[now.getDay()];
+})
+
+onMounted(() => {
+    getSummaryInfo();
 })
 
 onUpdated(() => {
