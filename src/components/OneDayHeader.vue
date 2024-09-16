@@ -28,6 +28,8 @@ function selectHeaderDay() {
       gap: 0.1rem;
       height: fit-content;
       background-color: rebeccapurple;
-      color: aliceblue;
+      color:beige;
+      font-size: 0.7rem;
+
 }
 </style>
