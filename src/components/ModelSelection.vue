@@ -40,7 +40,7 @@ export default {
     text-align: center;
     display:flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: space-around;
     background-color:cornflowerblue;
     color: beige;
     cursor: pointer;
