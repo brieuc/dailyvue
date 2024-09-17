@@ -1,12 +1,9 @@
 <template>
 <div>
 <div id="border">
-    <one-day-header @on-click-header-day="selectDay()"
-                    :day="day" :date="date"
-                    :spent-kcal="spentKcal"
-                    :drinking-beer="drinkingBeer"
-                    :ingested-kcal="ingestedKcal"
-                    :sport-duration="sportDuration"></one-day-header>
+    <div @click="selectDay()" style="min-height: 35px; align-content: cen;background-color:rebeccapurple; color: white;">
+        <span>{{ day }}</span> <span>{{ date }}</span>
+    </div>
     <div v-if="isEnteringItems">
         <model-selection style="height: 35px;" @on-select-model="onSelectModel"></model-selection>  
         <div v-if="selectedCategory === 'food'">
@@ -29,6 +26,12 @@
 <slot></slot>
 
 <div v-if="isDisplayingItems">
+    <one-day-summary    :date="date"
+                        :spent-kcal="spentKcal"
+                        :drinking-beer="drinkingBeer"
+                        :ingested-kcal="ingestedKcal"
+                        :sport-duration="sportDuration">
+    </one-day-summary>
     <day-entries :date="date" :entries="entries" 
                     :shouldBeDisplayed="shouldBeDisplayed"
                     v-on:on-update-free-entry="onUpdateFreeEntry"
@@ -42,7 +45,7 @@
 </template>
 
 <script setup>
-import OneDayHeader from './OneDayHeader.vue';
+import OneDaySummary from './OneDaySummary.vue';
 import ModelFood from './ModelFood.vue';
 import ModelSport from './ModelSport.vue';
 import ModelFree from './ModelFree.vue';
@@ -74,34 +77,34 @@ const day = computed( () => {
 })
 
 onMounted(() => {
-    getSummaryInfo();
+    //getSummaryInfo();
 })
 
 onUpdated(() => {
     //console.log("oneday updated " + this.date + " " + this.enteringItems + " " + this.displayingItems);
     console.log("props oneday updated " + props.date + " " + isEnteringItems.value + " " + isDisplayingItems.value);
-    getSummaryInfo();
+    //getSummaryInfo();
 })
 
 function getSummaryInfo() {
-      fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + props.date + '&toDate=' + props.date, {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
+    fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + props.date + '&toDate=' + props.date, {
+    method: 'GET',
+    headers: {
+        'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+        }
 	})
-      .then(response => {
-            console.log(response.status);
-            if (response.ok) {
-                  return response.json();
-            }
-      })
-      .then(summaryInfo => {
-            spentKcal.value = summaryInfo.spentKcal;
-            ingestedKcal.value = summaryInfo.ingestedKcal;
-            sportDuration.value = summaryInfo.sportDuration;
-            drinkingBeer.value = summaryInfo.drinkingBeer;
-      });
+    .then(response => {
+        console.log(response.status);
+        if (response.ok) {
+                return response.json();
+        }
+    })
+    .then(summaryInfo => {
+        spentKcal.value = summaryInfo.spentKcal;
+        ingestedKcal.value = summaryInfo.ingestedKcal;
+        sportDuration.value = summaryInfo.sportDuration;
+        drinkingBeer.value = summaryInfo.drinkingBeer;
+    });
 }
 
 function getQuantity(entry) {
@@ -127,6 +130,7 @@ function selectDay() {
 }
     
 function displayDay() {
+    getSummaryInfo();
     console.log("display day");
     selectedDay.value = null;
     if (isDisplayingItems.value) {
