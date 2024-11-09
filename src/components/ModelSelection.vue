@@ -36,6 +36,7 @@ export default {
 <style>
 
 .flexRow {
+    border: 1px black solid;
     align-items: center;
     text-align: center;
     display:flex;

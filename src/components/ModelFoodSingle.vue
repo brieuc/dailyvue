@@ -1,12 +1,9 @@
 <template>
-<div class="modelFlex">
+<div class="wrapper">
     <div>{{ title }}</div>
     <div>{{ kcal }}</div>
-    <div>
-        <span class="button" @click="onAdd"> + </span>
-        <span class="button" @click="onSub"> - </span>
-    </div>
-
+    <div><button class="button-10" @click="onAdd"> + </button></div>
+    <div><button class="button-10" @click="onSub"> - </button></div>
 </div>
 </template>
 
@@ -43,12 +40,10 @@ export default {
 
 <style>
 
-.modelFlex {
-    display: flex;
-    gap: 10px;
-    height: 40px;
+.wrapper {
+  display: grid;
+  grid-template-columns: 200px 70px 40px 40px;
 }
-
 
 .button {
   background-color: #655263; /* Green */
@@ -62,5 +57,20 @@ export default {
   border-style: solid;
   border-color: rgb(57, 55, 55);
   border-width: 1px;  
+}
+
+.button-10 {
+      padding: 6px 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      border-radius: 6px;
+      border: none;
+
+      color: #fff;
+      background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+      background-origin: border-box;
+      box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
 }
 </style>

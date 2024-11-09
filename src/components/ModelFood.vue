@@ -1,6 +1,6 @@
 <template>
-<div>
-    <div class="div-margin" v-for="model in models" :key="model.id">
+<div style="padding-top: 10px; padding-bottom: 10px; border: 1px black solid" >
+    <div style="padding-left:10px;" v-for="model in models" :key="model.id">
         <model-food-single @on-add-food-entry="onAddFoodEntry" @on-sub-food-entry="onSubFoodEntry" 
                 :title="model.title"
                 :description="model.description"
@@ -140,7 +140,4 @@
 </script>
 
 <style>
-.div-margin {
-    padding-top: 8px;
-}
 </style>
