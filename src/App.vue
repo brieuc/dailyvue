@@ -4,7 +4,14 @@
   <login-entry v-on:on-generated-token="onGeneratedToken"></login-entry>
 </div>
 <div v-else>
-  <button class="button-10" @click="loadEntries()">Charger toutes les entrées</button>
+<table style="margin: auto; border: 1px; border-style: dashed;">
+          <tr>
+            <td>food models</td><td>{{ dailyStore.foodModels.length }}</td>
+            <td>sport models</td><td>{{ dailyStore.sportModels.length }}</td>
+            <td>free models</td><td>{{ dailyStore.freeModels.length }}</td>
+          </tr>
+</table>
+<button class="button-10" @click="loadEntries()">Charger toutes les entrées</button>
 <div v-for="period in periods" :key="period.startDate">
   <one-period :initial-date="period.startDate"
               :has-loaded-entries="period.hasBeenLoaded"
@@ -23,11 +30,16 @@ import ErrorView from './components/ErrorView.vue'
 import LoginEntry from './components/LoginEntry.vue'
 import OnePeriod from './components/OnePeriod.vue'
 import { useOnePeriodItem } from './oneperiod';
-
+import { useDailyStore } from './dailyStore';
+import { createModelFood } from './modelfood';
+import { createModelSport } from './modelsport';
+import { createModelFree } from './modelfree';
 
 const periods = ref([]);
 const error403 = ref(false);
 const token = ref(""); 
+const dailyStore = useDailyStore();
+//const models = ref([]);
 
 const errorMessage = computed(()=> {
   return "ERROR MSG PB";
@@ -49,6 +61,72 @@ function onGeneratedToken(tokenRing) {
   localStorage.setItem("token", token.value);
   error403.value = false;
   initDates();
+  initSportModels();
+  initFoodModels();
+  initFreeModels();
+}
+
+async function initFreeModels() {
+  const response = await fetch(process.env.VUE_APP_URL + '/model/free', {
+      method: 'GET',
+      headers: {
+        'Authorization' : 'Bearer ' + localStorage.getItem('token'),
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      data.forEach(model => {
+        console.log("free : " + JSON.stringify(model));
+        let reactiveModel = reactive(createModelFree(model.id, model.title, model.description));
+        dailyStore.freeModels.push(reactiveModel);
+
+      });
+    }
+}
+
+async function initSportModels() {
+  const response = await fetch(process.env.VUE_APP_URL + '/model/sport', {
+        method: 'GET',
+        headers: {
+          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+        }
+  });
+  if (response.ok) {
+    const data = await response.json();
+    data.forEach(model => {
+      console.log("sport : " + JSON.stringify(model));
+      let reactiveModel = reactive(createModelSport(model.id, model.title,
+        model.description, model.sport)
+      );
+
+      dailyStore.sportModels.push(reactiveModel);
+    });
+  }
+}
+
+async function initFoodModels() {
+    const response = await fetch(process.env.VUE_APP_URL + '/model/food', {
+        method: 'GET',
+        headers: {
+            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+        }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      data.forEach(model => {
+            let reactiveModel = reactive(
+                createModelFood(
+                  model.id, model.title, model.description, model.kcal
+            ));
+            // There is no difference in execution between passing
+            // the model json or the reactive object created from the json.
+            //this.models.push(model);
+            dailyStore.foodModels.push(reactiveModel);
+        });
+        console.log(JSON.stringify(dailyStore.foodModels.value));
+    }
 }
 
 async function initDates() {
@@ -97,10 +175,12 @@ async function getMinDate() {
     }
   );
   if (response.status == 403) {
+    console.log("erreur 403");
     error403.value = true;
     return -1;
   }
   else if (response.ok) {
+    console.log("pas d'erreur 403");
     error403.value = false;
     const data = await response.json();
     let minDate = data.pop();
@@ -109,7 +189,11 @@ async function getMinDate() {
 }
 
 onMounted(() => {
+
   initDates();
+  initFoodModels();
+  initSportModels();
+  initFreeModels();
 });
 </script>
 
