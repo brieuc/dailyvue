@@ -51,7 +51,17 @@ function isModelIsFreeFood() {
 	}
 	return false;
 }
+function getModels() {
+	models.value = dailyStore.freeModels;
+	if (selectedModel.value == null) {
+		selectedModel.value = models.value.at(0);
+	}
+	else {
+		selectedModel.value = props.model;
+	}
+}
 
+/*
 function getModels() {
 	fetch(process.env.VUE_APP_URL + '/model/free', {
 		method: 'GET',
@@ -73,6 +83,7 @@ function getModels() {
 		console.log("models " + JSON.stringify(models.value));
 	})
 }
+*/
 
 function onUpdateFreeEntry() {
 	let emitMethod = "";

@@ -73,19 +73,11 @@ export default {
       4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]);
 
 
-    function getModels() {
-      fetch(process.env.VUE_APP_URL + '/model/sport', {
-          method: 'GET',
-          headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-          }
-        })
-        .then(response => response.json())
-        .then(json => {
-          json.forEach(sport => {
-            sportsMap.value.set(sport.id, sport.title);
-          });
-        })
+    function convertArrayToMap() {
+      dailyStore.sportModels.forEach(model => {
+        console.log("ModelSport : " + JSON.stringify(model));
+        sportsMap.value.set(model.id, model.title);
+      });
     }
 
     function addSportEntry() {
@@ -155,7 +147,7 @@ export default {
       selectValues,
 
       addSportEntry,
-      getModels,
+      convertArrayToMap,
 
       sportsMap,
       benefits
@@ -164,7 +156,7 @@ export default {
 
   mounted() {
     console.log('onMounted');
-    this.getModels();
+    this.convertArrayToMap();
   }
 }
 
