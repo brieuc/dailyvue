@@ -51,13 +51,17 @@ function isModelIsFreeFood() {
 	}
 	return false;
 }
+
 function getModels() {
 	models.value = dailyStore.freeModels;
+	console.log("getModels free ", JSON.stringify(models.value));
 	if (selectedModel.value == null) {
 		selectedModel.value = models.value.at(0);
+		//console.log("selected null ", selectedModel.value );
 	}
 	else {
 		selectedModel.value = props.model;
+		console.log("props free ", JSON.stringify(props.model));
 	}
 }
 

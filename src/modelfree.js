@@ -1,9 +1,11 @@
 import { ref } from 'vue'
 
-export function createModelFree(modelId, modelTitle, modelDescription) {
+export function createModelFree(modelId, modelTitle, modelDescription, modelImage) {
       let id = modelId;
       let title = modelTitle;
       let description = modelDescription;
+      let image = modelImage;
 
-      return {id, title, description}
+
+      return {id, title, description, image}
 }

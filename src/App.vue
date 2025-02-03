@@ -78,7 +78,9 @@ async function initFreeModels() {
       const data = await response.json();
       data.forEach(model => {
         console.log("free : " + JSON.stringify(model));
-        let reactiveModel = reactive(createModelFree(model.id, model.title, model.description));
+        let reactiveModel = reactive(createModelFree(model.id, model.title, model.description,
+          model.image
+        ));
         dailyStore.freeModels.push(reactiveModel);
 
       });

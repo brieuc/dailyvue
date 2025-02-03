@@ -34,14 +34,15 @@ function onAddFoodEntry(model) {
     if (activeEntry != null) {
         quantity = activeEntry.quantity + 1;
     }
-    this.updateFoodEntry(activeEntry, model, quantity);
+    console.log("active entry " + JSON.stringify(model) + " " + quantity);
+    updateFoodEntry(activeEntry, model, quantity);
 }
 
 function onSubFoodEntry(model) {
     let activeEntry = entriesByModelId.value.get(model.id);
     // If there is no entry, so there is nothing to substract
     if (activeEntry != null) {
-        this.updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
+        updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
     }
 }
 
@@ -73,6 +74,7 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
             description: model.description
         });
     }
+    console.log("body fetch " + JSON.stringify(bodyFetch));
     fetch(url, {
         method: fetchMethod,
         headers: {
@@ -121,6 +123,7 @@ function getModels() {
     })
     */
     models.value = dailyStore.foodModels;
+    //getEntries();
 }
             
 function getEntries() {
@@ -139,7 +142,7 @@ function getEntries() {
     .then(json => {
         console.log("json for each " + JSON.stringify(json));
         json.forEach(entry => {
-            this.entriesByModelId.set(entry.modelId, entry)
+            entriesByModelId.value.set(entry.modelId, entry)
         });   
     })
 }

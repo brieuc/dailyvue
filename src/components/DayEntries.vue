@@ -68,6 +68,9 @@
             <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button> 
             &nbsp;
             <button class="button-color" v-if="entry.editMode !== true" @click="onDeleteEntry(entry)">Delete</button>
+            &nbsp;
+            <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onDuplicateEntry(entry)">Duplicate</button>
+      
       </div>
 </div>
 </template>
@@ -91,6 +94,40 @@ onUpdated(() => {
       });
 });
 */
+
+function onDuplicateEntry(entry) {
+      /*
+      fetch(process.env.VUE_APP_URL + '/auth/login', {
+            method: 'POST',
+            headers: {
+                  'Acces-Control-Allow-Origin': '*',
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  //'Authorization' : 'Bearer ' + localStorage.getItem("token"), no need
+            },
+		bodyToAdd = {
+			id: props.entryId,
+			title: title.value,
+			description: description.value,
+		};
+		if (entry.model.title === 'Free Food') {
+			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free/food'
+			bodyToAdd.foodType = foodType.value;
+			bodyToAdd.kcal = kcal.value;
+		}
+            }),
+      })
+      .then(response => {
+            console.log(response);
+            if (response.ok)
+                  return response.json();
+      })
+      .then(json => {
+            console.log(json.token);
+            emit("onGeneratedToken", json.token);
+      });
+      */
+}
 
 function onAddFreeEntry(entry) {
       console.log("Day Entries onAddFreeEntry");
