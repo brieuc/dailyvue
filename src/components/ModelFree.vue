@@ -24,8 +24,7 @@ import { ref, defineEmits, onMounted, defineProps, isRef, onUpdated } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 
 const models = ref([]);
-const foodTypeArray = ref(["ALCOHOL"]);
-
+const foodTypeArray = ref(["ALCOHOL", "YOGHOURT", "MEAL", "ICECREAM", "JUNKFOOD", "CHOCO"]);
 
 const dailyStore = useDailyStore();
 const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry']);
