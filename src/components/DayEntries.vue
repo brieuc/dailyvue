@@ -69,7 +69,7 @@
             &nbsp;
             <button class="button-color" v-if="entry.editMode !== true" @click="onDeleteEntry(entry)">Delete</button>
             &nbsp;
-            <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onDuplicateEntry(entry)">Duplicate</button>
+            <button class="button-color" v-if="entry.type == 'FREE' && entry.editMode !== true" @click="onCreateFoodModel(entry)">Create Model</button>
       
       </div>
 </div>
@@ -79,6 +79,7 @@
 import ModelFree from './ModelFree.vue';
 import ModelSport from './ModelSport.vue';
 import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
+import { createFoodModelFromEntity } from '@/ModelService';
 
 const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
@@ -95,38 +96,8 @@ onUpdated(() => {
 });
 */
 
-function onDuplicateEntry(entry) {
-      /*
-      fetch(process.env.VUE_APP_URL + '/auth/login', {
-            method: 'POST',
-            headers: {
-                  'Acces-Control-Allow-Origin': '*',
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  //'Authorization' : 'Bearer ' + localStorage.getItem("token"), no need
-            },
-		bodyToAdd = {
-			id: props.entryId,
-			title: title.value,
-			description: description.value,
-		};
-		if (entry.model.title === 'Free Food') {
-			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free/food'
-			bodyToAdd.foodType = foodType.value;
-			bodyToAdd.kcal = kcal.value;
-		}
-            }),
-      })
-      .then(response => {
-            console.log(response);
-            if (response.ok)
-                  return response.json();
-      })
-      .then(json => {
-            console.log(json.token);
-            emit("onGeneratedToken", json.token);
-      });
-      */
+function onCreateFoodModel(entry) {
+      createFoodModelFromEntity(entry)
 }
 
 function onAddFreeEntry(entry) {
