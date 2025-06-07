@@ -1,8 +1,10 @@
 <template>
       <h3>login</h3>
       <table class="center">
-            <tr><td>username</td><td><input type="text" v-model="username"></td></tr>
-            <tr><td>password</td><td><input type="text" v-model="password"></td></tr>
+            <tbody>
+                  <tr><td>username</td><td><input type="text" v-model="username"></td></tr>
+                  <tr><td>password</td><td><input type="text" v-model="password"></td></tr>
+            </tbody>
       </table>
       <input type="submit" @click="login()" value="Login">
 </template>

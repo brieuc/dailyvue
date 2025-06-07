@@ -33,36 +33,42 @@ import OneDay from './OneDay.vue';
 import SummaryInfo from './SummaryInfo.vue'
 import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted, isReactive } from 'vue'
 import { createOneDayItem } from '@/oneday';
+import { useFetchEntries } from '@/entries';
 
-let fromDate = ref("");
-let toDate = ref("");
+const fromDate = ref("");
+const toDate = ref("");
 
 
-let entriesShouldBeDisplayed = ref(true);
-let nbTreatedEntries = ref(0);
+const entriesShouldBeDisplayed = ref(true);
 
-let ingestedKcal = ref(0.0);
-let spentKcal = ref(0.0);
-let sportDuration = ref(0.0);
-let drinkingBeer = ref(0.0);
-let anaerobic = ref(0.0);
-let aerobic = ref(0.0);
+const ingestedKcal = ref(0.0);
+const spentKcal = ref(0.0);
+const sportDuration = ref(0.0);
+const drinkingBeer = ref(0.0);
+const anaerobic = ref(0.0);
+const aerobic = ref(0.0);
 
 const shouldLoadEntries = ref();
 
-let entryMap = ref(new Map());
+const entryMap = ref(new Map());
 const lastSelectedDate = ref();
 
 const props = defineProps(["initialDate", "numberOfDays", "hasLoadedEntries"]);
 
+// Load the hidden period
 function loadThenDisplayEntries() {
       shouldLoadEntries.value = true;
       loadPeriodEntries();
 }
 
 // Called after an update from OneDay to load the new value
-function onLoadEntryByDate(sDate) {
-      loadEntriesByDate(sDate);
+async function onLoadEntryByDate(sDate) {
+      //loadEntriesByDate(sDate);
+      const { entries } = await useFetchEntries(sDate);
+      const oneDayItem = entryMap.value.get(sDate);
+      oneDayItem.entries = entries
+      console.log("reload the day " + sDate + " " + JSON.stringify(oneDayItem));
+      entryMap.value.set(sDate, oneDayItem);
 }
 
 function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
@@ -85,58 +91,8 @@ function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
       lastSelectedDate.value = sDate;      
 }
 
-function loadEntriesByDate(sDate) {
-      //entriesShouldBeDisplayed.value = false;
-      nbTreatedEntries.value = 0;
-      fetch(process.env.VUE_APP_URL + '/entry/' + sDate, {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
-	})
-      .then(response => response.json())
-      .then(entries => {
-            console.log("entries" + entries);
-            entries.forEach(entry => {
-                  getModel(entry, entries.length);
-            });
-            // Keep the entering and displaying boolean even after reloading
-            // means we keep the food selection opened after clicking. otherwise, we 
-            // reset to false and hide the food selection which is really annoying.
-            const formerOneDayItem = entryMap.value.get(sDate);
-            let isEnteringItems = false;
-            let isDisplayingItems = false;
-            if (isReactive(formerOneDayItem)) {
-                  isEnteringItems = formerOneDayItem.isEnteringItems;
-                  isDisplayingItems = formerOneDayItem.isDisplayingItems;
-            }
-            
-            const oneDayItem = reactive(createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems));
-            entryMap.value.set(sDate, oneDayItem);
-            // TODO : Find another way
-            entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
-            //entryMap.value = new Map([...entryMap.entries()].sort());
-      });
-}
 
-function getModel(entry, nbEntries) {
-      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
-	})
-      .then(response => response.json())
-      .then(model => {
-            entry.model = model;
-            nbTreatedEntries.value++;
-            if (nbTreatedEntries.value === nbEntries) {
-                  entriesShouldBeDisplayed.value = true;
-            }
-      });
-}
-
-function loadPeriodEntries() {     
+async function loadPeriodEntries() {     
       let initialDate = props.initialDate;
       let date = null;
       for (let days = 0; days < props.numberOfDays; days++) {
@@ -144,12 +100,33 @@ function loadPeriodEntries() {
             date.setDate(date.getDate() + days);
             if (shouldLoadEntries.value) {
                   if (date <= Date.now()) {
-                        loadEntriesByDate(date.toISOString().split("T")[0]);
+                        const sDate = date.toISOString().split("T")[0];
+
+                        // Keep the entering and displaying boolean even after reloading
+                        // means we keep the food selection opened after clicking. otherwise, we 
+                        // reset to false and hide the food selection which is really annoying.
+                        const formerOneDayItem = entryMap.value.get(sDate);
+                        let isEnteringItems = false;
+                        let isDisplayingItems = false;
+                        if (isReactive(formerOneDayItem)) {
+                              isEnteringItems = formerOneDayItem.isEnteringItems;
+                              isDisplayingItems = formerOneDayItem.isDisplayingItems;
+                        }
+                        //loadEntriesByDate(date.toISOString().split("T")[0]);
+                        const { entries } = await useFetchEntries(sDate);
+                        const oneDayItem = reactive(createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems));
+                        entryMap.value.set(sDate, oneDayItem);
+                        console.log("oneDayItem " + JSON.stringify(oneDayItem));
+                        // TODO : Find another way
+                        entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
+                        //entryMap.value = new Map([...entryMap.entries()].sort());
                   }
             }
       }
       fromDate.value = initialDate.toISOString().split("T")[0];
       toDate.value = date.toISOString().split("T")[0];
+
+      console.log("fromDate " + fromDate.value + " " + "toDate " + toDate.value);
       //fromDate.value = "2024-07-12";
       //toDate.value = "2024-07-26";
 }
@@ -168,19 +145,22 @@ function getSummaryInfo() {
             }
       })
       .then(summaryInfo => {
+            console.log("summaryInfo " + summaryInfo);
             spentKcal.value = summaryInfo.spentKcal;
             ingestedKcal.value = summaryInfo.ingestedKcal;
             sportDuration.value = summaryInfo.sportDuration;
             drinkingBeer.value = summaryInfo.drinkingBeer;
             anaerobic.value = summaryInfo.anaerobic;
             aerobic.value = summaryInfo.aerobic;
+      })
+      .catch(error => {
+        console.log("summaryInfo " + error);
       });
-
 }
 
-onMounted(() => {
+onMounted(async () => {
       shouldLoadEntries.value = props.hasLoadedEntries;
-      loadPeriodEntries();
+      await loadPeriodEntries();
       getSummaryInfo();
 });
 

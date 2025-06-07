@@ -5,11 +5,13 @@
 </div>
 <div v-else>
 <table style="margin: auto; border: 1px; border-style: dashed;">
-          <tr>
-            <td>food models</td><td>{{ dailyStore.foodModels.length }}</td>
-            <td>sport models</td><td>{{ dailyStore.sportModels.length }}</td>
-            <td>free models</td><td>{{ dailyStore.freeModels.length }}</td>
-          </tr>
+    <tbody>
+      <tr>
+        <td>food models</td><td>{{ dailyStore.foodModels.length }}</td>
+        <td>sport models</td><td>{{ dailyStore.sportModels.length }}</td>
+        <td>free models</td><td>{{ dailyStore.freeModels.length }}</td>
+      </tr>
+    </tbody>
 </table>
 <button class="button-10" @click="loadEntries()">Charger toutes les entrées</button>
 <div v-for="period in periods" :key="period.startDate">
@@ -49,9 +51,7 @@ const errorMessage = computed(()=> {
 function loadEntries() {
   periods.value.forEach(p => {
     const {date, isLoaded} = p;
-    console.log("period " + JSON.stringify(p));
     p.hasBeenLoaded = true;
-    console.log("period after " + JSON.stringify(p));
   });
 }
 
@@ -77,7 +77,6 @@ async function initFreeModels() {
     if (response.ok) {
       const data = await response.json();
       data.forEach(model => {
-        console.log("free : " + JSON.stringify(model));
         let reactiveModel = reactive(createModelFree(model.id, model.title, model.description,
           model.image
         ));
@@ -97,7 +96,6 @@ async function initSportModels() {
   if (response.ok) {
     const data = await response.json();
     data.forEach(model => {
-      console.log("sport : " + JSON.stringify(model));
       let reactiveModel = reactive(createModelSport(model.id, model.title,
         model.description, model.sport)
       );

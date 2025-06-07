@@ -63,10 +63,10 @@ const selectedCategory = ref();
 const isDisplayingItems = defineModel("isDisplayingItems")
 const isEnteringItems = defineModel("isEnteringItems");
 
-const sportDuration = ref();
-const ingestedKcal = ref();
-const spentKcal = ref();
-const drinkingBeer = ref();
+const sportDuration = ref(0);
+const ingestedKcal = ref(0);
+const spentKcal = ref(0);
+const drinkingBeer = ref(0);
 
 
 
@@ -82,7 +82,6 @@ onMounted(() => {
 
 onUpdated(() => {
     //console.log("oneday updated " + this.date + " " + this.enteringItems + " " + this.displayingItems);
-    console.log("props oneday updated " + props.date + " " + isEnteringItems.value + " " + isDisplayingItems.value);
     //getSummaryInfo();
 })
 
@@ -104,6 +103,9 @@ function getSummaryInfo() {
         ingestedKcal.value = summaryInfo.ingestedKcal;
         sportDuration.value = summaryInfo.sportDuration;
         drinkingBeer.value = summaryInfo.drinkingBeer;
+    })
+    .catch(error => {
+        console.log("summaryInfo " + error);
     });
 }
 

@@ -17,22 +17,23 @@
                               @on-add-sport-entry="onAddSportEntry">
                         </model-sport>
                   </div>
-                  <div>
+                  <div v-else>
                         <div>{{ entry.title }}</div>
                         <div class="formatted">{{ entry.description }}</div>
                         <table class="center">
-                              
-                              <tr><td>Modèle</td>
-                                    <td v-if="entry.model"><b>{{ entry.model.title }}</b></td>
-                              </tr>
-                              <tr><td>Sport</td>
-                                    <td v-if="entry.model">{{ entry.model.sport }}</td>
-                              </tr>
-                              <tr><td>Duration</td><td>{{ entry.duration }}</td></tr>
-                              <tr><td>Calories</td><td>{{ entry.kcal }}</td></tr>
-                              <tr><td>Aerobic</td><td>{{ entry.aerobic }}</td></tr>
-                              <tr><td>Anaerobic</td><td>{{ entry.anaerobic }}</td></tr>
-                              <tr><td>Benefit</td><td>{{ entry.benefit }}</td></tr>
+                              <tbody>
+                                    <tr><td>Modèle</td>
+                                          <td v-if="entry.model"><b>{{ entry.model.title }}</b></td>
+                                    </tr>
+                                    <tr><td>Sport</td>
+                                          <td v-if="entry.model">{{ entry.model.sport }}</td>
+                                    </tr>
+                                    <tr><td>Duration</td><td>{{ entry.duration }}</td></tr>
+                                    <tr><td>Calories</td><td>{{ entry.kcal }}</td></tr>
+                                    <tr><td>Aerobic</td><td>{{ entry.aerobic }}</td></tr>
+                                    <tr><td>Anaerobic</td><td>{{ entry.anaerobic }}</td></tr>
+                                    <tr><td>Benefit</td><td>{{ entry.benefit }}</td></tr>
+                              </tbody>
                         </table>
                   </div>
             </div>
@@ -47,6 +48,7 @@
                                     :foodType="entry.foodType"
                                     :kcal="entry.kcal"
                                     :model="entry.model"
+                                    :modelId="entry.modelId"
                                     @on-add-free-entry="onAddFreeEntry(entry)"
                                     @on-update-free-entry="onUpdateFreeEntry(entry)">
                         </model-free>
@@ -63,7 +65,6 @@
                   <div v-if="entry.model">
                         <div>Calories {{ entry.quantity * entry.model.kcal }}</div>
                   </div>
-
             </div>
             <button class="button-color" v-if="entry.type != 'FOOD' && entry.editMode !== true" @click="onEditEntry(entry)">Edit</button> 
             &nbsp;
@@ -79,7 +80,7 @@
 import ModelFree from './ModelFree.vue';
 import ModelSport from './ModelSport.vue';
 import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
-import { createFoodModelFromEntity } from '@/ModelService';
+import { createFoodModelFromEntry } from '@/ModelService';
 
 const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
@@ -97,7 +98,7 @@ onUpdated(() => {
 */
 
 function onCreateFoodModel(entry) {
-      createFoodModelFromEntity(entry)
+      createFoodModelFromEntry(entry)
 }
 
 function onAddFreeEntry(entry) {

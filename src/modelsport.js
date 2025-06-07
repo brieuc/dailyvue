@@ -1,5 +1,3 @@
-import { ref } from 'vue'
-
 export function createModelSport(modelId, modelTitle, modelDescription, modelSport) {
       let id = modelId;
       let title = modelTitle;

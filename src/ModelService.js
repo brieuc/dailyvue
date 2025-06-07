@@ -1,6 +1,6 @@
 import { useDailyStore } from "./dailyStore";
 
-export function createFoodModelFromEntity(entry) {
+export function createFoodModelFromEntry(entry) {
       const dailyStore = useDailyStore();
       const bodyToAdd = {
             "title": entry.title,

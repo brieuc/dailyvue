@@ -97,55 +97,9 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
 }
             
 function getModels() {
-    /*
-    fetch(process.env.VUE_APP_URL + '/model/food', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-    })
-    .then(response => {
-        if(response.ok) {
-            return response.json()
-        }
-    })
-    .then(json => {
-        json.forEach(model => {
-            let reactiveModel = reactive(createModelFood(
-                model.id, model.title, model.description, model.kcal
-            ));
-            // There is no difference in execution between passing
-            // the model json or the reactive object created from the json.
-            //this.models.push(model);
-            this.models.push(reactiveModel);
-        });
-        this.getEntries();
-    })
-    */
     models.value = dailyStore.foodModels;
-    //getEntries();
 }
-            
-function getEntries() {
-    fetch(process.env.VUE_APP_URL + '/entry/' + selectedDay.value + '/food', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-        }
-    )
-    .then(response => {
-        if(response.ok) {
-            return response.json(); 
-        }
-    })
-    .then(json => {
-        console.log("json for each " + JSON.stringify(json));
-        json.forEach(entry => {
-            entriesByModelId.value.set(entry.modelId, entry)
-        });   
-    })
-}
+
 onMounted(() => {
     getModels();
 });
