@@ -33,7 +33,7 @@ import OneDay from './OneDay.vue';
 import SummaryInfo from './SummaryInfo.vue'
 import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted, isReactive } from 'vue'
 import { createOneDayItem } from '@/oneday';
-import { useFetchEntries } from '@/entries';
+import { useFetchOneDayItem } from '@/entries';
 
 const fromDate = ref("");
 const toDate = ref("");
@@ -62,11 +62,11 @@ function loadThenDisplayEntries() {
 }
 
 // Called after an update from OneDay to load the new value
-async function onLoadEntryByDate(sDate) {
+function onLoadEntryByDate(sDate) {
       //loadEntriesByDate(sDate);
-      const { entries } = await useFetchEntries(sDate);
-      const oneDayItem = entryMap.value.get(sDate);
-      oneDayItem.entries = entries
+      const { oneDayItem } = useFetchOneDayItem(sDate);
+      //const oneDayItem = entryMap.value.get(sDate);
+      //oneDayItem.entries = entries
       console.log("reload the day " + sDate + " " + JSON.stringify(oneDayItem));
       entryMap.value.set(sDate, oneDayItem);
 }
@@ -92,7 +92,7 @@ function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
 }
 
 
-async function loadPeriodEntries() {     
+function loadPeriodEntries() {     
       let initialDate = props.initialDate;
       let date = null;
       for (let days = 0; days < props.numberOfDays; days++) {
@@ -113,8 +113,7 @@ async function loadPeriodEntries() {
                               isDisplayingItems = formerOneDayItem.isDisplayingItems;
                         }
                         //loadEntriesByDate(date.toISOString().split("T")[0]);
-                        const { entries } = await useFetchEntries(sDate);
-                        const oneDayItem = reactive(createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems));
+                        const { oneDayItem } = useFetchOneDayItem(sDate);
                         entryMap.value.set(sDate, oneDayItem);
                         console.log("oneDayItem " + JSON.stringify(oneDayItem));
                         // TODO : Find another way
@@ -158,9 +157,9 @@ function getSummaryInfo() {
       });
 }
 
-onMounted(async () => {
+onMounted(() => {
       shouldLoadEntries.value = props.hasLoadedEntries;
-      await loadPeriodEntries();
+      loadPeriodEntries();
       getSummaryInfo();
 });
 

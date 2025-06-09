@@ -1,42 +1,26 @@
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { useDailyStore } from "./dailyStore";
+import { createOneDayItem } from "./oneday";
 
-export async function useFetchEntries(date) {
-      const entries = ref([]);
+export function useFetchOneDayItem(date) {
+      const oneDayItem = reactive(createOneDayItem([], date, false, false));
       const dailyStore = useDailyStore();
       const modelsMap = dailyStore.getModelsMap();
-      
-      if (date instanceof Date && !isNaN(date)) {
-            entries.value = [];
-      }
-      else {
-            const elements = await loadEntriesByDate(date);
-            elements.forEach(e => {
-                  entries.value.push(e);
+
+      fetch(process.env.VUE_APP_URL + '/entry/' + date, {
+            method: 'GET',
+            headers: {
+                  'Authorization' : 'Bearer ' + localStorage.getItem("token"),
+            }
+            })
+      .then(response => response.json())
+      .then(data => {
+            oneDayItem.entries = data;
+            console.log(data);
+            oneDayItem.entries.forEach(e => {
+                  e.model = modelsMap.value.get(e.modelId);
             });
-      }
-
-      entries.value.forEach(e => {
-            e.model = modelsMap.value.get(e.modelId);
-      });
-
-      return { entries };
-}
-
-async function loadEntriesByDate(sDate) {
-      let entries = new Array();
-      const response = await fetch(process.env.VUE_APP_URL + '/entry/' + sDate, {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
-	});
-      if (response.ok) {
-            const data = await response.json();
-            data.forEach(async element => {
-                  var count = entries.push(element);
-            });
-      }
-      console.log("fini de récupérer les modls");
-      return entries;
+      })
+                
+      return { oneDayItem };
 }
