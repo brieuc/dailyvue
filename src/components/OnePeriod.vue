@@ -63,11 +63,17 @@ function loadThenDisplayEntries() {
 
 // Called after an update from OneDay to load the new value
 function onLoadEntryByDate(sDate) {
-      //loadEntriesByDate(sDate);
+      const formerOneDayItem = entryMap.value.get(sDate);
+      let isEnteringItems = false;
+      let isDisplayingItems = false;
+      if (isReactive(formerOneDayItem)) {
+            isEnteringItems = formerOneDayItem.isEnteringItems;
+            isDisplayingItems = formerOneDayItem.isDisplayingItems;
+      }
       const { oneDayItem } = useFetchOneDayItem(sDate);
-      //const oneDayItem = entryMap.value.get(sDate);
-      //oneDayItem.entries = entries
-      console.log("reload the day " + sDate + " " + JSON.stringify(oneDayItem));
+      oneDayItem.isDisplayingItems = isDisplayingItems;
+      oneDayItem.isEnteringItems = isEnteringItems;
+
       entryMap.value.set(sDate, oneDayItem);
 }
 
@@ -114,6 +120,8 @@ function loadPeriodEntries() {
                         }
                         //loadEntriesByDate(date.toISOString().split("T")[0]);
                         const { oneDayItem } = useFetchOneDayItem(sDate);
+                        oneDayItem.isDisplayingItems = isDisplayingItems;
+                        oneDayItem.isEnteringItems = isEnteringItems;
                         entryMap.value.set(sDate, oneDayItem);
                         console.log("oneDayItem " + JSON.stringify(oneDayItem));
                         // TODO : Find another way
