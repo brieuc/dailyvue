@@ -34,10 +34,12 @@ import SummaryInfo from './SummaryInfo.vue'
 import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted, isReactive } from 'vue'
 import { createOneDayItem } from '@/oneday';
 import { useFetchOneDayItem } from '@/entries';
+import { useDailyStore } from '@/dailyStore';
 
 const fromDate = ref("");
 const toDate = ref("");
 
+const dailyStore = useDailyStore();
 
 const entriesShouldBeDisplayed = ref(true);
 
@@ -78,8 +80,11 @@ function onLoadEntryByDate(sDate) {
 }
 
 function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
-
+      const modelsMap = dailyStore.getModelsMap();
       const oneDayItem = entryMap.value.get(sDate);
+      oneDayItem.entries.forEach(e => {
+            e.model = modelsMap.value.get(e.modelId);
+      });
       console.log("onePeriod oneDayItem.isDisplayingItems ", oneDayItem.isDisplayingItems, isDisplayingItems);
       console.log("onePeriod oneDayItem.isEnteringItems", oneDayItem.isEnteringItems, isEnteringItems);
       
