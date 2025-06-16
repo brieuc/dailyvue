@@ -188,13 +188,11 @@ async function getMinDate() {
   }
 }
 
-onMounted(async () => {
-
-  await initDates();
-  await initFoodModels();
-  await initSportModels();
-  await initFreeModels();
-  console.log("tous les modples sont loadés");
+onMounted(() => {
+  initDates();
+  initFoodModels();
+  initSportModels();
+  initFreeModels();
 });
 </script>
 

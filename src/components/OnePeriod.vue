@@ -72,22 +72,15 @@ function onLoadEntryByDate(sDate) {
             isEnteringItems = formerOneDayItem.isEnteringItems;
             isDisplayingItems = formerOneDayItem.isDisplayingItems;
       }
+      console.log("reload oneday " + sDate);
       const { oneDayItem } = useFetchOneDayItem(sDate);
       oneDayItem.isDisplayingItems = isDisplayingItems;
       oneDayItem.isEnteringItems = isEnteringItems;
-
       entryMap.value.set(sDate, oneDayItem);
 }
 
 function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
-      const modelsMap = dailyStore.getModelsMap();
       const oneDayItem = entryMap.value.get(sDate);
-      oneDayItem.entries.forEach(e => {
-            e.model = modelsMap.value.get(e.modelId);
-      });
-      console.log("onePeriod oneDayItem.isDisplayingItems ", oneDayItem.isDisplayingItems, isDisplayingItems);
-      console.log("onePeriod oneDayItem.isEnteringItems", oneDayItem.isEnteringItems, isEnteringItems);
-      
       if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
             const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
             lastSelectedItem.isDisplayingItems = false;
