@@ -117,7 +117,7 @@ function loadPeriodEntries() {
                               isDisplayingItems = formerOneDayItem.isDisplayingItems;
                         }
                         //loadEntriesByDate(date.toISOString().split("T")[0]);
-                        const { oneDayItem } = useFetchOneDayItem(sDate);
+                        const { oneDayItem, requestCount, receiveCount } = useFetchOneDayItem(sDate);
                         oneDayItem.isDisplayingItems = isDisplayingItems;
                         oneDayItem.isEnteringItems = isEnteringItems;
                         entryMap.value.set(sDate, oneDayItem);
@@ -125,6 +125,7 @@ function loadPeriodEntries() {
                         // TODO : Find another way
                         entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
                         //entryMap.value = new Map([...entryMap.entries()].sort());
+                        console.log("requestCount " + requestCount.value, "receiveCount " + receiveCount.value);
                   }
             }
       }

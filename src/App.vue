@@ -154,7 +154,7 @@ async function initDates() {
         //d = new Date(element);
         //this.dates.push(d);
         //console.log("d : " + d);
-        if (i < 4)
+        if (i < 2)
           periods.value.push(reactive(useOnePeriodItem(date, true)));
         else
           periods.value.push(reactive(useOnePeriodItem(date, false)));
