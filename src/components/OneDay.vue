@@ -1,217 +1,207 @@
 <template>
-<div>
-<div id="border">
-    <div @click="selectDay()" style="min-height: 35px; align-content: cen;background-color:rebeccapurple; color: white;">
+  <div>
+    <div id="border">
+      <div @click="selectDay()" style="min-height: 35px; align-content: center; background-color:rebeccapurple; color: white;">
         <span>{{ day }}</span> <span>{{ date }}</span>
-    </div>
-    <div v-if="isEnteringItems">
+      </div>
+      
+      <div v-if="isEnteringItems">
         <model-selection style="height: 35px;" @on-select-model="onSelectModel"></model-selection>  
         <div v-if="selectedCategory === 'food'">
-            <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
+          <model-food @on-update-food-entry="onUpdateFoodEntry" :date="selectedDay"></model-food>
         </div>
         <div v-if="selectedCategory === 'sport'">
-            <model-sport :date="selectedDay" @on-add-sport-entry="onAddSportEntry"></model-sport>
+          <model-sport :date="selectedDay" @on-add-sport-entry="onAddSportEntry"></model-sport>
         </div>
         <div v-if="selectedCategory === 'free'">
-            <model-free :date="selectedDay" @on-add-free-entry="onAddFreeEntry"></model-free>
+          <model-free :date="selectedDay" @on-add-free-entry="onAddFreeEntry"></model-free>
         </div>
-    </div>
-    <div class="flex" @click="displayDay()">
-        <div v-for="entry in entries" :key="entry.id" >
-            {{ entry.title }} {{ getQuantity(entry) }}
+      </div>
+      
+      <div class="flex" @click="displayDay()">
+        <div v-for="entry in entries" :key="entry.id">
+          {{ entry.title }} {{ getQuantity(entry) }}
         </div>  
+      </div>
     </div>
-</div>
-<slot name="category"></slot>
-<slot></slot>
 
-<div v-if="isDisplayingItems">
-    <one-day-summary    :date="date"
-                        :spent-kcal="spentKcal"
-                        :drinking-beer="drinkingBeer"
-                        :ingested-kcal="ingestedKcal"
-                        :sport-duration="sportDuration">
-    </one-day-summary>
-    <day-entries :date="date" :entries="entries" 
-                    :shouldBeDisplayed="shouldBeDisplayed"
-                    v-on:on-update-free-entry="onUpdateFreeEntry"
-                    @on-update-sport-entry="onUpdateSportEntry"
-                    @on-delete-entry="onDeleteEntry">
-    </day-entries>
-</div>
-
-
-</div>
+    <div v-if="isDisplayingItems">
+      <one-day-summary    
+        :date="date"
+        :spent-kcal="summaryData.spentKcal"
+        :drinking-beer="summaryData.drinkingBeer"
+        :ingested-kcal="summaryData.ingestedKcal"
+        :sport-duration="summaryData.sportDuration">
+      </one-day-summary>
+      
+      <day-entries 
+        :date="date" 
+        :entries="entries" 
+        :shouldBeDisplayed="shouldBeDisplayed"
+        @on-update-free-entry="onUpdateFreeEntry"
+        @on-update-sport-entry="onUpdateSportEntry"
+        @on-delete-entry="onDeleteEntry">
+      </day-entries>
+    </div>
+  </div>
 </template>
 
 <script setup>
+import { ref, computed, defineModel, defineProps, defineEmits } from 'vue';
 import OneDaySummary from './OneDaySummary.vue';
 import ModelFood from './ModelFood.vue';
 import ModelSport from './ModelSport.vue';
 import ModelFree from './ModelFree.vue';
 import ModelSelection from './ModelSelection.vue';
 import DayEntries from './DayEntries.vue';
+import { useEntries } from '@/composables/useEntries.js';
 
-import { defineEmits, defineProps, defineModel, onUpdated, ref, computed, onMounted } from 'vue';
+const emit = defineEmits(['onSelectDay', 'onLoadEntryByDate']);
+const props = defineProps(['shouldBeDisplayed', 'date', 'entries']);
 
-const emit = defineEmits(["onSelectDay", "onLoadEntryByDate"]);
-const props = defineProps([ "shouldBeDisplayed", "date", "entries"]);
+const { getSummary } = useEntries();
 
+// Reactive data
 const selectedDay = ref();
 const displayedDay = ref();
 const selectedCategory = ref();
-const isDisplayingItems = defineModel("isDisplayingItems")
-const isEnteringItems = defineModel("isEnteringItems");
+const isDisplayingItems = defineModel('isDisplayingItems');
+const isEnteringItems = defineModel('isEnteringItems');
 
-const sportDuration = ref(0);
-const ingestedKcal = ref(0);
-const spentKcal = ref(0);
-const drinkingBeer = ref(0);
+const summaryData = ref({
+  spentKcal: 0,
+  ingestedKcal: 0,
+  sportDuration: 0,
+  drinkingBeer: 0
+});
 
+// Computed
+const day = computed(() => {
+  const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+  const date = new Date(props.date);
+  return days[date.getDay()];
+});
 
+// Methods
+const getSummaryInfo = async () => {
+  try {
+    const summary = await getSummary(props.date, props.date);
+    if (summary) {
+      summaryData.value = {
+        spentKcal: summary.spentKcal || 0,
+        ingestedKcal: summary.ingestedKcal || 0,
+        sportDuration: summary.sportDuration || 0,
+        drinkingBeer: summary.drinkingBeer || 0
+      };
+    }
+  } catch (error) {
+    console.error("Erreur lors du chargement du résumé:", error);
+  }
+};
 
-const day = computed( () => {
-    const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-    let now = new Date(props.date);
-    return days[now.getDay()];
-})
-
-onMounted(() => {
-    //getSummaryInfo();
-})
-
-onUpdated(() => {
-    //console.log("oneday updated " + this.date + " " + this.enteringItems + " " + this.displayingItems);
-    //getSummaryInfo();
-})
-
-function getSummaryInfo() {
-    fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + props.date + '&toDate=' + props.date, {
-    method: 'GET',
-    headers: {
-        'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-	})
-    .then(response => {
-        console.log(response.status);
-        if (response.ok) {
-                return response.json();
-        }
-    })
-    .then(summaryInfo => {
-        spentKcal.value = summaryInfo.spentKcal;
-        ingestedKcal.value = summaryInfo.ingestedKcal;
-        sportDuration.value = summaryInfo.sportDuration;
-        drinkingBeer.value = summaryInfo.drinkingBeer;
-    })
-    .catch(error => {
-        console.log("summaryInfo " + error);
-    });
-}
-
-function getQuantity(entry) {
-    if (entry.quantity > 1)
-        return "(" + entry.quantity + ")";
-    else
-        return "";
-}
+const getQuantity = (entry) => {
+  if (entry.quantity && entry.quantity > 1) {
+    return `(${entry.quantity})`;
+  }
+  return "";
+};
     
-function selectDay() {
-    console.log("select day");
-    displayedDay.value = null;
-    if (isEnteringItems.value) {
-        isEnteringItems.value = false;
-    }
-    else {
-        isEnteringItems.value = true
-    }
-    isDisplayingItems.value = false;
-    selectedDay.value = props.date;
-    emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
-    //this.loadEntriesByDate(this.selectedDay);
-}
-    
-function displayDay() {
-    getSummaryInfo();
-    console.log("display day");
-    selectedDay.value = null;
-    if (isDisplayingItems.value) {
-        isDisplayingItems.value = false;
-    }
-    else {
-        isDisplayingItems.value = true;
-    }
+const selectDay = () => {
+  console.log("select day");
+  displayedDay.value = null;
+  
+  if (isEnteringItems.value) {
     isEnteringItems.value = false;
-    displayedDay.value = props.date;
-    emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
-    //this.loadEntriesByDate(this.displayedDay);
-}
+  } else {
+    isEnteringItems.value = true;
+  }
+  
+  isDisplayingItems.value = false;
+  selectedDay.value = props.date;
+  emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
+};
+    
+const displayDay = async () => {
+  console.log("display day");
+  await getSummaryInfo();
+  
+  selectedDay.value = null;
+  
+  if (isDisplayingItems.value) {
+    isDisplayingItems.value = false;
+  } else {
+    isDisplayingItems.value = true;
+  }
+  
+  isEnteringItems.value = false;
+  displayedDay.value = props.date;
+  emit("onSelectDay", props.date, isEnteringItems.value, isDisplayingItems.value);
+};
 
-function onDeleteEntry(entry) {
-    console.log("deleting entry : " + JSON.stringify(entry));
-    loadEntriesByDate(displayedDay.value);
-}
+const onDeleteEntry = (entry) => {
+  console.log("deleting entry:", JSON.stringify(entry));
+  loadEntriesByDate(displayedDay.value);
+};
 
-function onAddFreeEntry(freeEntry) {
-    selectedCategory.value = null;
-    loadEntriesByDate(selectedDay.value);
-}
+const onAddFreeEntry = (freeEntry) => {
+  console.log("OneDay onAddFreeEntry:", JSON.stringify(freeEntry));
+  selectedCategory.value = null;
+  loadEntriesByDate(selectedDay.value);
+};
 
-function onUpdateFreeEntry(freeEntry) {
-    console.log('OneDay.vue onUpdateFreeEntry : ' + JSON.stringify(freeEntry));
-    selectedCategory.value = null;
-    loadEntriesByDate(displayedDay.value);
-    //displayedDay.value = null;
-}
+const onUpdateFreeEntry = (freeEntry) => {
+  console.log('OneDay.vue onUpdateFreeEntry:', JSON.stringify(freeEntry));
+  selectedCategory.value = null;
+  loadEntriesByDate(displayedDay.value);
+};
 
-function onAddSportEntry(sportEntry) {
-    console.log('OneDay.vue onAddSportEntry: ' + JSON.stringify(sportEntry));
-    selectedCategory.value = null;
-    loadEntriesByDate(selectedDay.value);
-}
+const onAddSportEntry = (sportEntry) => {
+  console.log('OneDay.vue onAddSportEntry:', JSON.stringify(sportEntry));
+  selectedCategory.value = null;
+  loadEntriesByDate(selectedDay.value);
+};
 
-function onUpdateSportEntry(sportEntry) {
-    console.log('OneDay.vue onUpdateSportEntry: ' + JSON.stringify(sportEntry));
-    selectedCategory.value = null;
-    loadEntriesByDate(displayedDay.value);
-}
+const onUpdateSportEntry = (sportEntry) => {
+  console.log('OneDay.vue onUpdateSportEntry:', JSON.stringify(sportEntry));
+  selectedCategory.value = null;
+  loadEntriesByDate(displayedDay.value);
+};
 
-function onUpdateFoodEntry(foodEntry) {
-    console.log('OneDay.vue onUpdateFoodEntry: ' + JSON.stringify(foodEntry));
-    loadEntriesByDate(selectedDay.value);
-}
+const onUpdateFoodEntry = (foodEntry) => {
+  console.log('OneDay.vue onUpdateFoodEntry:', JSON.stringify(foodEntry));
+  loadEntriesByDate(selectedDay.value);
+};
 
-function onSelectModel(categoryName) {
-    console.log('OneDay.vue onSelectModel ' + categoryName);
-    selectedCategory.value = categoryName;
-}
+const onSelectModel = (categoryName) => {
+  console.log('OneDay.vue onSelectModel', categoryName);
+  selectedCategory.value = categoryName;
+};
 
-function loadEntriesByDate(sDate) {
-    emit("onLoadEntryByDate", sDate);
-}
-
+const loadEntriesByDate = (sDate) => {
+  emit("onLoadEntryByDate", sDate);
+};
 </script>
 
 <style>
 .flex {
-    display: flex;
-    border: 1px;
-    border-color: black;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  display: flex;
+  border: 1px;
+  border-color: black;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 #border {
-    border: 1px;
-    --border-radius: 5px;
-    border-color: black;
-    border-style: solid;
-    cursor: pointer;
-    --margin: auto;
-    width: 400px;
-    --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
-    --padding: 1rem;
+  border: 1px;
+  --border-radius: 5px;
+  border-color: black;
+  border-style: solid;
+  cursor: pointer;
+  --margin: auto;
+  width: 400px;
+  --box-shadow: 0 2px 2px rgba(0, 0, 0, 0.26);
+  --padding: 1rem;
 }
 
 @media only screen and (max-width: 393px) {

@@ -1,229 +1,138 @@
 <template>
-<error-view></error-view>
-<div v-if="error403">
-  <login-entry v-on:on-generated-token="onGeneratedToken"></login-entry>
-</div>
-<div v-else>
-<table style="margin: auto; border: 1px; border-style: dashed;">
-    <tbody>
-      <tr>
-        <td>food models</td><td>{{ dailyStore.foodModels.length }}</td>
-        <td>sport models</td><td>{{ dailyStore.sportModels.length }}</td>
-        <td>free models</td><td>{{ dailyStore.freeModels.length }}</td>
-      </tr>
-    </tbody>
-</table>
-<button class="button-10" @click="loadEntries()">Charger toutes les entrées</button>
-<div v-for="period in periods" :key="period.startDate">
-  <one-period :initial-date="period.startDate"
-              :has-loaded-entries="period.hasBeenLoaded"
-              :number-of-days=7>
-  </one-period>
-  <p></p>
-</div>
-</div>
-
-
+  <error-view></error-view>
+  
+  <div v-if="!isLoggedIn">
+    <login-entry @on-generated-token="onGeneratedToken"></login-entry>
+  </div>
+  
+  <div v-else>
+    <table style="margin: auto; border: 1px; border-style: dashed;">
+      <tbody>
+        <tr>
+          <td>food models</td><td>{{ store.foodModels.length }}</td>
+          <td>sport models</td><td>{{ store.sportModels.length }}</td>
+          <td>free models</td><td>{{ store.freeModels.length }}</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <button class="button-10" @click="loadAllEntries()">
+      Charger toutes les entrées
+    </button>
+    
+    <div v-for="period in periods" :key="period.startDate">
+      <one-period 
+        :initial-date="period.startDate"
+        :has-loaded-entries="period.hasBeenLoaded"
+        :number-of-days="7">
+      </one-period>
+      <p></p>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue';
-import ErrorView from './components/ErrorView.vue'
-import LoginEntry from './components/LoginEntry.vue'
-import OnePeriod from './components/OnePeriod.vue'
+import { ref, onMounted } from 'vue';
+import ErrorView from './components/ErrorView.vue';
+import LoginEntry from './components/LoginEntry.vue';
+import OnePeriod from './components/OnePeriod.vue';
 import { useOnePeriodItem } from './oneperiod';
 import { useDailyStore } from './dailyStore';
-import { createModelFood } from './modelfood';
-import { createModelSport } from './modelsport';
-import { createModelFree } from './modelfree';
+import { useAuth } from './composables/useAuth.js';
+import { useModels } from './composables/useModels.js';
+import { entryService } from './services/entries.js';
+
+const { isLoggedIn } = useAuth();
+const { loadAllModels } = useModels();
+const store = useDailyStore();
 
 const periods = ref([]);
-const error403 = ref(false);
-const token = ref(""); 
-const dailyStore = useDailyStore();
-//const models = ref([]);
 
-const errorMessage = computed(()=> {
-  return "ERROR MSG PB";
-});
-      
-
-function loadEntries() {
-  periods.value.forEach(p => {
-    const {date, isLoaded} = p;
-    p.hasBeenLoaded = true;
+const loadAllEntries = () => {
+  periods.value.forEach(period => {
+    period.hasBeenLoaded = true;
   });
-}
+};
 
-function onGeneratedToken(tokenRing) {
-  token.value = tokenRing;
-  console.log("tokenRing " + tokenRing);
-  localStorage.setItem("token", token.value);
-  error403.value = false;
-  initDates();
-  initSportModels();
-  initFoodModels();
-  initFreeModels();
-}
+const onGeneratedToken = async (token) => {
+  console.log("Token reçu:", token);
+  console.log("onGeneratedTokem is logged in " + isLoggedIn.value);
 
-async function initFreeModels() {
-  const response = await fetch(process.env.VUE_APP_URL + '/model/free', {
-      method: 'GET',
-      headers: {
-        'Authorization' : 'Bearer ' + localStorage.getItem('token'),
-      }
-    });
+  try {
+    // Charger les modèles après connexion
+    await loadAllModels();
+    
+    // Initialiser les dates
+    await initDates();
+  } catch (error) {
+    console.error("Erreur lors de l'initialisation:", error);
+    store.errorMessage = "Erreur lors du chargement des données";
+  }
+};
 
-    if (response.ok) {
-      const data = await response.json();
-      data.forEach(model => {
-        let reactiveModel = reactive(createModelFree(model.id, model.title, model.description,
-          model.image
-        ));
-        dailyStore.freeModels.push(reactiveModel);
-
-      });
+const initDates = async () => {
+  try {
+    // Récupérer la date minimale
+    const minDate = await entryService.getMinDate();
+    if (!minDate) {
+      console.warn("Aucune date minimale trouvée");
+      return;
     }
-}
 
-async function initSportModels() {
-  const response = await fetch(process.env.VUE_APP_URL + '/model/sport', {
-        method: 'GET',
-        headers: {
-          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-  });
-  if (response.ok) {
-    const data = await response.json();
-    data.forEach(model => {
-      let reactiveModel = reactive(createModelSport(model.id, model.title,
-        model.description, model.sport)
-      );
+    // Récupérer les dates pertinentes
+    const dates = await entryService.getRelevantDates(minDate, 7);
+    
+    // Créer les périodes
+    periods.value = dates.map((date, index) => ({
+      ...useOnePeriodItem(date, index < 2), // Charger seulement les 2 premières
+      startDate: new Date(date)
+    }));
 
-      dailyStore.sportModels.push(reactiveModel);
-    });
+  } catch (error) {
+    console.error("Erreur lors de l'initialisation des dates:", error);
+    store.errorMessage = "Impossible de charger les dates";
   }
-}
+};
 
-async function initFoodModels() {
-    const response = await fetch(process.env.VUE_APP_URL + '/model/food', {
-        method: 'GET',
-        headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      data.forEach(model => {
-            let reactiveModel = reactive(
-                createModelFood(
-                  model.id, model.title, model.description, model.kcal
-            ));
-            // There is no difference in execution between passing
-            // the model json or the reactive object created from the json.
-            //this.models.push(model);
-            dailyStore.foodModels.push(reactiveModel);
-        });
-        console.log(JSON.stringify(dailyStore.foodModels.value));
+onMounted(async () => {
+    console.log("App.vue is logged in " + isLoggedIn.value);
+  // Si déjà connecté au montage, charger les données
+  if (isLoggedIn.value) {
+    try {
+      await loadAllModels();
+      await initDates();
+    } catch (error) {
+      console.error("Erreur au montage:", error);
     }
-}
-
-async function initDates() {
-
-  let i = 0;
-  if (localStorage.getItem("token") == null) {
-    error403.value = true;
-    return;
   }
-
-  let minDate = await getMinDate();
-  if (minDate != -1) {
-    let minDateStr = minDate;
-    let d = null;
-    fetch(process.env.VUE_APP_URL + '/entry/get/' + minDateStr + '?numberOfDays=7', {
-        method: 'GET',
-        headers: {
-          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        }
-      }
-    )
-    .then(response => response.json())
-    .then(entries => {
-      entries.forEach(date => {
-        //d = new Date(element);
-        //this.dates.push(d);
-        //console.log("d : " + d);
-        if (i < 2)
-          periods.value.push(reactive(useOnePeriodItem(date, true)));
-        else
-          periods.value.push(reactive(useOnePeriodItem(date, false)));
-        i++;
-        //console.log("period " + period.startDate);
-      });
-    })
-  }
-}
-
-//Remonté au dessus directement en utilisant le then juste après.
-async function getMinDate() {
-  const response = await fetch(process.env.VUE_APP_URL + '/entry/firstDate', {
-      method: 'GET',
-      headers: {
-        'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-      }
-    }
-  );
-  if (response.status == 403) {
-    console.log("erreur 403");
-    error403.value = true;
-    return -1;
-  }
-  else if (response.ok) {
-    console.log("pas d'erreur 403");
-    error403.value = false;
-    const data = await response.json();
-    let minDate = data.pop();
-    return minDate;
-  }
-}
-
-onMounted(() => {
-  initDates();
-  initFoodModels();
-  initSportModels();
-  initFreeModels();
 });
 </script>
 
 <style>
 .button-10 {
-      margin: auto;
-      display: flex;
-      justify-content: space-evenly;
-      padding: 6px 14px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-      border-radius: 6px;
-      border: none;
-
-      color: #fff;
-      background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
-      background-origin: border-box;
-      box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
+  margin: auto;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 6px 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  border-radius: 6px;
+  border: none;
+  color: #fff;
+  background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+  background-origin: border-box;
+  box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .button-10:focus {
-      box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
-      outline: 0;
+  box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+  outline: 0;
 }
 
 body {
   background-image: linear-gradient(to right bottom, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
-  /*background-image: url("./assets/pexels-padrinan-255379.jpg");*/
-
   background-attachment: fixed;
 }
 
@@ -236,6 +145,7 @@ body {
 input[type="text"] {
   font-size: 16px;
 }
+
 textarea {
   font-size: 16px;
 }
