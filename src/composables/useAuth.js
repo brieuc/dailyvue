@@ -1,17 +1,18 @@
 // src/composables/useAuth.js  
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { authService } from '@/services/auth.js';
 
 export function useAuth() {
-  const isLoggedIn = ref(authService.isLoggedIn());
+  const token = ref(localStorage.getItem('token'))
+  const isLoggedIn = computed(() => !!token.value)
   const error = ref('');
 
   const login = async (username, password) => {
     error.value = '';
     try {
-      const token = await authService.login(username, password);
-      isLoggedIn.value = true;
-      return token;
+      const data = await authService.login(username, password);
+      token.value = data;
+      return data;
     } catch (err) {
       error.value = err.message;
       throw err;
@@ -19,14 +20,18 @@ export function useAuth() {
   };
 
   const logout = () => {
+    // ✅ Suppression du token - déclenche la réactivité !
+    token.value = null
     authService.logout();
-    isLoggedIn.value = false;
-  };
+  }
+  
+  const getToken = () => token.value;
 
   return {
     isLoggedIn,
     error,
     login,
-    logout
+    logout,
+    getToken
   };
 }

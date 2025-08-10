@@ -62,7 +62,8 @@ const summaryData = ref({
 
 // Computed dates
 const fromDate = computed(() => {
-  return props.initialDate.toISOString().split('T')[0];
+  const fromDate = new Date(props.initialDate.valueOf());
+  return fromDate.toISOString().split('T')[0];
 });
 
 const toDate = computed(() => {
