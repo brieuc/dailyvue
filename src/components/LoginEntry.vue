@@ -1,49 +1,44 @@
 <template>
-      <h3>login</h3>
-      <table class="center">
-            <tbody>
-                  <tr><td>username</td><td><input type="text" v-model="username"></td></tr>
-                  <tr><td>password</td><td><input type="text" v-model="password"></td></tr>
-            </tbody>
-      </table>
-      <input type="submit" @click="login()" value="Login">
+  <h3>Login</h3>
+  <form @submit.prevent="handleLogin">
+    <table class="center">
+      <tbody>
+        <tr>
+          <td>Username</td>
+          <td><input type="text" v-model="credentials.username" required></td>
+        </tr>
+        <tr>
+          <td>Password</td>
+          <td><input type="password" v-model="credentials.password" required></td>
+        </tr>
+      </tbody>
+    </table>
+    <input type="submit" :disabled="loading" :value="loading ? 'Connexion...' : 'Login'">
+    <div v-if="error" class="error">{{ error }}</div>
+  </form>
 </template>
 
 <script setup>
+import { ref, reactive, defineEmits } from 'vue';
+import { useAuth } from '@/composables/useAuth.js';
 
-import { ref, defineEmits } from 'vue'
+const emit = defineEmits(['onGeneratedToken']);
 
-const emit = defineEmits(["onGeneratedToken"]);
-let username = ref('');
-let password = ref('');
+const { login, loading, error } = useAuth();
 
-function login() {
-      fetch(process.env.VUE_APP_URL + '/auth/login', {
-            method: 'POST',
-            headers: {
-                  'Acces-Control-Allow-Origin': '*',
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  //'Authorization' : 'Bearer ' + localStorage.getItem("token"), no need
-            },
-            body: JSON.stringify({
-                  username: username.value,
-                  password: password.value
-            }),
-      })
-      .then(response => {
-            console.log(response);
-            if (response.ok)
-                  return response.json();
-      })
-      .then(json => {
-            console.log(json.token);
-            emit("onGeneratedToken", json.token);
-      });
-}
+
+const credentials = reactive({
+  username: '',
+  password: ''
+});
+
+const handleLogin = async () => {
+  try {
+    const token = await login(credentials.username, credentials.password);
+    console.log("token " + token);
+    emit('onGeneratedToken', token);
+  } catch (err) {
+    console.error('Login failed:', err);
+  }
+};
 </script>
-<style>
-.center {
-      margin: auto;
-}
-</style>

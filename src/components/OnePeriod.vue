@@ -1,207 +1,220 @@
 <template>
+  <summary-info 
+    :fromDate="fromDate"
+    :toDate="toDate"
+    :ingestedKcal="summaryData.ingestedKcal"
+    :spentKcal="summaryData.spentKcal"
+    :sportDuration="summaryData.sportDuration"
+    :aerobic="summaryData.aerobic"
+    :anaerobic="summaryData.anaerobic"
+    :drinking-beer="summaryData.drinkingBeer">
+  </summary-info>
 
-<summary-info     :fromDate="fromDate"
-                  :toDate="toDate"
-                  :ingestedKcal="ingestedKcal"
-                  :spentKcal="spentKcal"
-                  :sportDuration="sportDuration"
-                  :aerobic="aerobic"
-                  :anaerobic="anaerobic"
-                  :drinking-beer="drinkingBeer">
-</summary-info>
-
-<div v-if="!shouldLoadEntries">
-      <button class="button-10" @click="loadThenDisplayEntries()">Charger les données</button>
-</div>
-<div v-else>
-      <div v-for="[date, oneDayItem] in entryMap" :key="date">
-            <one-day    :date="oneDayItem.date"
-                        :entries="oneDayItem.entries"
-                        :shouldBeDisplayed="entriesShouldBeDisplayed"
-                        v-on:on-load-entry-by-date="onLoadEntryByDate"
-                        @on-select-day="onSelectDay"
-                        v-model:isEnteringItems="oneDayItem.isEnteringItems"
-                        v-model:isDisplayingItems="oneDayItem.isDisplayingItems">
-            </one-day>
-      </div>
-</div>
-
+  <div v-if="!shouldLoadEntries">
+    <button class="button-10" @click="loadThenDisplayEntries()" :disabled="loading">
+      {{ loading ? 'Chargement...' : 'Charger les données' }}
+    </button>
+  </div>
+  
+  <div v-else>
+    <div v-for="[date, oneDayItem] in entryMap" :key="date">
+      <one-day    
+        :date="oneDayItem.date"
+        :entries="oneDayItem.entries"
+        :shouldBeDisplayed="entriesShouldBeDisplayed"
+        @on-load-entry-by-date="onLoadEntryByDate"
+        @on-select-day="onSelectDay"
+        v-model:isEnteringItems="oneDayItem.isEnteringItems"
+        v-model:isDisplayingItems="oneDayItem.isDisplayingItems">
+      </one-day>
+    </div>
+  </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onUpdated, isReactive, defineProps } from 'vue';
 import OneDay from './OneDay.vue';
-import SummaryInfo from './SummaryInfo.vue'
-import { ref, reactive, defineEmits, defineProps, onUpdated, onMounted, isReactive } from 'vue'
+import SummaryInfo from './SummaryInfo.vue';
 import { createOneDayItem } from '@/oneday';
-import { useFetchOneDayItem } from '@/entries';
+import { useEntries } from '@/composables/useEntries.js';
 import { useDailyStore } from '@/dailyStore';
 
-const fromDate = ref("");
-const toDate = ref("");
+const props = defineProps(['initialDate', 'numberOfDays', 'hasLoadedEntries']);
 
-const dailyStore = useDailyStore();
+const { getEntriesWithModels, getSummary, loading } = useEntries();
+const store = useDailyStore();
 
+// Data
+const shouldLoadEntries = ref(props.hasLoadedEntries);
 const entriesShouldBeDisplayed = ref(true);
-
-const ingestedKcal = ref(0.0);
-const spentKcal = ref(0.0);
-const sportDuration = ref(0.0);
-const drinkingBeer = ref(0.0);
-const anaerobic = ref(0.0);
-const aerobic = ref(0.0);
-
-const shouldLoadEntries = ref();
-
 const entryMap = ref(new Map());
 const lastSelectedDate = ref();
 
-const props = defineProps(["initialDate", "numberOfDays", "hasLoadedEntries"]);
+// Summary data
+const summaryData = ref({
+  ingestedKcal: 0,
+  spentKcal: 0,
+  sportDuration: 0,
+  drinkingBeer: 0,
+  anaerobic: 0,
+  aerobic: 0
+});
 
-// Load the hidden period
-function loadThenDisplayEntries() {
-      shouldLoadEntries.value = true;
-      loadPeriodEntries();
-}
+// Computed dates
+const fromDate = computed(() => {
+  return props.initialDate.toISOString().split('T')[0];
+});
 
-// Called after an update from OneDay to load the new value
-function onLoadEntryByDate(sDate) {
-      const formerOneDayItem = entryMap.value.get(sDate);
-      let isEnteringItems = false;
-      let isDisplayingItems = false;
-      if (isReactive(formerOneDayItem)) {
-            isEnteringItems = formerOneDayItem.isEnteringItems;
-            isDisplayingItems = formerOneDayItem.isDisplayingItems;
-      }
-      console.log("reload oneday " + sDate);
-      const { oneDayItem } = useFetchOneDayItem(sDate);
-      oneDayItem.isDisplayingItems = isDisplayingItems;
-      oneDayItem.isEnteringItems = isEnteringItems;
-      entryMap.value.set(sDate, oneDayItem);
-}
+const toDate = computed(() => {
+  const endDate = new Date(props.initialDate.valueOf());
+  endDate.setDate(endDate.getDate() + props.numberOfDays - 1);
+  return endDate.toISOString().split('T')[0];
+});
 
-function onSelectDay(sDate, isEnteringItems, isDisplayingItems) {
-      const oneDayItem = entryMap.value.get(sDate);
-      if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
-            const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
-            lastSelectedItem.isDisplayingItems = false;
-            lastSelectedItem.isEnteringItems = false;
-      }
+// Methods
+const loadThenDisplayEntries = async () => {
+  shouldLoadEntries.value = true;
+  await loadPeriodEntries();
+};
 
-      //No need to update oneDayItem because of the defineModel
-      //value has already been changed in the OneDay.
-      //const oneDayItem = entryMap.value.get(sDate);
-      //oneDayItem.isDisplayingItems = isDisplayingItems;
-      //oneDayItem.isEnteringItems = isEnteringItems;
-      lastSelectedDate.value = sDate;      
-}
+const onLoadEntryByDate = async (sDate) => {
+  const formerOneDayItem = entryMap.value.get(sDate);
+  let isEnteringItems = false;
+  let isDisplayingItems = false;
+  
+  if (isReactive(formerOneDayItem)) {
+    isEnteringItems = formerOneDayItem.isEnteringItems;
+    isDisplayingItems = formerOneDayItem.isDisplayingItems;
+  }
+  
+  console.log("reload oneday", sDate);
+  
+  try {
+    const entries = await getEntriesWithModels(sDate);
+    const oneDayItem = createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems);
+    entryMap.value.set(sDate, oneDayItem);
+  } catch (error) {
+    console.error("Erreur lors du rechargement:", error);
+  }
+};
 
+const onSelectDay = (sDate, isEnteringItems, isDisplayingItems) => {
+  if (lastSelectedDate.value != null && lastSelectedDate.value != sDate) {
+    const lastSelectedItem = entryMap.value.get(lastSelectedDate.value);
+    if (lastSelectedItem) {
+      lastSelectedItem.isDisplayingItems = false;
+      lastSelectedItem.isEnteringItems = false;
+    }
+  }
+  lastSelectedDate.value = sDate;
+};
 
-function loadPeriodEntries() {     
-      let initialDate = props.initialDate;
-      let date = null;
-      for (let days = 0; days < props.numberOfDays; days++) {
-            date = new Date(initialDate.valueOf());
-            date.setDate(date.getDate() + days);
-            if (shouldLoadEntries.value) {
-                  if (date <= Date.now()) {
-                        const sDate = date.toISOString().split("T")[0];
-
-                        // Keep the entering and displaying boolean even after reloading
-                        // means we keep the food selection opened after clicking. otherwise, we 
-                        // reset to false and hide the food selection which is really annoying.
-                        const formerOneDayItem = entryMap.value.get(sDate);
-                        let isEnteringItems = false;
-                        let isDisplayingItems = false;
-                        if (isReactive(formerOneDayItem)) {
-                              isEnteringItems = formerOneDayItem.isEnteringItems;
-                              isDisplayingItems = formerOneDayItem.isDisplayingItems;
-                        }
-                        //loadEntriesByDate(date.toISOString().split("T")[0]);
-                        const { oneDayItem, requestCount, receiveCount } = useFetchOneDayItem(sDate);
-                        oneDayItem.isDisplayingItems = isDisplayingItems;
-                        oneDayItem.isEnteringItems = isEnteringItems;
-                        entryMap.value.set(sDate, oneDayItem);
-                        console.log("oneDayItem " + JSON.stringify(oneDayItem));
-                        // TODO : Find another way
-                        entryMap.value = new Map([...entryMap.value.entries()].sort((a, b) => b[0].localeCompare(a[0])));
-                        //entryMap.value = new Map([...entryMap.entries()].sort());
-                        console.log("requestCount " + requestCount.value, "receiveCount " + receiveCount.value);
-                  }
-            }
-      }
-      fromDate.value = initialDate.toISOString().split("T")[0];
-      toDate.value = date.toISOString().split("T")[0];
-
-      console.log("fromDate " + fromDate.value + " " + "toDate " + toDate.value);
-      //fromDate.value = "2024-07-12";
-      //toDate.value = "2024-07-26";
-}
-
-function getSummaryInfo() {
-      fetch(process.env.VUE_APP_URL + '/entry/summary-info?fromDate=' + fromDate.value + '&toDate=' + toDate.value, {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
-	})
-      .then(response => {
-            console.log(response.status);
-            if (response.ok) {
-                  return response.json();
-            }
-      })
-      .then(summaryInfo => {
-            console.log("summaryInfo " + summaryInfo);
-            spentKcal.value = summaryInfo.spentKcal;
-            ingestedKcal.value = summaryInfo.ingestedKcal;
-            sportDuration.value = summaryInfo.sportDuration;
-            drinkingBeer.value = summaryInfo.drinkingBeer;
-            anaerobic.value = summaryInfo.anaerobic;
-            aerobic.value = summaryInfo.aerobic;
+// src/components/OnePeriod.vue - Version ultra-simple
+const loadPeriodEntries = () => {
+  if (!shouldLoadEntries.value) return;
+  
+  const initialDate = props.initialDate;
+  const dates = [];
+  
+  // Préparer toutes les dates
+  for (let days = 0; days < props.numberOfDays; days++) {
+    const date = new Date(initialDate.valueOf());
+    date.setDate(date.getDate() + days);
+    
+    if (date <= new Date()) {
+      dates.push(date.toISOString().split("T")[0]);
+    }
+  }
+  
+  // ✅ Créer une Promise pour chaque date et les traiter au fur et à mesure
+  dates.forEach(sDate => {
+    // Créer le placeholder
+    const oneDayItem = createOneDayItem([], sDate, false, false);
+    oneDayItem.loading = true;
+    entryMap.value.set(sDate, oneDayItem);
+    
+    // ✅ Lancer la Promise et traiter la réponse quand elle arrive
+    getEntriesWithModels(sDate)
+      .then(entries => {
+        // Conserver les états UI existants
+        const existingItem = entryMap.value.get(sDate);
+        const updatedItem = createOneDayItem(
+          entries, 
+          sDate, 
+          existingItem?.isEnteringItems || false,
+          existingItem?.isDisplayingItems || false
+        );
+        updatedItem.loading = false;
+        
+        // ✅ Mettre à jour le DOM dès que cette date est prête
+        entryMap.value.set(sDate, updatedItem);
       })
       .catch(error => {
-        console.log("summaryInfo " + error);
+        console.error(`Erreur pour ${sDate}:`, error);
+        const existingItem = entryMap.value.get(sDate);
+        if (existingItem) {
+          existingItem.loading = false;
+          existingItem.error = error.message;
+        }
       });
-}
+  });
+};
 
-onMounted(() => {
-      shouldLoadEntries.value = props.hasLoadedEntries;
-      loadPeriodEntries();
-      getSummaryInfo();
+const loadSummaryInfo = async () => {
+  try {
+    const summary = await getSummary(fromDate.value, toDate.value);
+    if (summary) {
+      summaryData.value = { ...summary };
+    }
+  } catch (error) {
+    console.error("Erreur lors du chargement du résumé:", error);
+  }
+};
+
+// Lifecycle
+onMounted(async () => {
+  shouldLoadEntries.value = props.hasLoadedEntries;
+  
+  if (shouldLoadEntries.value) {
+    await loadPeriodEntries();
+  }
+  
+  await loadSummaryInfo();
 });
-
 
 onUpdated(() => {
-      if (shouldLoadEntries.value != true && shouldLoadEntries.value != props.hasLoadedEntries) {
-            shouldLoadEntries.value = true;
-            loadPeriodEntries();
-      }
+  if (!shouldLoadEntries.value && props.hasLoadedEntries) {
+    shouldLoadEntries.value = true;
+    loadPeriodEntries();
+  }
 });
-
 </script>
 
 <style>
-/* CSS */
 .button-10 {
-      margin: auto;
-      display: flex;
-      justify-content: space-evenly;
-      padding: 6px 14px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-      border-radius: 6px;
-      border: none;
-
-      color: #fff;
-      background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
-      background-origin: border-box;
-      box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
+  margin: auto;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 6px 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  border-radius: 6px;
+  border: none;
+  color: #fff;
+  background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+  background-origin: border-box;
+  box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .button-10:focus {
-      box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
-      outline: 0;
+  box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+  outline: 0;
+}
+
+.button-10:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
