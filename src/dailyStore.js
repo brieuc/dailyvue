@@ -3,10 +3,13 @@ import { ref } from 'vue'
 
 export const useDailyStore = defineStore('dailystore', () => {
 
+
       const foodModels = ref([]);
       const sportModels = ref([]);
       const freeModels = ref([]);
       const errorMessage = ref('');
+
+      errorMessage.value = "";
       
       function getModelsMap() {
             const modelsMap = ref(new Map());

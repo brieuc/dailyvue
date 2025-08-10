@@ -17,12 +17,13 @@ export const authService = {
     }
 
     const data = await response.json();
+    console.log("token " + data.token);
     localStorage.setItem('token', data.token);
     return data.token;
   },
 
   logout() {
-    localStorage.removeItem('token');
+    //localStorage.removeItem('token');
   },
 
   isLoggedIn() {

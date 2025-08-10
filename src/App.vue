@@ -15,6 +15,7 @@
         </tr>
       </tbody>
     </table>
+    <button @click="handleLogout" class="logout-btn">Déconnexion</button>
     
     <button class="button-10" @click="loadAllEntries()">
       Charger toutes les entrées
@@ -32,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import ErrorView from './components/ErrorView.vue';
 import LoginEntry from './components/LoginEntry.vue';
 import OnePeriod from './components/OnePeriod.vue';
@@ -42,7 +43,8 @@ import { useAuth } from './composables/useAuth.js';
 import { useModels } from './composables/useModels.js';
 import { entryService } from './services/entries.js';
 
-const { isLoggedIn } = useAuth();
+// ✅ Utilisation du composable useAuth
+const { isLoggedIn, logout } = useAuth()
 const { loadAllModels } = useModels();
 const store = useDailyStore();
 
@@ -54,58 +56,82 @@ const loadAllEntries = () => {
   });
 };
 
-const onGeneratedToken = async (token) => {
+const onGeneratedToken = (token) => {
   console.log("Token reçu:", token);
-  console.log("onGeneratedTokem is logged in " + isLoggedIn.value);
+  console.log("onGeneratedToken - isLoggedIn:", isLoggedIn.value);
 
-  try {
-    // Charger les modèles après connexion
-    await loadAllModels();
-    
-    // Initialiser les dates
-    await initDates();
-  } catch (error) {
-    console.error("Erreur lors de l'initialisation:", error);
+  // ✅ Utilise la fonction centralisée avec Promises
+  initializeAppData()
+    .then(() => {
+      console.log("🎉 Données chargées après connexion");
+    })
+    .catch(error => {
+      console.error("💥 Échec du chargement après connexion:", error);
+    });
+};
+
+// ✅ VERSION AVEC RETURN (CORRECTE)
+const initDates = () => {
+  return entryService.getMinDate()  // ✅ RETURN de la Promise !
+    .then(minDate => {
+      console.log("Date minimale:", minDate);
+      return entryService.getRelevantDates(minDate, 7);
+    })
+    .then(dates => {
+      periods.value = dates.map(date => ({ startDate: date }));
+    })
+    .catch(error => {
+      console.error("Erreur:", error);
+      throw error;  // Re-throw pour l'appelant
+    });
+  
+  // ✅ Cette fonction retourne une Promise que l'appelant peut attendre
+};
+
+// ✅ Fonction centralisée pour initialiser toutes les données avec Promises
+const initializeAppData = () => {
+  console.log("🚀 Début de l'initialisation des données...");
+  
+  // Charger les modèles et les dates en parallèle pour optimiser les performances
+  return Promise.all([
+    loadAllModels(),  // ✅ Utilise useModels !
+    initDates()
+  ])
+  .then(() => {
+    console.log("✅ Initialisation des données terminée");
+  })
+  .catch(error => {
+    console.error("❌ Erreur lors de l'initialisation:", error);
     store.errorMessage = "Erreur lors du chargement des données";
-  }
+    throw error; // Re-throw pour permettre la gestion dans les appelants
+  });
 };
 
-const initDates = async () => {
-  try {
-    // Récupérer la date minimale
-    const minDate = await entryService.getMinDate();
-    if (!minDate) {
-      console.warn("Aucune date minimale trouvée");
-      return;
-    }
-
-    // Récupérer les dates pertinentes
-    const dates = await entryService.getRelevantDates(minDate, 7);
-    
-    // Créer les périodes
-    periods.value = dates.map((date, index) => ({
-      ...useOnePeriodItem(date, index < 2), // Charger seulement les 2 premières
-      startDate: new Date(date)
-    }));
-
-  } catch (error) {
-    console.error("Erreur lors de l'initialisation des dates:", error);
-    store.errorMessage = "Impossible de charger les dates";
-  }
-};
-
-onMounted(async () => {
-    console.log("App.vue is logged in " + isLoggedIn.value);
-  // Si déjà connecté au montage, charger les données
-  if (isLoggedIn.value) {
-    try {
-      await loadAllModels();
-      await initDates();
-    } catch (error) {
-      console.error("Erreur au montage:", error);
-    }
+// ✅ Watcher pour initialiser les données quand l'utilisateur se connecte
+watch(isLoggedIn, (newValue) => {
+  if (newValue) {
+    initializeAppData()
+  } else {
+    // Nettoyer les données quand l'utilisateur se déconnecte
+    periods.value = []
+    store.foodModels.splice(0)
+    store.sportModels.splice(0)
+    store.freeModels.splice(0)
   }
 });
+
+// Initialisation des données au montage si déjà connecté
+onMounted(() => {
+  console.log("app.vue " + isLoggedIn.value);
+  if (isLoggedIn.value) {
+    initializeAppData()
+  }
+});
+
+function handleLogout() {
+  logout();
+  // La réactivité va automatiquement mettre à jour l'interface
+}
 </script>
 
 <style>
