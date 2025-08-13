@@ -51,6 +51,7 @@ const store = useDailyStore();
 const periods = ref([]);
 
 const loadAllEntries = () => {
+  console.log("loadAllEntries")
   periods.value.forEach(period => {
     period.hasBeenLoaded = true;
   });
@@ -78,7 +79,10 @@ const initDates = () => {
       return entryService.getRelevantDates(minDate, 7);
     })
     .then(dates => {
-      periods.value = dates.map(date => ({ startDate: date }));
+      periods.value = dates.map((date, index) => 
+        useOnePeriodItem(date, index < 4)
+        //useOnePeriodItem(date, true)
+      );
     })
     .catch(error => {
       console.error("Erreur:", error);

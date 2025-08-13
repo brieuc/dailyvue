@@ -23,6 +23,7 @@ export const authService = {
   },
 
   logout() {
+    console.log('Token supprimé:', Date.now());
     //localStorage.removeItem('token');
   },
 

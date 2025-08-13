@@ -20,6 +20,7 @@ export function useAuth() {
   };
 
   const logout = () => {
+    console.log('useAuth Token supprimé:', Date.now());
     // ✅ Suppression du token - déclenche la réactivité !
     token.value = null
     authService.logout();

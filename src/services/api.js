@@ -18,15 +18,16 @@ class ApiClient {
       headers: this.getHeaders(),
       ...options
     });
-
+/*
     // Gestion simple de l'auth expirée
     if (response.status === 403) {
       localStorage.removeItem('token');
       //window.location.reload(); // ou émettre un event
     }
+
     else 
       console.log("auh OK");
-
+      */
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

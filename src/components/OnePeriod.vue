@@ -112,6 +112,7 @@ const onSelectDay = (sDate, isEnteringItems, isDisplayingItems) => {
 
 // src/components/OnePeriod.vue - Version ultra-simple
 const loadPeriodEntries = () => {
+  console.log("loadPeriodEntries");
   if (!shouldLoadEntries.value) return;
   
   const initialDate = props.initialDate;
@@ -176,9 +177,9 @@ const loadSummaryInfo = async () => {
 onMounted(async () => {
   shouldLoadEntries.value = props.hasLoadedEntries;
   
-  if (shouldLoadEntries.value) {
+  //if (shouldLoadEntries.value) {
     await loadPeriodEntries();
-  }
+  //}
   
   await loadSummaryInfo();
 });
