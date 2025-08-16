@@ -61,7 +61,7 @@ const credentials = reactive({
 const handleLogin = async () => {
   try {
     const token = await login(credentials.username, credentials.password);
-    console.log("token " + token);
+    console.log("LoginEntry handleLogin " + token);
     emit('onGeneratedToken', token);
   } catch (err) {
     console.error('Login failed:', err);
