@@ -7,7 +7,8 @@ export const authService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(
-        {username: username,
+        {
+          username: username,
           password: password
         })
     });
@@ -17,14 +18,14 @@ export const authService = {
     }
 
     const data = await response.json();
-    console.log("token " + data.token);
+    console.log("authService token " + data.token);
     localStorage.setItem('token', data.token);
     return data.token;
   },
 
   logout() {
     console.log('Token supprimé:', Date.now());
-    //localStorage.removeItem('token');
+    localStorage.removeItem('token');
   },
 
   isLoggedIn() {

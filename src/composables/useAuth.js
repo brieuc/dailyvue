@@ -2,17 +2,19 @@
 import { ref, computed } from 'vue';
 import { authService } from '@/services/auth.js';
 
+// État global partagé (en dehors de la fonction)
+const isLoggedIn = ref(authService.isLoggedIn());
+const error = ref('');
+
 export function useAuth() {
-  const token = ref(localStorage.getItem('token'))
-  const isLoggedIn = computed(() => !!token.value)
-  const error = ref('');
 
   const login = async (username, password) => {
     error.value = '';
     try {
-      const data = await authService.login(username, password);
-      token.value = data;
-      return data;
+      const token = await authService.login(username, password);
+      isLoggedIn.value = true;
+      console.log("useAuth after login computed " + isLoggedIn.value);
+      return token;
     } catch (err) {
       error.value = err.message;
       throw err;
@@ -22,17 +24,13 @@ export function useAuth() {
   const logout = () => {
     console.log('useAuth Token supprimé:', Date.now());
     // ✅ Suppression du token - déclenche la réactivité !
-    token.value = null
     authService.logout();
   }
-  
-  const getToken = () => token.value;
 
   return {
     isLoggedIn,
     error,
     login,
-    logout,
-    getToken
+    logout
   };
 }

@@ -110,10 +110,12 @@ const initializeAppData = () => {
     throw error; // Re-throw pour permettre la gestion dans les appelants
   });
 };
+/*
 
 // ✅ Watcher pour initialiser les données quand l'utilisateur se connecte
 watch(isLoggedIn, (newValue) => {
   if (newValue) {
+    console.log("app.vue watch" + newValue + "isLogged.value " + isLoggedIn.value);
     initializeAppData()
   } else {
     // Nettoyer les données quand l'utilisateur se déconnecte
@@ -123,10 +125,10 @@ watch(isLoggedIn, (newValue) => {
     store.freeModels.splice(0)
   }
 });
-
+*/
 // Initialisation des données au montage si déjà connecté
 onMounted(() => {
-  console.log("app.vue " + isLoggedIn.value);
+  console.log("app.vue onMounted" + isLoggedIn.value);
   if (isLoggedIn.value) {
     initializeAppData()
   }
