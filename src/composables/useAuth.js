@@ -6,6 +6,7 @@ import { authService } from '@/services/auth.js';
 const isLoggedIn = ref(authService.isLoggedIn());
 const error = ref('');
 
+export {isLoggedIn, error};
 export function useAuth() {
 
   const login = async (username, password) => {
@@ -25,11 +26,10 @@ export function useAuth() {
     console.log('useAuth Token supprimé:', Date.now());
     // ✅ Suppression du token - déclenche la réactivité !
     authService.logout();
+    isLoggedIn.value = false;
   }
 
   return {
-    isLoggedIn,
-    error,
     login,
     logout
   };
