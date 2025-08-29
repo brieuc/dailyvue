@@ -22,11 +22,13 @@
 <script setup>
 import { ref, defineEmits, onMounted, defineProps, isRef, onUpdated } from 'vue'
 import { useDailyStore } from '@/dailyStore';
+import { useEntries } from '@/composables/useEntries';
 
 const models = ref([]);
 const foodTypeArray = ref(["ALCOHOL", "YOGHOURT", "MEAL", "ICECREAM", "JUNKFOOD", "CHOCO"]);
 
 const dailyStore = useDailyStore();
+const { createEntry, updateEntry } = useEntries();
 const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry']);
 const props = defineProps(["date", "title", "description", "entryId", "mode",
 					"foodType", "kcal", "model", "modelId"]);
@@ -64,96 +66,50 @@ function getModels() {
 	}
 }
 
-/*
-function getModels() {
-	fetch(process.env.VUE_APP_URL + '/model/free', {
-		method: 'GET',
-		headers: {
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		}
-	})
-	.then(response => response.json())
-	.then(json => {
-		//const model = json.at(0);
-		//modelId = model.id;
-		models.value = json;
-		if (selectedModel.value == null) {
-			selectedModel.value = models.value.at(0);
-		}
-		else {
-			selectedModel.value = props.model;
-		}
-		console.log("models " + JSON.stringify(models.value));
-	})
-}
-*/
-
 function onUpdateFreeEntry() {
 	let emitMethod = "";
 	let fetchMethod = "";
 	let fetchURL = "";
 	let bodyToAdd = {};
+
+	let entryPromise;
 	if (props.entryId) {
-		fetchMethod = 'PUT';
-		emitMethod = "onUpdateFreeEntry";
-		bodyToAdd = {
-			modelId:  props.modelId,
-			date: props.date,
-			id: props.entryId,
+
+		const isFreeFoodModel = selectedModel.value.title === 'Free Food';
+
+		entryPromise = updateEntry(props.entryId, {
 			title: title.value,
 			description: description.value,
-		};
-		console.log("selectedModel " + JSON.stringify(selectedModel.value));
-		if (selectedModel.value.title === 'Free Food') {
-			console.log("PUT model " + selectedModel.value.title);
-			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free/food'
-			bodyToAdd.foodType = foodType.value;
-			bodyToAdd.kcal = kcal.value;
-		}
-		else {
-			console.log("PUT model " + selectedModel.value.title);
-			selectedModel.value.title
-			fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/free'
-		}
+			date: props.date,
+			type: isFreeFoodModel ? "FREE_FOOD" : "FREE",
+			...(isFreeFoodModel && {
+				foodType: foodType.value,
+				kcal: kcal.value
+			})
+		});
 	}
 	else {
-		fetchMethod = "POST";
-		emitMethod = "onAddFreeEntry";
-		bodyToAdd = {
+		entryPromise = createEntry({
 			title: title.value,
 			description: description.value,
 			date: props.date,
-			modelId: selectedModel.value.id
-		};
-		console.log("selectedModel " + JSON.stringify(selectedModel.value));
-		if (selectedModel.value.title === 'Free Food') {
-			fetchURL = process.env.VUE_APP_URL + '/entry/free/food';
-			bodyToAdd.foodType = foodType.value;
-			bodyToAdd.kcal = kcal.value;
-		}
-		else {
-			fetchURL = process.env.VUE_APP_URL + '/entry/free';
-		}
+			modelId: selectedModel.value.id,
+			...(selectedModel.value.title === 'Free Food' 
+			? { 
+				type: "FREE_FOOD",
+				foodType: foodType.value,
+				kcal: kcal.value 
+				}
+			: { 
+				type: "FREE" 
+				}
+			)
+		});
 	}
-	
-	let statusCode = 0;
-	fetch(fetchURL, {
-		method: fetchMethod,
-		headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-			'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-		},
-		body: JSON.stringify(bodyToAdd),
-	})
-	.then(response => {
-		statusCode = response.status;
-		return response.json()
-	})
-	.then(json => {
-		dailyStore.errorMessage = json.message;
-		emit(emitMethod, json);
+
+	entryPromise
+	.then(newEntry => {
+		emit(emitMethod, newEntry);
 	});
 }
 </script>

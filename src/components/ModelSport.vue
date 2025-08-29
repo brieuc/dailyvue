@@ -34,6 +34,7 @@
 <script>
 import { ref } from 'vue'
 import { useDailyStore } from '@/dailyStore';
+import { useEntries } from '@/composables/useEntries';
 
 export default {
   props: {
@@ -54,6 +55,7 @@ export default {
   setup(props, { emit }) {
 
     const dailyStore = useDailyStore();
+    const { createEntry, updateEntry } = useEntries();
 
     let sportsMap = ref(new Map());
     const benefits = ['base', 'anaerobie', 'sprint', 'tempo', 'vo2max'];
@@ -85,7 +87,23 @@ export default {
       let fetchURL = "";
       let bodyToAdd = {};
 
+      let entryPromise;
+
       if (props.entryId) {
+
+        entryPromise = updateEntry(props.entryId, {
+          id: props.entryId,
+          title: rTitle.value,
+          description: rDescription.value,
+          kcal: rKcal.value,
+          duration: rDuration.value,
+          aerobic: rAerobic.value,
+          anaerobic: rAnaerobic.value,
+          benefit: rBenefit.value,
+          type: "SPORT"
+        });
+/*
+        entryPromise = cre
         fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/sport'
         console.log(fetchURL);
         fetchMethod = 'PUT';
@@ -99,8 +117,23 @@ export default {
           anaerobic: rAnaerobic.value,
           benefit: rBenefit.value,
         };
+        */
       }
       else {
+
+        entryPromise = createEntry({
+          title: rTitle.value,
+          description: rDescription.value,
+          kcal: rKcal.value,
+          duration: rDuration.value,
+          aerobic: rAerobic.value,
+          anaerobic: rAnaerobic.value,
+          benefit: rBenefit.value,
+          modelId: rSportModelId.value,
+          date: props.date,
+          type: "SPORT"
+        });
+        /*
         fetchURL = process.env.VUE_APP_URL + '/entry/sport';
         fetchMethod = "POST";
         bodyToAdd = {
@@ -114,25 +147,17 @@ export default {
           modelId: rSportModelId.value,
           date: props.date
         };
+        */
       }
 
-      console.log(JSON.stringify(bodyToAdd));
-
-      fetch(fetchURL, {
-        method: fetchMethod,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        },
-        body: JSON.stringify(bodyToAdd),
+      entryPromise
+      .then(newEntry => {
+        //dailyStore.errorMessage = json.message;
+        emit('onAddSportEntry', newEntry);
       })
-        .then(response => response.json())
-        .then(json => {
-          dailyStore.errorMessage = json.message;
-          emit('onAddSportEntry', bodyToAdd);
-        });
+      .catch(error => {
+          console.error('Erreur:', error);
+      });
     }
 
     return {
