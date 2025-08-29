@@ -12,14 +12,15 @@
 </template>
     
 <script setup>
-import { reactive, defineEmits, defineProps, ref, onMounted } from 'vue';
+import { defineEmits, defineProps, ref, onMounted } from 'vue';
 import ModelFoodSingle from './ModelFoodSingle.vue';
-import { createModelFood } from '@/modelfood';
 import { useDailyStore } from '@/dailyStore';
+import { useEntries } from '@/composables/useEntries';
 
 const emit = defineEmits(['onUpdateFoodEntry']);
 const props = defineProps(["date"]);
 const dailyStore = useDailyStore();
+const {createEntry, updateEntry} = useEntries();
 
 
 const selectedDay = ref(props.date);
@@ -51,49 +52,36 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
     let url = '';
     let bodyFetch = '';
     // If there is no entry for this model Id, we need to POST
+    let entryPromise;
+
     if (activeEntry != null) {
-        activeEntry.quantity = newQuantity;
-        fetchMethod = 'PUT';
-        url = process.env.VUE_APP_URL + '/entry/' + activeEntry.id + '/food';
-        bodyFetch = JSON.stringify({
+        entryPromise = updateEntry(activeEntry.id, {
             id: activeEntry.id,
             title: activeEntry.title,
             description: activeEntry.description,
             quantity: newQuantity,
-        });
+            type: "FOOD"
+            });
     }
     else {
-        fetchMethod = 'POST';
-        url = process.env.VUE_APP_URL + '/entry/food';
-        console.log(url);
-        bodyFetch = JSON.stringify({
+        entryPromise = createEntry({
             quantity: newQuantity,
             modelId: model.id,
             date: selectedDay.value,
             title: model.title,
-            description: model.description
-        });
+            description: model.description,
+            type: "FOOD"
+            });
     }
-    console.log("body fetch " + JSON.stringify(bodyFetch));
-    fetch(url, {
-        method: fetchMethod,
-        headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-        },
-        body: bodyFetch,
-    })
-    .then(response => {
-        if (response.ok)
-            return response.json();
-    })
-    .then(json => {
-        const newEntry = json;
+    entryPromise
+    .then(newEntry => {
         entriesByModelId.value.set(newEntry.modelId, newEntry);
         emit("onUpdateFoodEntry", newEntry);
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
     });
+
 }
             
 function getModels() {

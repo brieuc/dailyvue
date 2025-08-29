@@ -13,11 +13,11 @@ export function useEntries() {
     return execute(() => entryService.getByDate(date));
   };
 
-  const createEntry = (data, type) => 
-    execute(() => entryService.create(data, type), 'Entrée créée !');
+  const createEntry = (data) => 
+    execute(() => entryService.create(data), 'Entrée créée !');
 
-  const updateEntry = (id, data, type) => 
-    execute(() => entryService.update(id, data, type), 'Entrée mise à jour !');
+  const updateEntry = (id, data) => 
+    execute(() => entryService.update(id, data), 'Entrée mise à jour !');
 
   const deleteEntry = (id) => 
     execute(() => entryService.delete(id), 'Entrée supprimée !');
