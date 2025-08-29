@@ -11,7 +11,7 @@
                                     :kcal="entry.kcal"
                                     :aerobic="entry.aerobic"
                                     :anaerobic="entry.anaerobic"
-                                    :benefit="entry.benefit"
+                                    :qbenefit="entry.benefit"
                                     :sportModelId="entry.model.id"
                                     :entryId="entry.id"
                               @on-add-sport-entry="onAddSportEntry">
@@ -85,17 +85,6 @@ import { createFoodModelFromEntry } from '@/ModelService';
 const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
-
-/*
-onUpdated(() => {
-      editMode = false;
-      props.entries.forEach(entry => {
-            //console.log(entry.title);
-            console.log(entry.model.title);
-            //getModel(entry);
-      });
-});
-*/
 
 function onCreateFoodModel(entry) {
       createFoodModelFromEntry(entry)

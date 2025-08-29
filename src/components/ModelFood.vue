@@ -35,16 +35,18 @@ function onAddFoodEntry(model) {
     if (activeEntry != null) {
         quantity = activeEntry.quantity + 1;
     }
-    console.log("active entry " + JSON.stringify(model) + " " + quantity);
+    console.log("onAddFoodEntry active entry " + JSON.stringify(model) + " " + quantity);
     updateFoodEntry(activeEntry, model, quantity);
 }
 
 function onSubFoodEntry(model) {
+
     let activeEntry = entriesByModelId.value.get(model.id);
     // If there is no entry, so there is nothing to substract
     if (activeEntry != null) {
         updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
     }
+    console.log("onSubFoodEntry active entry " + JSON.stringify(model) + " " + activeEntry.quantity - 1);
 }
 
 function updateFoodEntry(activeEntry, model, newQuantity) {
@@ -60,8 +62,10 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
             title: activeEntry.title,
             description: activeEntry.description,
             quantity: newQuantity,
+            modelId: model.id,
+            date: activeEntry.date,
             type: "FOOD"
-            });
+        });
     }
     else {
         entryPromise = createEntry({
@@ -71,17 +75,17 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
             title: model.title,
             description: model.description,
             type: "FOOD"
-            });
+        });
     }
+
     entryPromise
     .then(newEntry => {
-        entriesByModelId.value.set(newEntry.modelId, newEntry);
+        entriesByModelId.value.set(newEntry.model.id, newEntry);
         emit("onUpdateFoodEntry", newEntry);
     })
     .catch(error => {
         console.error('Erreur:', error);
     });
-
 }
             
 function getModels() {
