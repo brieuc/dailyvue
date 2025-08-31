@@ -48,6 +48,7 @@
 <script setup>
 import { reactive, defineEmits } from 'vue';
 import { useAuth } from '@/composables/useAuth.js';
+import { logger } from '@/utils/logger';
 
 const emit = defineEmits(['onGeneratedToken']);
 
@@ -61,10 +62,9 @@ const credentials = reactive({
 const handleLogin = async () => {
   try {
     const token = await login(credentials.username, credentials.password);
-    console.log("LoginEntry handleLogin " + token);
     emit('onGeneratedToken', token);
   } catch (err) {
-    console.error('Login failed:', err);
+    logger.error("token problem");
   }
 };
 </script>

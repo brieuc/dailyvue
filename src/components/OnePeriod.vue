@@ -88,8 +88,6 @@ const onLoadEntryByDate = async (sDate) => {
     isDisplayingItems = formerOneDayItem.isDisplayingItems;
   }
   
-  console.log("reload oneday", sDate);
-  
   try {
     const entries = await getEntriesWithModels(sDate);
     const oneDayItem = createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems);
@@ -112,7 +110,6 @@ const onSelectDay = (sDate, isEnteringItems, isDisplayingItems) => {
 
 // src/components/OnePeriod.vue - Version ultra-simple
 const loadPeriodEntries = () => {
-  console.log("loadPeriodEntries");
   if (!shouldLoadEntries.value) return;
   
   const initialDate = props.initialDate;

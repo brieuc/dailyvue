@@ -11,7 +11,7 @@
                                     :kcal="entry.kcal"
                                     :aerobic="entry.aerobic"
                                     :anaerobic="entry.anaerobic"
-                                    :benefit="entry.benefit"
+                                    :qbenefit="entry.benefit"
                                     :sportModelId="entry.model.id"
                                     :entryId="entry.id"
                               @on-add-sport-entry="onAddSportEntry">
@@ -86,28 +86,15 @@ const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEn
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
 
-/*
-onUpdated(() => {
-      editMode = false;
-      props.entries.forEach(entry => {
-            //console.log(entry.title);
-            console.log(entry.model.title);
-            //getModel(entry);
-      });
-});
-*/
-
 function onCreateFoodModel(entry) {
       createFoodModelFromEntry(entry)
 }
 
 function onAddFreeEntry(entry) {
-      console.log("Day Entries onAddFreeEntry");
       emit('onAddFreeEntry', entry);
 }
 
 function onUpdateFreeEntry(entry) {
-      console.log("Day Entries onUpdateFreeEntry");
       emit('onUpdateFreeEntry', entry);
 }
 

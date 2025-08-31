@@ -51,23 +51,17 @@ const store = useDailyStore();
 const periods = ref([]);
 
 const loadAllEntries = () => {
-  console.log("loadAllEntries")
   periods.value.forEach(period => {
     period.hasBeenLoaded = true;
   });
 };
 
 const onGeneratedToken = (token) => {
-  console.log("Token reçu:", token);
-  console.log("onGeneratedToken - isLoggedIn:", isLoggedIn.value);
-
   // ✅ Utilise la fonction centralisée avec Promises
   initializeAppData()
     .then(() => {
-      console.log("🎉 Données chargées après connexion");
     })
     .catch(error => {
-      console.error("💥 Échec du chargement après connexion:", error);
     });
 };
 
@@ -75,7 +69,6 @@ const onGeneratedToken = (token) => {
 const initDates = () => {
   return entryService.getMinDate()  // ✅ RETURN de la Promise !
     .then(minDate => {
-      console.log("Date minimale:", minDate);
       return entryService.getRelevantDates(minDate, 7);
     })
     .then(dates => {
@@ -85,7 +78,6 @@ const initDates = () => {
       );
     })
     .catch(error => {
-      console.error("Erreur:", error);
       throw error;  // Re-throw pour l'appelant
     });
   
@@ -94,7 +86,6 @@ const initDates = () => {
 
 // ✅ Fonction centralisée pour initialiser toutes les données avec Promises
 const initializeAppData = () => {
-  console.log("🚀 Début de l'initialisation des données...");
   
   // Charger les modèles et les dates en parallèle pour optimiser les performances
   return Promise.all([
@@ -102,10 +93,8 @@ const initializeAppData = () => {
     initDates()
   ])
   .then(() => {
-    console.log("✅ Initialisation des données terminée");
   })
   .catch(error => {
-    console.error("❌ Erreur lors de l'initialisation:", error);
     store.errorMessage = "Erreur lors du chargement des données";
     throw error; // Re-throw pour permettre la gestion dans les appelants
   });
@@ -115,7 +104,6 @@ const initializeAppData = () => {
 // ✅ Watcher pour initialiser les données quand l'utilisateur se connecte
 watch(isLoggedIn, (newValue) => {
   if (newValue) {
-    console.log("app.vue watch" + newValue + "isLogged.value " + isLoggedIn.value);
     initializeAppData()
   } else {
     // Nettoyer les données quand l'utilisateur se déconnecte
@@ -128,7 +116,6 @@ watch(isLoggedIn, (newValue) => {
 
 // Initialisation des données au montage si déjà connecté
 onMounted(() => {
-  console.log("app.vue onMounted" + isLoggedIn.value);
   if (isLoggedIn.value) {
     initializeAppData()
   }
@@ -167,7 +154,7 @@ body {
   background-image: linear-gradient(to right bottom, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
   background-attachment: fixed;
 }
-@media only screen and (max-width: 393px) {
+@media only screen and (max-width: 393px, ) {
   body {
     background-image: linear-gradient(to right bottom, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
   }

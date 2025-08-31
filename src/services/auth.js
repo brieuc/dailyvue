@@ -18,18 +18,15 @@ export const authService = {
     }
 
     const data = await response.json();
-    console.log("authService token " + data.token);
     localStorage.setItem('token', data.token);
     return data.token;
   },
 
   logout() {
-    console.log('Token supprimé:', Date.now());
     localStorage.removeItem('token');
   },
 
   isLoggedIn() {
-    console.log("Athsevice is loggin " + localStorage.getItem('token'));
     return !!localStorage.getItem('token');
   }
 };
