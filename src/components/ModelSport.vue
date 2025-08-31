@@ -77,7 +77,6 @@ export default {
 
     function convertArrayToMap() {
       dailyStore.sportModels.forEach(model => {
-        console.log("ModelSport : " + JSON.stringify(model));
         sportsMap.value.set(model.id, model.title);
       });
     }
@@ -180,7 +179,6 @@ export default {
   },
 
   mounted() {
-    console.log('onMounted');
     this.convertArrayToMap();
   }
 }

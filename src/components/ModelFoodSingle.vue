@@ -28,7 +28,6 @@ export default {
     },
     methods: {
         onAdd() {
-            console.log("ModelFoodSingle model : ", JSON.stringify(this.model));
             this.$emit("onAddFoodEntry", this.model);
         },
         onSub() {

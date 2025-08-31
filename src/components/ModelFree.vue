@@ -44,7 +44,6 @@ onMounted(() => {
 });
 
 function isModelIsFreeFood() {
-	console.log("isModelIsFreeFood " + selectedModel.value);
 	if(!selectedModel.value)
 		return false;
 	if(selectedModel.value.title == "Free Food") {
@@ -55,14 +54,12 @@ function isModelIsFreeFood() {
 
 function getModels() {
 	models.value = dailyStore.freeModels;
-	console.log("getModels free ", JSON.stringify(models.value));
 	if (selectedModel.value == null && props.model == null) {
 		selectedModel.value = models.value.at(0);
 		//console.log("selected null ", selectedModel.value );
 	}
 	else {
 		selectedModel.value = props.model;
-		console.log("props free ", JSON.stringify(props.model));
 	}
 }
 

@@ -35,7 +35,6 @@ function onAddFoodEntry(model) {
     if (activeEntry != null) {
         quantity = activeEntry.quantity + 1;
     }
-    console.log("onAddFoodEntry active entry " + JSON.stringify(model) + " " + quantity);
     updateFoodEntry(activeEntry, model, quantity);
 }
 
@@ -46,7 +45,6 @@ function onSubFoodEntry(model) {
     if (activeEntry != null) {
         updateFoodEntry(activeEntry, model, activeEntry.quantity - 1);
     }
-    console.log("onSubFoodEntry active entry " + JSON.stringify(model) + " " + activeEntry.quantity - 1);
 }
 
 function updateFoodEntry(activeEntry, model, newQuantity) {

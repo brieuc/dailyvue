@@ -107,7 +107,6 @@ const getQuantity = (entry) => {
 };
     
 const selectDay = () => {
-  console.log("select day");
   displayedDay.value = null;
   
   if (isEnteringItems.value) {
@@ -122,7 +121,6 @@ const selectDay = () => {
 };
     
 const displayDay = async () => {
-  console.log("display day");
   await getSummaryInfo();
   
   selectedDay.value = null;
@@ -139,41 +137,34 @@ const displayDay = async () => {
 };
 
 const onDeleteEntry = (entry) => {
-  console.log("deleting entry:", JSON.stringify(entry));
   loadEntriesByDate(displayedDay.value);
 };
 
 const onAddFreeEntry = (freeEntry) => {
-  console.log("OneDay onAddFreeEntry:", JSON.stringify(freeEntry));
   selectedCategory.value = null;
   loadEntriesByDate(selectedDay.value);
 };
 
 const onUpdateFreeEntry = (freeEntry) => {
-  console.log('OneDay.vue onUpdateFreeEntry:', JSON.stringify(freeEntry));
   selectedCategory.value = null;
   loadEntriesByDate(displayedDay.value);
 };
 
 const onAddSportEntry = (sportEntry) => {
-  console.log('OneDay.vue onAddSportEntry:', JSON.stringify(sportEntry));
   selectedCategory.value = null;
   loadEntriesByDate(selectedDay.value);
 };
 
 const onUpdateSportEntry = (sportEntry) => {
-  console.log('OneDay.vue onUpdateSportEntry:', JSON.stringify(sportEntry));
   selectedCategory.value = null;
   loadEntriesByDate(displayedDay.value);
 };
 
 const onUpdateFoodEntry = (foodEntry) => {
-  console.log('OneDay.vue onUpdateFoodEntry:', JSON.stringify(foodEntry));
   loadEntriesByDate(selectedDay.value);
 };
 
 const onSelectModel = (categoryName) => {
-  console.log('OneDay.vue onSelectModel', categoryName);
   selectedCategory.value = categoryName;
 };
 

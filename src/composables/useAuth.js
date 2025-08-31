@@ -14,7 +14,6 @@ export function useAuth() {
     try {
       const token = await authService.login(username, password);
       isLoggedIn.value = true;
-      console.log("useAuth after login computed " + isLoggedIn.value);
       return token;
     } catch (err) {
       error.value = err.message;
@@ -23,8 +22,6 @@ export function useAuth() {
   };
 
   const logout = () => {
-    console.log('useAuth Token supprimé:', Date.now());
-    // ✅ Suppression du token - déclenche la réactivité !
     authService.logout();
     isLoggedIn.value = false;
   }

@@ -91,12 +91,10 @@ function onCreateFoodModel(entry) {
 }
 
 function onAddFreeEntry(entry) {
-      console.log("Day Entries onAddFreeEntry");
       emit('onAddFreeEntry', entry);
 }
 
 function onUpdateFreeEntry(entry) {
-      console.log("Day Entries onUpdateFreeEntry");
       emit('onUpdateFreeEntry', entry);
 }
 
