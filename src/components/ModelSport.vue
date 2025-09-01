@@ -35,6 +35,7 @@
 import { ref } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
+import { logger } from '@/utils/logger';
 
 export default {
   props: {
@@ -139,7 +140,7 @@ export default {
         emit('onAddSportEntry', newEntry);
       })
       .catch(error => {
-          console.error('Erreur:', error);
+          logger.error('Erreur:');
       });
     }
 
