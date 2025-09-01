@@ -101,22 +101,6 @@ export default {
           benefit: rBenefit.value,
           type: "SPORT"
         });
-/*
-        entryPromise = cre
-        fetchURL = process.env.VUE_APP_URL + '/entry/' + props.entryId + '/sport'
-        console.log(fetchURL);
-        fetchMethod = 'PUT';
-        bodyToAdd = {
-          id: props.entryId,
-          title: rTitle.value,
-          description: rDescription.value,
-          kcal: rKcal.value,
-          duration: rDuration.value,
-          aerobic: rAerobic.value,
-          anaerobic: rAnaerobic.value,
-          benefit: rBenefit.value,
-        };
-        */
       }
       else {
 

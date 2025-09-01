@@ -56,7 +56,6 @@ function getModels() {
 	models.value = dailyStore.freeModels;
 	if (selectedModel.value == null && props.model == null) {
 		selectedModel.value = models.value.at(0);
-		//console.log("selected null ", selectedModel.value );
 	}
 	else {
 		selectedModel.value = props.model;
