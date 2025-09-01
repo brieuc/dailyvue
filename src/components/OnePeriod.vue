@@ -38,6 +38,7 @@ import SummaryInfo from './SummaryInfo.vue';
 import { createOneDayItem } from '@/oneday';
 import { useEntries } from '@/composables/useEntries.js';
 import { useDailyStore } from '@/dailyStore';
+import { logger } from '@/utils/logger';
 
 const props = defineProps(['initialDate', 'numberOfDays', 'hasLoadedEntries']);
 
@@ -93,7 +94,7 @@ const onLoadEntryByDate = async (sDate) => {
     const oneDayItem = createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems);
     entryMap.value.set(sDate, oneDayItem);
   } catch (error) {
-    console.error("Erreur lors du rechargement:", error);
+    logger.error("Erreur lors du rechargement:");
   }
 };
 
@@ -149,7 +150,7 @@ const loadPeriodEntries = () => {
         entryMap.value.set(sDate, updatedItem);
       })
       .catch(error => {
-        console.error(`Erreur pour ${sDate}:`, error);
+        logger.error(`Erreur pour ${sDate}:`);
         const existingItem = entryMap.value.get(sDate);
         if (existingItem) {
           existingItem.loading = false;
@@ -166,7 +167,7 @@ const loadSummaryInfo = async () => {
       summaryData.value = { ...summary };
     }
   } catch (error) {
-    console.error("Erreur lors du chargement du résumé:", error);
+    logger.error("Erreur lors du chargement du résumé:");
   }
 };
 

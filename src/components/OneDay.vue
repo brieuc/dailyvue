@@ -55,6 +55,7 @@ import ModelFree from './ModelFree.vue';
 import ModelSelection from './ModelSelection.vue';
 import DayEntries from './DayEntries.vue';
 import { useEntries } from '@/composables/useEntries.js';
+import { logger } from '@/utils/logger';
 
 const emit = defineEmits(['onSelectDay', 'onLoadEntryByDate']);
 const props = defineProps(['shouldBeDisplayed', 'date', 'entries']);
@@ -95,7 +96,7 @@ const getSummaryInfo = async () => {
       };
     }
   } catch (error) {
-    console.error("Erreur lors du chargement du résumé:", error);
+    logger.error("Erreur lors du chargement du résumé:");
   }
 };
 

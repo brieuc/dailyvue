@@ -16,6 +16,7 @@ import { defineEmits, defineProps, ref, onMounted } from 'vue';
 import ModelFoodSingle from './ModelFoodSingle.vue';
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
+import { logger } from '@/utils/logger';
 
 const emit = defineEmits(['onUpdateFoodEntry']);
 const props = defineProps(["date"]);
@@ -82,7 +83,7 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
         emit("onUpdateFoodEntry", newEntry);
     })
     .catch(error => {
-        console.error('Erreur:', error);
+        logger.error('Erreur:', error);
     });
 }
             
