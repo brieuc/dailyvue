@@ -102,21 +102,6 @@ function onAddSportEntry(entry) {
       emit('onUpdateSportEntry', entry);
 }
 
-/*
-function getModel(entry) {
-      fetch(process.env.VUE_APP_URL + '/model/' + entry.modelId, {
-          method: 'GET',
-          headers: {
-            'Authorization' : 'Bearer ' + localStorage.getItem("token"),
-          }
-      })
-      .then(response => response.json())
-      .then(model => {
-            console.log("model " + model.title);
-            entry.model = model
-      });
-}
-*/
 function onEditEntry(entry) {
       entry.editMode = true;
       editMode = true;
