@@ -36,12 +36,14 @@ import { ref } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
 import { logger } from '@/utils/logger';
+import { version } from 'core-js';
 
 export default {
   props: {
     mode: null,
     entryId: null,
-    date: Date,
+    version: Number,
+    date: String,
     title: String,
     description: String,
     kcal: Number,
@@ -52,7 +54,7 @@ export default {
     sportModelId: null
 
   },
-  emits: ["onAddSportEntry"],
+  emits: ["onAddSportEntry", "onUpdateSportEntry"],
   setup(props, { emit }) {
 
     const dailyStore = useDailyStore();
@@ -83,61 +85,47 @@ export default {
     }
 
     function addSportEntry() {
-      let fetchMethod = "";
-      let fetchURL = "";
-      let bodyToAdd = {};
-
+   
+      let emitMethod = '';
       let entryPromise;
 
       if (props.entryId) {
-
+        emitMethod = 'onUpdateSportEntry';
         entryPromise = updateEntry(props.entryId, {
           id: props.entryId,
+          version: props.version,
           title: rTitle.value,
           description: rDescription.value,
+          date: props.date,
           kcal: rKcal.value,
           duration: rDuration.value,
           aerobic: rAerobic.value,
           anaerobic: rAnaerobic.value,
           benefit: rBenefit.value,
+          modelId: rSportModelId.value,
           type: "SPORT"
         });
       }
       else {
-
+        emitMethod = 'onAddSportEntry';
         entryPromise = createEntry({
           title: rTitle.value,
           description: rDescription.value,
+          date: props.date,
           kcal: rKcal.value,
           duration: rDuration.value,
           aerobic: rAerobic.value,
           anaerobic: rAnaerobic.value,
           benefit: rBenefit.value,
           modelId: rSportModelId.value,
-          date: props.date,
           type: "SPORT"
         });
-        /*
-        fetchURL = process.env.VUE_APP_URL + '/entry/sport';
-        fetchMethod = "POST";
-        bodyToAdd = {
-          title: rTitle.value,
-          description: rDescription.value,
-          kcal: rKcal.value,
-          duration: rDuration.value,
-          aerobic: rAerobic.value,
-          anaerobic: rAnaerobic.value,
-          benefit: rBenefit.value,
-          modelId: rSportModelId.value,
-          date: props.date
-        };
-        */
       }
 
       entryPromise
       .then(newEntry => {
         //dailyStore.errorMessage = json.message;
-        emit('onAddSportEntry', newEntry);
+        emit(emitMethod, newEntry);
       })
       .catch(error => {
           logger.error('Erreur:');

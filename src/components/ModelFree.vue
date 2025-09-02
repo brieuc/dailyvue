@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted, defineProps, isRef, onUpdated } from 'vue'
+import { ref, defineEmits, onMounted, defineProps } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
 
@@ -31,7 +31,7 @@ const dailyStore = useDailyStore();
 const { createEntry, updateEntry } = useEntries();
 const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry']);
 const props = defineProps(["date", "title", "description", "entryId", "mode",
-					"foodType", "kcal", "model", "modelId"]);
+					"foodType", "kcal", "model", "modelId", "version"]);
 
 const title = ref(props.title);
 const description = ref(props.description);
@@ -64,19 +64,19 @@ function getModels() {
 
 function onUpdateFreeEntry() {
 	let emitMethod = "";
-	let fetchMethod = "";
-	let fetchURL = "";
-	let bodyToAdd = {};
 
 	let entryPromise;
 	if (props.entryId) {
-
+		emitMethod = 'onUpdateFreeEntry';
 		const isFreeFoodModel = selectedModel.value.title === 'Free Food';
 
 		entryPromise = updateEntry(props.entryId, {
+			id: props.entryId,
+			version: props.version,
 			title: title.value,
 			description: description.value,
 			date: props.date,
+			modelId: selectedModel.value.id,
 			type: isFreeFoodModel ? "FREE_FOOD" : "FREE",
 			...(isFreeFoodModel && {
 				foodType: foodType.value,
@@ -85,6 +85,7 @@ function onUpdateFreeEntry() {
 		});
 	}
 	else {
+		emitMethod = 'onAddFreeEntry';
 		entryPromise = createEntry({
 			title: title.value,
 			description: description.value,

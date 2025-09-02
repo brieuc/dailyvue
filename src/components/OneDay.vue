@@ -38,7 +38,9 @@
         :date="date" 
         :entries="entries" 
         :shouldBeDisplayed="shouldBeDisplayed"
+        @on-add-free-entry="onAddFreeEntry"
         @on-update-free-entry="onUpdateFreeEntry"
+        @on-add-sport-entry="onAddSportEntry"
         @on-update-sport-entry="onUpdateSportEntry"
         @on-delete-entry="onDeleteEntry">
       </day-entries>
