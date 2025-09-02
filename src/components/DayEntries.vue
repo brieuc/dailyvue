@@ -3,18 +3,20 @@
       <div v-for="entry in entries" :key="entry.id" class="div-entry-center">
             <div v-if="entry.type === 'SPORT'">
                   <div v-if="entry.editMode">
-                        <model-sport :date="selectedDay"
+                        <model-sport :date="entry.date"
                                     mode="update"
+                                    :version="entry.version"
                                     :title="entry.title"
                                     :description="entry.description"
                                     :duration="entry.duration"
                                     :kcal="entry.kcal"
                                     :aerobic="entry.aerobic"
                                     :anaerobic="entry.anaerobic"
-                                    :qbenefit="entry.benefit"
+                                    :benefit="entry.benefit"
                                     :sportModelId="entry.model.id"
                                     :entryId="entry.id"
-                              @on-add-sport-entry="onAddSportEntry">
+                              @on-add-sport-entry="onAddSportEntry"
+                              @on-update-sport-entry="onUpdateSportEntry">
                         </model-sport>
                   </div>
                   <div v-else>
@@ -38,10 +40,11 @@
                   </div>
             </div>
 
-            <div v-if="entry.type === 'FREE'">
+            <div v-if="['FREE', 'FREE_FOOD'].includes(entry.type)">
                   <div v-if="entry.editMode">
                         <model-free :date="entry.date" 
                                     mode="update"
+                                    :version="entry.version"
                                     :title="entry.title"
                                     :description="entry.description"
                                     :entryId="entry.id"
@@ -82,7 +85,7 @@ import ModelSport from './ModelSport.vue';
 import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 import { createFoodModelFromEntry } from '@/ModelService';
 
-const emit = defineEmits(['onUpdateFreeEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
+const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry', 'onAddSportEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
 
@@ -99,6 +102,10 @@ function onUpdateFreeEntry(entry) {
 }
 
 function onAddSportEntry(entry) {
+      emit('onAddSportEntry', entry);
+}
+
+function onUpdateSportEntry(entry) {
       emit('onUpdateSportEntry', entry);
 }
 
