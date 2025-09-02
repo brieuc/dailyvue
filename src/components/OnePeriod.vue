@@ -17,7 +17,7 @@
   </div>
   
   <div v-else>
-    <div v-for="[date, oneDayItem] in entryMap" :key="date">
+    <div v-for="[date, oneDayItem] in reversedEntryMap" :key="date">
       <one-day    
         :date="oneDayItem.date"
         :entries="oneDayItem.entries"
@@ -39,6 +39,10 @@ import { createOneDayItem } from '@/oneday';
 import { useEntries } from '@/composables/useEntries.js';
 import { useDailyStore } from '@/dailyStore';
 import { logger } from '@/utils/logger';
+
+const reversedEntryMap = computed(() => {
+  return Array.from(entryMap.value).reverse()
+});
 
 const props = defineProps(['initialDate', 'numberOfDays', 'hasLoadedEntries']);
 
