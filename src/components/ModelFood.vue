@@ -58,6 +58,7 @@ function updateFoodEntry(activeEntry, model, newQuantity) {
     if (activeEntry != null) {
         entryPromise = updateEntry(activeEntry.id, {
             id: activeEntry.id,
+            version: activeEntry.version,
             title: activeEntry.title,
             description: activeEntry.description,
             quantity: newQuantity,
