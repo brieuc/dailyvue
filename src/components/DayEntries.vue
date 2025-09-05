@@ -73,7 +73,7 @@
             &nbsp;
             <button class="button-color" v-if="entry.editMode !== true" @click="onDeleteEntry(entry)">Delete</button>
             &nbsp;
-            <button class="button-color" v-if="entry.type == 'FREE' && entry.editMode !== true" @click="onCreateFoodModel(entry)">Create Model</button>
+            <button class="button-color" v-if="['FREE', 'FREE_FOOD'].includes(entry.type) && entry.editMode !== true" @click="onCreateFoodModel(entry)">Create Model</button>
       
       </div>
 </div>
@@ -82,9 +82,10 @@
 <script setup>
 import ModelFree from './ModelFree.vue';
 import ModelSport from './ModelSport.vue';
-import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
-import { createFoodModelFromEntry } from '@/ModelService';
+import { ref, defineEmits, defineProps, onUpdated, onMounted, useModel } from 'vue'
+import { useModels } from '@/composables/useModels';
 
+const { createFoodModelFromEntry } = useModels();
 const emit = defineEmits(['onAddFreeEntry', 'onUpdateFreeEntry', 'onAddSportEntry', 'onUpdateSportEntry', 'onDeleteEntry']);
 const props = defineProps(["date", "entries", "shouldBeDisplayed"]);
 let editMode = ref(false);
