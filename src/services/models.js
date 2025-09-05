@@ -15,7 +15,7 @@ export const modelService = {
   },
 
   async createFoodModel(data) {
-    return api.post('/model/food', data);
+    return api.post('/model', data);
   },
 
   async createFromEntry(entry) {
@@ -23,7 +23,8 @@ export const modelService = {
       title: entry.title,
       description: entry.description,
       kcal: entry.kcal,
-      foodType: entry.foodType
+      foodType: entry.foodType,
+      type: 'FOOD'
     });
   }
 };
