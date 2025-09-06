@@ -47,7 +47,9 @@ self.addEventListener('fetch', function(event) {
 
         return fetch(event.request).then(
           function(response) {
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            // Filtrer les schemes non supportés
+            if (!response || response.status !== 200 || 
+                (!event.request.url.startsWith('http://') && !event.request.url.startsWith('https://'))) {
               return response;
             }
 
