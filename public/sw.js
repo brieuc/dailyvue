@@ -88,6 +88,12 @@ self.addEventListener('fetch', function(event) {
       return;
     }
     
+    // API - Données de summary (cache first, changent peu souvent)
+    if (isSummaryRequest(pathname)) {
+      event.respondWith(cacheFirst(event.request, API_CACHE));
+      return;
+    }
+    
     // API - Entrées par date (cache intelligent)
     if (isEntryByDateRequest(pathname)) {
       const isToday = isDateToday(extractDateFromPath(pathname));
@@ -130,7 +136,8 @@ async function invalidateRelatedCache(pathname, method) {
       // Invalider les listes générales qui pourraient être affectées
       const keysToDelete = [
         '/entry/firstDate',
-        '/entry/get/' // Invalide tous les patterns de dates multiples
+        '/entry/get/', // Invalide tous les patterns de dates multiples
+        'summary' // Invalide tous les summary qui pourraient être affectés
       ];
       
       const allKeys = await cache.keys();
@@ -138,7 +145,7 @@ async function invalidateRelatedCache(pathname, method) {
         const url = new URL(request.url);
         const path = url.pathname;
         
-        if (keysToDelete.some(pattern => path.startsWith(pattern))) {
+        if (keysToDelete.some(pattern => path.includes(pattern))) {
           await cache.delete(request);
           console.log('[SW] Invalidated cache for:', path);
         }
@@ -242,6 +249,12 @@ function isApiRequest(pathname) {
 function isModelRequest(pathname) {
   return pathname.match(/^\/model\/(food|sport|free)$/) ||
          pathname.match(/^\/model\/[a-f0-9-]+$/);
+}
+
+function isSummaryRequest(pathname) {
+  return pathname.includes('summary-info') || 
+         pathname.includes('summary') ||
+         pathname.startsWith('/entry/firstDate');
 }
 
 function isEntryByDateRequest(pathname) {
