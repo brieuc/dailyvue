@@ -244,6 +244,12 @@ function isModelRequest(pathname) {
          pathname.match(/^\/model\/[a-f0-9-]+$/);
 }
 
+function isSummaryRequest(pathname) {
+  return pathname.includes('summary-info') || 
+         pathname.includes('summary') ||
+         pathname.startsWith('/entry/firstDate');
+}
+
 function isEntryByDateRequest(pathname) {
   return pathname.match(/^\/entry\/\d{4}-\d{2}-\d{2}$/);
 }
