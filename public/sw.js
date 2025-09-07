@@ -22,14 +22,23 @@ self.addEventListener('fetch', function(event) {
   // Si POST sur /entry/*, supprimer le GET correspondant du cache
   if (event.request.method === 'POST' && url.pathname.startsWith('/entry/')) {
     event.respondWith(
-      fetch(event.request).then(function(response) {
+      fetch(event.request).then(async function(response) {
         if (response.ok) {
-          // Supprimer le GET correspondant du cache
-          const getRequest = new Request(event.request.url, { method: 'GET' });
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.delete(getRequest);
-            console.log('Cache cleared for:', url.pathname);
-          });
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            
+            // Supprimer le GET correspondant
+            const getRequest = new Request(event.request.url, { method: 'GET' });
+            const deleted = await cache.delete(getRequest);
+            
+            // Aussi supprimer les listes d'entrées qui pourraient être affectées
+            await cache.delete('/entries');
+            await cache.delete('/entries/');
+            
+            console.log('Cache cleared for:', url.pathname, 'Success:', deleted);
+          } catch (error) {
+            console.error('Cache clear failed:', error);
+          }
         }
         return response;
       })
