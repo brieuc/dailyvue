@@ -5,8 +5,8 @@
       <div class="summary-item">Calories dépensées {{ spentKcal }} kcal</div>
       <div class="summary-item">Calories ingérées {{ ingestedKcal }} kcal</div>
       <div class="summary-item">Alcalories {{ drinkingBeer }} kcal</div>
-      <div class="summary-item">Aerobic {{ `Aerobic ${Math.round(aerobic * 100) / 100}` }}</div>
-      <div class="summary-item">Anaerobic {{ `Anaerobic ${Math.round(anaerobic * 100) / 100}` }}</div>
+      <div class="summary-item">Aerobic {{ `${Math.round(aerobic * 100) / 100}` }}</div>
+      <div class="summary-item">Anaerobic {{ `${Math.round(anaerobic * 100) / 100}` }}</div>
 </div>
 </template>
 
