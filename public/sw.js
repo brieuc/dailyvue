@@ -96,13 +96,15 @@ self.addEventListener('fetch', function(event) {
     
     // API - Entrées par date (cache intelligent)
     if (isEntryByDateRequest(pathname)) {
-      const isToday = isDateToday(extractDateFromPath(pathname));
+      const lookingDate = new Date(extractDateFromPath(pathname));
+      const today = new Date();
+      const sevenDaysBefore = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000));
       
-      if (isToday) {
-        // Pour aujourd'hui: network first (données peuvent changer)
+      if (lookingDate <= today && lookingDate >= sevenDaysBefore) {
+        // Pour les 7 derniers jours: network first
         event.respondWith(networkFirst(event.request, API_CACHE));
       } else {
-        // Pour les jours passés: cache first (données stables)
+        // Pour les dates plus anciennes: cache first
         event.respondWith(cacheFirst(event.request, API_CACHE));
       }
       return;
@@ -253,8 +255,7 @@ function isModelRequest(pathname) {
 
 function isSummaryRequest(pathname) {
   return pathname.includes('summary-info') || 
-         pathname.includes('summary') ||
-         pathname.startsWith('/entry/firstDate');
+         pathname.includes('summary')
 }
 
 function isEntryByDateRequest(pathname) {
