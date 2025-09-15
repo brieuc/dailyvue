@@ -128,15 +128,38 @@ async function invalidateRelatedCache(pathname, method) {
     console.log('[SW] try to invalidated cache for:', pathname);
     const cache = await caches.open(API_CACHE);
     
-    // Si mutation sur une entrée avec date
-    if (pathname.match(/^\/entry\/\d{4}-\d{2}-\d{2}$/)) {
-      // Invalider exactement cette date
+    // Si mutation sur une entrée avec date spécifique (POST/PUT /entry/$date)
+    if (pathname.match(/^\/entry\/\d{4}-\d{2}-\d{2}$/) && ['POST', 'PUT'].includes(method)) {
+      const date = extractDateFromPath(pathname);
+      console.log('[SW] Invalidating cache for entry date:', date);
+      
+      // 1. Supprimer l'entrée exacte /entry/$date
       await cache.delete(pathname);
-      console.log('[SW] Invalidated cache for:', pathname);
+      console.log('[SW] Invalidated entry cache for:', pathname);
+      
+      // 2. Supprimer tous les summary-info affectés par cette date
+      await invalidateSummaryInfoForDate(cache, date);
+      
+      // 3. Invalider les listes générales qui pourraient être affectées
+      const keysToDelete = [
+        '/entry/firstDate',
+        '/entry/get/' // Invalide tous les patterns de dates multiples
+      ];
+      
+      const allKeys = await cache.keys();
+      for (const request of allKeys) {
+        const url = new URL(request.url);
+        const path = url.pathname;
+        
+        if (keysToDelete.some(pattern => path.includes(pattern))) {
+          await cache.delete(request.url, { ignoreVary: true });
+          console.log('[SW] Invalidated cache for:', path);
+        }
+      }
     }
     
-    // Si création/modification d'entrée
-    if (pathname.startsWith('/entry') && ['POST', 'PUT'].includes(method)) {
+    // Si création/modification d'entrée générale (autres patterns)
+    else if (pathname.startsWith('/entry') && ['POST', 'PUT'].includes(method)) {
       // Invalider les listes générales qui pourraient être affectées
       const keysToDelete = [
         '/entry/firstDate',
@@ -150,9 +173,8 @@ async function invalidateRelatedCache(pathname, method) {
         const path = url.pathname;
         
         if (keysToDelete.some(pattern => path.includes(pattern))) {
-          //await cache.delete(request.url);
           await cache.delete(request.url, { ignoreVary: true });
-          console.log('[SW] Invalidated cache for:', path, " ", request);
+          console.log('[SW] Invalidated cache for:', path);
         }
       }
     }
@@ -181,6 +203,45 @@ async function invalidateRelatedCache(pathname, method) {
     
   } catch (error) {
     console.error('[SW] Cache invalidation failed:', error);
+  }
+}
+
+// 🗑️ INVALIDATION SPÉCIFIQUE DES SUMMARY-INFO
+async function invalidateSummaryInfoForDate(cache, date) {
+  try {
+    console.log('[SW] Invalidating summary-info for date:', date);
+    const targetDate = new Date(date);
+    
+    const allKeys = await cache.keys();
+    for (const request of allKeys) {
+      const url = new URL(request.url);
+      const path = url.pathname;
+      
+      // Vérifier si c'est une requête summary-info
+      if (path.includes('summary-info')) {
+        const searchParams = url.searchParams;
+        const fromDate = searchParams.get('fromDate');
+        const toDate = searchParams.get('toDate');
+        
+        if (fromDate && toDate) {
+          const fromDateObj = new Date(fromDate);
+          const toDateObj = new Date(toDate);
+          
+          // Cas 1: Match exact (fromDate=$date&toDate=$date)
+          if (fromDate === date && toDate === date) {
+            await cache.delete(request.url, { ignoreVary: true });
+            console.log('[SW] Invalidated exact summary-info match:', fromDate, 'to', toDate);
+          }
+          // Cas 2: Date comprise dans l'intervalle [fromDate, toDate]
+          else if (targetDate >= fromDateObj && targetDate <= toDateObj) {
+            await cache.delete(request.url, { ignoreVary: true });
+            console.log('[SW] Invalidated summary-info range:', fromDate, 'to', toDate, 'containing', date);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[SW] Summary-info invalidation failed:', error);
   }
 }
 
