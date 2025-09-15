@@ -84,10 +84,12 @@ const loadThenDisplayEntries = async () => {
 };
 
 const onLoadEntryByDate = async (sDate) => {
+  logger.log("reload sDate");
   const formerOneDayItem = entryMap.value.get(sDate);
   let isEnteringItems = false;
   let isDisplayingItems = false;
-  
+
+
   if (isReactive(formerOneDayItem)) {
     isEnteringItems = formerOneDayItem.isEnteringItems;
     isDisplayingItems = formerOneDayItem.isDisplayingItems;
@@ -97,6 +99,7 @@ const onLoadEntryByDate = async (sDate) => {
     const entries = await getEntriesWithModels(sDate);
     const oneDayItem = createOneDayItem(entries, sDate, isEnteringItems, isDisplayingItems);
     entryMap.value.set(sDate, oneDayItem);
+    loadSummaryInfo();
   } catch (error) {
     logger.error("Erreur lors du rechargement:");
   }
@@ -176,14 +179,10 @@ const loadSummaryInfo = async () => {
 };
 
 // Lifecycle
-onMounted(async () => {
+onMounted(() => {
   shouldLoadEntries.value = props.hasLoadedEntries;
-  
-  //if (shouldLoadEntries.value) {
-    await loadPeriodEntries();
-  //}
-  
-  await loadSummaryInfo();
+  loadPeriodEntries();
+  loadSummaryInfo();
 });
 
 onUpdated(() => {

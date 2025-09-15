@@ -116,6 +116,7 @@ watch(isLoggedIn, (newValue) => {
 
 // Initialisation des données au montage si déjà connecté
 onMounted(() => {
+  console.log("TEST");
   if (isLoggedIn.value) {
     initializeAppData()
   }

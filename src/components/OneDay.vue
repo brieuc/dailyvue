@@ -164,6 +164,7 @@ const onUpdateSportEntry = (sportEntry) => {
 };
 
 const onUpdateFoodEntry = (foodEntry) => {
+  logger.log("onUpdateFoodEntry");
   loadEntriesByDate(selectedDay.value);
 };
 
@@ -172,6 +173,7 @@ const onSelectModel = (categoryName) => {
 };
 
 const loadEntriesByDate = (sDate) => {
+  logger.log("loadEntriesByDate");
   emit("onLoadEntryByDate", sDate);
 };
 </script>
