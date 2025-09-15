@@ -63,6 +63,7 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
       fetch(event.request).then(async function(response) {
         if (response.ok) {
+          console.log("TEST");
           await invalidateRelatedCache(pathname, event.request.method);
         }
         return response;
@@ -124,6 +125,7 @@ self.addEventListener('fetch', function(event) {
 // 🗑️ INVALIDATION DU CACHE
 async function invalidateRelatedCache(pathname, method) {
   try {
+    console.log('[SW] try to invalidated cache for:', pathname);
     const cache = await caches.open(API_CACHE);
     
     // Si mutation sur une entrée avec date
@@ -148,8 +150,9 @@ async function invalidateRelatedCache(pathname, method) {
         const path = url.pathname;
         
         if (keysToDelete.some(pattern => path.includes(pattern))) {
-          await cache.delete(request);
-          console.log('[SW] Invalidated cache for:', path);
+          //await cache.delete(request.url);
+          await cache.delete(request.url, { ignoreVary: true });
+          console.log('[SW] Invalidated cache for:', path, " ", request);
         }
       }
     }

@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import { logger } from '@/utils/logger';
+
 export default {
     name: 'ModelFoodSingle',
     emits: ["onAddFoodEntry", "onSubFoodEntry"],
@@ -28,6 +30,8 @@ export default {
     },
     methods: {
         onAdd() {
+            logger.log("onAddFoodEntry");
+            debugger;
             this.$emit("onAddFoodEntry", this.model);
         },
         onSub() {
