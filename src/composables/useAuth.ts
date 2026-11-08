@@ -1,6 +1,6 @@
 // src/composables/useAuth.js  
 import { ref, computed } from 'vue';
-import { authService } from '@/services/auth.js';
+import { authService } from '@/services/auth';
 
 // État global partagé (en dehors de la fonction)
 const isLoggedIn = ref(authService.isLoggedIn());

@@ -1,8 +1,8 @@
 
 // src/composables/useEntries.js
-import { useApi } from './useApi.js';
-import { entryService } from '@/services/entries.js';
-import { useDailyStore } from '@/dailyStore.js';
+import { useApi } from './useApi';
+import { entryService } from '@/services/entries';
+import { useDailyStore } from '@/dailyStore';
 
 export function useEntries() {
   const { loading, execute } = useApi();

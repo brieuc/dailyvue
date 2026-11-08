@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, defineModel, defineProps, defineEmits } from 'vue';
 import OneDaySummary from './OneDaySummary.vue';
 import ModelFood from './ModelFood.vue';
@@ -56,7 +56,7 @@ import ModelSport from './ModelSport.vue';
 import ModelFree from './ModelFree.vue';
 import ModelSelection from './ModelSelection.vue';
 import DayEntries from './DayEntries.vue';
-import { useEntries } from '@/composables/useEntries.js';
+import { useEntries } from '@/composables/useEntries';
 import { logger } from '@/utils/logger';
 
 const emit = defineEmits(['onSelectDay', 'onLoadEntryByDate']);

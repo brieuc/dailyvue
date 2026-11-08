@@ -1,8 +1,8 @@
 // src/composables/useModels.js
 import { onMounted } from 'vue';
-import { useApi } from './useApi.js';
-import { modelService } from '@/services/models.js';
-import { useDailyStore } from '@/dailyStore.js';
+import { useApi } from './useApi';
+import { modelService } from '@/services/models';
+import { useDailyStore } from '@/dailyStore';
 
 export function useModels() {
   const { loading, execute } = useApi();

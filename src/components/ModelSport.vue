@@ -31,12 +31,11 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
 import { logger } from '@/utils/logger';
-import { version } from 'core-js';
 
 export default {
   props: {
@@ -86,7 +85,7 @@ export default {
 
     function addSportEntry() {
    
-      let emitMethod = '';
+      let emitMethod: 'onAddSportEntry' | 'onUpdateSportEntry' = 'onAddSportEntry';
       let entryPromise;
 
       if (props.entryId) {

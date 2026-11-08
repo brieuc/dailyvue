@@ -94,6 +94,6 @@ The main app uses Promise.all() to load models and dates in parallel during init
 Global reactive state via Pinia with automatic cleanup on logout. The app watches `isLoggedIn` to trigger data initialization or cleanup.
 
 ### Environment Configuration
-- Base API URL configured via `process.env.VUE_APP_URL`
+- Base API URL configured via `import.meta.env.VITE_API_URL`
 - Token stored in localStorage for persistence
 - Responsive design with mobile breakpoints at 393px

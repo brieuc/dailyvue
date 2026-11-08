@@ -19,7 +19,7 @@
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, defineEmits, onMounted, defineProps } from 'vue'
 import { useDailyStore } from '@/dailyStore';
 import { useEntries } from '@/composables/useEntries';
@@ -63,7 +63,7 @@ function getModels() {
 }
 
 function onUpdateFreeEntry() {
-	let emitMethod = "";
+	let emitMethod: "onAddFreeEntry" | "onUpdateFreeEntry" = "onAddFreeEntry";
 
 	let entryPromise;
 	if (props.entryId) {

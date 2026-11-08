@@ -1,5 +1,5 @@
 // src/services/entries.js
-import { api } from './api.js';
+import { api } from './api';
 
 export const entryService = {
   async getByDate(date) {

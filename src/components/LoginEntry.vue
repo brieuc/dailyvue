@@ -45,14 +45,15 @@
   </div>
 </template>
 
-<script setup>
-import { reactive, defineEmits } from 'vue';
-import { useAuth } from '@/composables/useAuth.js';
+<script setup lang="ts">
+import { ref, reactive, defineEmits } from 'vue';
+import { useAuth, error } from '@/composables/useAuth';
 import { logger } from '@/utils/logger';
 
 const emit = defineEmits(['onGeneratedToken']);
 
-const { login, loading, error } = useAuth();
+const { login } = useAuth();
+const loading = ref(false);
 
 const credentials = reactive({
   username: '',
@@ -60,11 +61,14 @@ const credentials = reactive({
 });
 
 const handleLogin = async () => {
+  loading.value = true;
   try {
     const token = await login(credentials.username, credentials.password);
     emit('onGeneratedToken', token);
   } catch (err) {
     logger.error("token problem");
+  } finally {
+    loading.value = false;
   }
 };
 </script>

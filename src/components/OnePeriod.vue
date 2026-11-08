@@ -31,12 +31,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUpdated, isReactive, defineProps } from 'vue';
 import OneDay from './OneDay.vue';
 import SummaryInfo from './SummaryInfo.vue';
 import { createOneDayItem } from '@/oneday';
-import { useEntries } from '@/composables/useEntries.js';
+import { useEntries } from '@/composables/useEntries';
 import { useDailyStore } from '@/dailyStore';
 import { logger } from '@/utils/logger';
 

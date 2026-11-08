@@ -79,7 +79,7 @@
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import ModelFree from './ModelFree.vue';
 import ModelSport from './ModelSport.vue';
 import { ref, defineEmits, defineProps, onUpdated, onMounted, useModel } from 'vue'
@@ -112,11 +112,11 @@ function onUpdateSportEntry(entry) {
 
 function onEditEntry(entry) {
       entry.editMode = true;
-      editMode = true;
+      editMode.value = true;
 }
 
 function onDeleteEntry(entry) {
-      fetch(process.env.VUE_APP_URL + '/entry/' + entry.id, {
+      fetch(import.meta.env.VITE_API_URL + '/entry/' + entry.id, {
           method: 'DELETE',
           headers: {
             'Authorization' : 'Bearer ' + localStorage.getItem("token"),

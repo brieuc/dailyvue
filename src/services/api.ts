@@ -1,7 +1,9 @@
 // src/services/api.js - Client HTTP simple
 class ApiClient {
+  baseURL: string | undefined;
+
   constructor() {
-    this.baseURL = process.env.VUE_APP_URL;
+    this.baseURL = import.meta.env.VITE_API_URL;
   }
 
   getHeaders() {

@@ -1,6 +1,6 @@
 // src/composables/useApi.js - Helper générique pour les appels API
 import { ref } from 'vue';
-import { useDailyStore } from '@/dailyStore.js';
+import { useDailyStore } from '@/dailyStore';
 
 export function useApi() {
   const store = useDailyStore();

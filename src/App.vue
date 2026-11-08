@@ -32,16 +32,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, onUpdated } from 'vue';
 import ErrorView from './components/ErrorView.vue';
 import LoginEntry from './components/LoginEntry.vue';
 import OnePeriod from './components/OnePeriod.vue';
 import { useOnePeriodItem } from './oneperiod';
 import { useDailyStore } from './dailyStore';
-import { useAuth, isLoggedIn, error } from './composables/useAuth.js';
-import { useModels } from './composables/useModels.js';
-import { entryService } from './services/entries.js';
+import { useAuth, isLoggedIn, error } from './composables/useAuth';
+import { useModels } from './composables/useModels';
+import { entryService } from './services/entries';
 
 // ✅ Utilisation du composable useAuth
 const { logout } = useAuth()
@@ -129,7 +129,6 @@ function handleLogout() {
 }
 </script>
 
-<style>
 <style>
 .button-10 {
   margin: auto;

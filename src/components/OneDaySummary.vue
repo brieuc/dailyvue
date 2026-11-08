@@ -7,7 +7,7 @@
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 import { ref, defineEmits, defineProps, onUpdated, onMounted } from 'vue'
 const props = defineProps(["date", "ingestedKcal", "spentKcal", "sportDuration",

@@ -11,6 +11,8 @@ export function createOneDayItem(entriesArray, sDate, enteringItems, displayingI
             entries,
             date,
             isDisplayingItems,
-            isEnteringItems
+            isEnteringItems,
+            loading: false,
+            error: undefined as string | undefined
       }
 }

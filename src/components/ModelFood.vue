@@ -11,7 +11,7 @@
 </div>
 </template>
     
-<script setup>
+<script setup lang="ts">
 import { defineEmits, defineProps, ref, onMounted } from 'vue';
 import ModelFoodSingle from './ModelFoodSingle.vue';
 import { useDailyStore } from '@/dailyStore';
