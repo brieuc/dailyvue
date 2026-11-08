@@ -1,16 +1,17 @@
 <template>
-      <div class="formatted" style="background-color: crimson; color: antiquewhite;">
-            {{ dailyStore.errorMessage }}
-      </div>
+  <div class="formatted" style="background-color: crimson; color: antiquewhite;">
+    {{ message }}
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useDailyStore } from '@/dailyStore';
-const dailyStore = useDailyStore();
+import { useNotification } from '@/composables/useNotification'
+
+const { message } = useNotification()
 </script>
 
-<style>
+<style scoped>
 .formatted {
-    white-space:pre-wrap;
+  white-space: pre-wrap;
 }
 </style>

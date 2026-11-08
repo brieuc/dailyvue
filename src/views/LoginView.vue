@@ -46,31 +46,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, defineEmits } from 'vue';
-import { useAuth, error } from '@/composables/useAuth';
-import { logger } from '@/utils/logger';
+import { reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
 
-const emit = defineEmits(['onGeneratedToken']);
+const { doLogin } = useAuth()
+const route = useRoute()
+const router = useRouter()
 
-const { login } = useAuth();
-const loading = ref(false);
+const loading = ref(false)
+const error = ref('')
 
 const credentials = reactive({
   username: '',
-  password: ''
-});
+  password: '',
+})
 
 const handleLogin = async () => {
-  loading.value = true;
+  error.value = ''
+  loading.value = true
   try {
-    const token = await login(credentials.username, credentials.password);
-    emit('onGeneratedToken', token);
-  } catch (err) {
-    logger.error("token problem");
+    if (await doLogin(credentials)) {
+      const redirect = route.query.redirect
+      router.push(typeof redirect === 'string' ? redirect : '/')
+    } else {
+      error.value = 'Login failed'
+    }
+  } catch {
+    error.value = 'Login failed'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script>
 
 <style scoped>

@@ -1,53 +1,50 @@
-import { authService } from "@/services/auth";
-import { isLoggedIn } from "@/composables/useAuth";
+import router from '@/router'
+import { useAuthStore } from '@/stores/auth'
 
-export const customFetch = async <T>(
-  url: string,
-  options?: RequestInit & { params?: Record<string, any> }
-): Promise<T> => {
-  const token = localStorage.getItem("token");
-  let finalUrl = `${import.meta.env.VITE_API_URL}${url}`;
+const LOGIN_URL = '/auth/login'
 
-  // Convertir les params en query string
-  if (options?.params) {
-    const searchParams = new URLSearchParams();
-    Object.entries(options.params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (typeof value === "object") {
-          // Aplatir les objets imbriqués
-          Object.entries(value).forEach(([subKey, subValue]) => {
-            if (subValue !== undefined && subValue !== null) {
-              searchParams.append(`${key}.${subKey}`, String(subValue));
-            }
-          });
-        } else {
-          searchParams.append(key, String(value));
-        }
-      }
-    });
-    finalUrl += `?${searchParams.toString()}`;
+export class ApiError extends Error {
+  readonly status: number
+
+  constructor(status: number, statusText: string) {
+    super(`HTTP ${status}: ${statusText}`)
+    this.name = 'ApiError'
+    this.status = status
   }
+}
 
-  const response = await fetch(finalUrl, {
+export const customFetch = async <T>(url: string, options?: RequestInit): Promise<T> => {
+  const auth = useAuthStore()
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
     ...options,
     headers: {
-      ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}),
       ...options?.headers,
     },
-  });
+  })
 
-  if (response.status === 403) {
-    // Pas de router dans l'app : on déconnecte, App.vue réagit à isLoggedIn
-    authService.logout();
-    isLoggedIn.value = false;
+  if (!response.ok) {
+    // Le backend répond aussi 403 à un login refusé : ce n'est pas une session expirée.
+    // Le test sur isAuthenticated évite une redirection par requête en cours.
+    const sessionExpired =
+      (response.status === 401 || response.status === 403) && url !== LOGIN_URL
+    if (sessionExpired && auth.isAuthenticated) {
+      auth.clear()
+      router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+    }
+    throw new ApiError(response.status, response.statusText)
   }
 
-  const data = response.ok && response.status !== 204 ? await response.json() : undefined;
+  // Un DELETE peut répondre 200 avec un corps vide : response.json() lèverait une erreur.
+  const body = await response.text()
+  const isJson = response.headers.get('content-type')?.includes('json')
+  const data = body && isJson ? JSON.parse(body) : undefined
 
   return {
     data,
     status: response.status,
     headers: response.headers,
-  } as T;
-};
+  } as T
+}
