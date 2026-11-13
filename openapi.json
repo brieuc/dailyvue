@@ -1,0 +1,976 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/model/{id}": {
+      "get": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "getModel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ModelDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFreeDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelSportDto"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "updateModel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ModelDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelFreeDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelSportDto"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ModelDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFreeDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelSportDto"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "deleteModel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/entry/{id}": {
+      "put": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "updateEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EntryDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFreeDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFreeFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntrySportDto"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EntryDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFreeDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFreeFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntrySportDto"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "deleteEntry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/model": {
+      "post": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "createModel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ModelDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelFreeDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ModelSportDto"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ModelDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelFreeDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ModelSportDto"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entry": {
+      "post": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "createEntry",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/EntryDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFreeDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntryFreeFoodDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntrySportDto"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EntryDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFreeDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntryFreeFoodDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EntrySportDto"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/sport": {
+      "get": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "getSportModels",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/ModelDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFoodDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFreeDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelSportDto"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/free": {
+      "get": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "getFreeModels",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/ModelDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFoodDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFreeDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelSportDto"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/model/food": {
+      "get": {
+        "tags": [
+          "model-controller"
+        ],
+        "operationId": "getFoodModels",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/ModelDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFoodDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelFreeDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ModelSportDto"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entry/{date}": {
+      "get": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "getEntries",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/EntryDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EntryFoodDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EntryFreeDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EntryFreeFoodDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/EntrySportDto"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entry/summary-info": {
+      "get": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "getSummaryInfo",
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entry/get/{date}": {
+      "get": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "getRelevantDates",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "numberOfDays",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entry/firstDate": {
+      "get": {
+        "tags": [
+          "entry-controller"
+        ],
+        "operationId": "getFirstDate",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ModelDto": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "type"
+        }
+      },
+      "ModelFoodDto": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ModelDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "foodType": {
+                "type": "string",
+                "enum": [
+                  "ALCOHOL",
+                  "YOGHOURT",
+                  "MEAL",
+                  "ICECREAM",
+                  "JUNKFOOD",
+                  "CHOCO"
+                ]
+              },
+              "kcal": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ]
+      },
+      "ModelFreeDto": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ModelDto"
+          }
+        ]
+      },
+      "ModelSportDto": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ModelDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "sport": {
+                "type": "string",
+                "enum": [
+                  "RUNNING",
+                  "SKATE",
+                  "BOXING",
+                  "HIIT",
+                  "BIKE",
+                  "STREET_WORKOUT",
+                  "HIKING",
+                  "SWIMMING",
+                  "CYCLING",
+                  "FREE",
+                  "SQUASH"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "EntryDto": {
+        "required": [
+          "date",
+          "modelId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FOOD",
+              "SPORT",
+              "FREE",
+              "FREE_FOOD"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "modelId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "discriminator": {
+          "propertyName": "type"
+        }
+      },
+      "EntryFoodDto": {
+        "required": [
+          "date",
+          "modelId",
+          "quantity",
+          "title"
+        ],
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntryDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "quantity": {
+                "type": "number",
+                "format": "double"
+              },
+              "model": {
+                "$ref": "#/components/schemas/ModelFoodDto"
+              }
+            }
+          }
+        ]
+      },
+      "EntryFreeDto": {
+        "required": [
+          "date",
+          "modelId",
+          "title"
+        ],
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntryDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "model": {
+                "$ref": "#/components/schemas/ModelFreeDto"
+              }
+            }
+          }
+        ]
+      },
+      "EntryFreeFoodDto": {
+        "required": [
+          "date",
+          "modelId",
+          "title"
+        ],
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntryDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "model": {
+                "$ref": "#/components/schemas/ModelFreeDto"
+              },
+              "foodType": {
+                "type": "string",
+                "enum": [
+                  "ALCOHOL",
+                  "YOGHOURT",
+                  "MEAL",
+                  "ICECREAM",
+                  "JUNKFOOD",
+                  "CHOCO"
+                ]
+              },
+              "kcal": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ]
+      },
+      "EntrySportDto": {
+        "required": [
+          "aerobic",
+          "anaerobic",
+          "benefit",
+          "date",
+          "duration",
+          "kcal",
+          "modelId",
+          "title"
+        ],
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntryDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kcal": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "aerobic": {
+                "type": "number",
+                "format": "double"
+              },
+              "anaerobic": {
+                "type": "number",
+                "format": "double"
+              },
+              "duration": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "benefit": {
+                "type": "string",
+                "enum": [
+                  "sprint",
+                  "tempo",
+                  "base",
+                  "anaerobie",
+                  "vo2max"
+                ]
+              },
+              "model": {
+                "$ref": "#/components/schemas/ModelSportDto"
+              }
+            }
+          }
+        ]
+      },
+      "AuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "SummaryInfoDto": {
+        "type": "object",
+        "properties": {
+          "spentKcal": {
+            "type": "number",
+            "format": "double"
+          },
+          "ingestedKcal": {
+            "type": "number",
+            "format": "double"
+          },
+          "sportDuration": {
+            "type": "number",
+            "format": "double"
+          },
+          "drinkingBeer": {
+            "type": "number",
+            "format": "double"
+          },
+          "aerobic": {
+            "type": "number",
+            "format": "double"
+          },
+          "anaerobic": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    }
+  }
+}
