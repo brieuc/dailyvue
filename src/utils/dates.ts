@@ -2,7 +2,11 @@
 // Tous les calculs se font en UTC : en heure locale, un passage à l'heure d'été
 // décale toISOString() sur la veille.
 
+/** Nombre de jours d'une période. */
+export const PERIOD_DAYS = 7
+
 const WEEK_DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
 
 const parseDay = (day: string): Date => new Date(`${day}T00:00:00Z`)
 
@@ -17,6 +21,12 @@ export const addDays = (day: string, days: number): string => {
 }
 
 export const weekDayName = (day: string): string => WEEK_DAYS[parseDay(day).getUTCDay()] as string
+
+/** "2026-01-05" → "5 janv." */
+export const shortDate = (day: string): string => {
+  const date = parseDay(day)
+  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`
+}
 
 /** Les jours d'une période déjà commencés, du plus récent au plus ancien. */
 export const elapsedDaysDescending = (

@@ -14,16 +14,13 @@ export function useEntries() {
   const { notify, notifyError, clear } = useNotification()
 
   const entries = ref<DayEntry[]>([])
-  let lastRequest = 0
+  const loaded = ref(false)
 
   const fetchEntries = async (date: string) => {
-    const request = ++lastRequest
     try {
       const { data } = await getEntries(date)
-      // Seule la réponse la plus récente compte si plusieurs rechargements se croisent.
-      if (request === lastRequest) {
-        entries.value = data as DayEntry[]
-      }
+      entries.value = data as DayEntry[]
+      loaded.value = true
     } catch (error) {
       notifyError(error)
     }
@@ -41,20 +38,34 @@ export function useEntries() {
     }
   }
 
+  // Le DTO renvoyé porte la nouvelle `version` : la liste reste à jour sans rechargement.
+  const storeEntry = (saved: DayEntry) => {
+    const exists = entries.value.some((entry) => entry.id === saved.id)
+    entries.value = exists
+      ? entries.value.map((entry) => (entry.id === saved.id ? saved : entry))
+      : [...entries.value, saved]
+  }
+
   const addEntry = async (entry: CreateEntryBody) => {
     const response = await mutate(() => createEntry(entry), 'Entrée créée !')
-    return response?.data as DayEntry | undefined
+    const saved = response?.data as DayEntry | undefined
+    if (saved) storeEntry(saved)
+    return saved
   }
 
   const editEntry = async (id: string, entry: UpdateEntryBody) => {
     const response = await mutate(() => updateEntry(id, entry), 'Entrée mise à jour !')
-    return response?.data as DayEntry | undefined
+    const saved = response?.data as DayEntry | undefined
+    if (saved) storeEntry(saved)
+    return saved
   }
 
   const removeEntry = async (id: string) => {
     const response = await mutate(() => deleteEntry(id), 'Entrée supprimée !')
-    return response !== undefined
+    if (response === undefined) return false
+    entries.value = entries.value.filter((entry) => entry.id !== id)
+    return true
   }
 
-  return { entries, fetchEntries, addEntry, editEntry, removeEntry }
+  return { entries, loaded, fetchEntries, addEntry, editEntry, removeEntry }
 }

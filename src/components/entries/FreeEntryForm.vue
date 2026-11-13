@@ -1,32 +1,52 @@
 <template>
-  <div class="bordered-box">
-    <p>
-      Model
-      <select v-model="modelId">
+  <form class="entry-form" @submit.prevent="submit">
+    <label class="field">
+      <span class="field-label">Modèle</span>
+      <select v-model="modelId" class="input">
         <option v-for="model in freeModels" :key="model.id" :value="model.id">{{ model.title }}</option>
       </select>
-    </p>
-    <p>Title &nbsp;<input v-model="title" type="text"></p>
-    <p>Description<textarea v-model="description" rows="5" cols="33"></textarea></p>
-    <p v-if="isFreeFood">
-      Food type
-      <select v-model="foodType">
-        <option v-for="value in FOOD_TYPES" :key="value" :value="value">{{ value }}</option>
-      </select>
-    </p>
-    <p v-if="isFreeFood">Calories &nbsp;<input v-model.number="kcal" type="text"></p>
-    <p><button @click="submit">{{ entry ? 'Update Entry' : 'Add Entry' }}</button></p>
-  </div>
+    </label>
+
+    <label class="field">
+      <span class="field-label">Titre</span>
+      <input v-model="title" type="text" class="input">
+    </label>
+
+    <label class="field">
+      <span class="field-label">Description</span>
+      <textarea v-model="description" class="input" rows="4"></textarea>
+    </label>
+
+    <template v-if="isFreeFood">
+      <div class="field">
+        <span class="field-label">Type d'aliment</span>
+        <ChoiceChips v-model="foodType" label="Type d'aliment" :options="FOOD_TYPES" />
+      </div>
+      <label class="field">
+        <span class="field-label">Calories</span>
+        <span class="input-unit">
+          <input v-model.number="kcal" type="number" inputmode="numeric" min="0" class="input">
+          <span class="unit">kcal</span>
+        </span>
+      </label>
+    </template>
+
+    <button type="submit" class="btn btn-primary btn-block">{{ entry ? 'Enregistrer' : 'Ajouter' }}</button>
+  </form>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { EntryFreeFoodDtoAllOfFoodType, type EntryFreeFoodDto } from '@/api/generated'
+import ChoiceChips from '@/components/ChoiceChips.vue'
 import { useModels } from '@/composables/useModels'
-import type { FreeEntry } from '@/types/entries'
+import { FOOD_TYPE_LABELS, type FreeEntry } from '@/types/entries'
 
 const FREE_FOOD_MODEL_TITLE = 'Free Food'
-const FOOD_TYPES = Object.values(EntryFreeFoodDtoAllOfFoodType)
+const FOOD_TYPES = (Object.keys(FOOD_TYPE_LABELS) as EntryFreeFoodDtoAllOfFoodType[]).map((value) => ({
+  value,
+  label: FOOD_TYPE_LABELS[value],
+}))
 
 const props = defineProps<{
   date: string

@@ -1,10 +1,8 @@
-import { storeToRefs } from 'pinia'
 import { login, type AuthenticationRequest } from '@/api/generated'
 import { useAuthStore } from '@/stores/auth'
 
 export function useAuth() {
   const auth = useAuthStore()
-  const { isAuthenticated } = storeToRefs(auth)
 
   const doLogin = async (credentials: AuthenticationRequest) => {
     const response = await login(credentials)
@@ -19,5 +17,5 @@ export function useAuth() {
     auth.clear()
   }
 
-  return { doLogin, logout, isAuthenticated }
+  return { doLogin, logout }
 }

@@ -1,113 +1,85 @@
 <template>
-  <div style="background-color: azure;">
-    <div v-for="entry in entries" :key="entry.id" class="div-entry-center">
-      <div v-if="isSportEntry(entry)">
-        <SportEntryForm
-          v-if="editingEntryId === entry.id"
-          :date="entry.date"
-          :entry="entry"
-          @submit="emit('submit', $event)"
-        />
-        <div v-else>
-          <div>{{ entry.title }}</div>
-          <div class="formatted">{{ entry.description }}</div>
-          <table class="center">
-            <tbody>
-              <tr><td>Modèle</td>
-                <td v-if="entry.model"><b>{{ entry.model.title }}</b></td>
-              </tr>
-              <tr><td>Sport</td>
-                <td v-if="entry.model">{{ entry.model.sport }}</td>
-              </tr>
-              <tr><td>Duration</td><td>{{ entry.duration }}</td></tr>
-              <tr><td>Calories</td><td>{{ entry.kcal }}</td></tr>
-              <tr><td>Aerobic</td><td>{{ entry.aerobic }}</td></tr>
-              <tr><td>Anaerobic</td><td>{{ entry.anaerobic }}</td></tr>
-              <tr><td>Benefit</td><td>{{ entry.benefit }}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <ul class="entry-list">
+    <li v-for="entry in entries" :key="entry.id" class="entry card">
+      <!-- Le parent fournit le formulaire : la liste ne fait qu'afficher. -->
+      <slot v-if="isEditableEntry(entry) && entry.id === editingEntryId" name="edit" :entry="entry" />
 
-      <div v-if="isFreeEntry(entry)">
-        <FreeEntryForm
-          v-if="editingEntryId === entry.id"
-          :date="entry.date"
-          :entry="entry"
-          @submit="emit('submit', $event)"
-        />
-        <div v-else>
-          <div>{{ entry.title }}</div>
-          <div>{{ entry.description }}</div>
-          <div v-if="entry.foodType">{{ entry.foodType }}</div>
-          <div v-if="entry.kcal">{{ entry.kcal }}</div>
-        </div>
-      </div>
+      <template v-else>
+        <SportEntryCard v-if="isSportEntry(entry)" :entry="entry" />
+        <FreeEntryCard v-else-if="isFreeEntry(entry)" :entry="entry" />
+        <FoodEntryCard v-else-if="isFoodEntry(entry)" :entry="entry" />
 
-      <div v-if="isFoodEntry(entry)">
-        <div>{{ entry.title }}</div>
-        <div v-if="entry.model">
-          <div>Calories {{ entry.quantity * (entry.model.kcal ?? 0) }}</div>
+        <div class="actions">
+          <button
+            v-if="isFreeEntry(entry)"
+            type="button"
+            class="btn btn-ghost btn-sm"
+            @click="emit('createModel', entry)"
+          >
+            Créer un modèle
+          </button>
+          <button
+            v-if="isEditableEntry(entry)"
+            type="button"
+            class="btn btn-ghost btn-sm"
+            @click="emit('edit', entry)"
+          >
+            Modifier
+          </button>
+          <button type="button" class="btn btn-ghost btn-danger btn-sm" @click="emit('delete', entry)">
+            Supprimer
+          </button>
         </div>
-      </div>
-
-      <template v-if="editingEntryId !== entry.id">
-        <button v-if="!isFoodEntry(entry)" @click="editingEntryId = entry.id">Edit</button>
-        &nbsp;
-        <button @click="emit('delete', entry)">Delete</button>
-        &nbsp;
-        <button v-if="isFreeEntry(entry)" @click="addFoodModelFromEntry(entry)">Create Model</button>
       </template>
-    </div>
-  </div>
+    </li>
+  </ul>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { CreateEntryBody } from '@/api/generated'
-import FreeEntryForm from '@/components/entries/FreeEntryForm.vue'
-import SportEntryForm from '@/components/entries/SportEntryForm.vue'
-import { useModels } from '@/composables/useModels'
-import { isFoodEntry, isFreeEntry, isSportEntry, type DayEntry } from '@/types/entries'
+import FoodEntryCard from '@/components/entries/FoodEntryCard.vue'
+import FreeEntryCard from '@/components/entries/FreeEntryCard.vue'
+import SportEntryCard from '@/components/entries/SportEntryCard.vue'
+import {
+  isEditableEntry,
+  isFoodEntry,
+  isFreeEntry,
+  isSportEntry,
+  type DayEntry,
+  type EditableEntry,
+  type FreeEntry,
+} from '@/types/entries'
 
-const props = defineProps<{ entries: DayEntry[] }>()
-const emit = defineEmits<{
-  submit: [entry: CreateEntryBody]
-  delete: [entry: DayEntry]
+defineProps<{
+  entries: DayEntry[]
+  editingEntryId?: string | null
 }>()
-
-const { addFoodModelFromEntry } = useModels()
-
-const editingEntryId = ref<string | null>(null)
-
-// Après un enregistrement réussi, la liste est rechargée et le formulaire se ferme.
-watch(
-  () => props.entries,
-  () => {
-    editingEntryId.value = null
-  },
-)
+const emit = defineEmits<{
+  edit: [entry: EditableEntry]
+  delete: [entry: DayEntry]
+  createModel: [entry: FreeEntry]
+}>()
+defineSlots<{ edit(props: { entry: EditableEntry }): unknown }>()
 </script>
 
 <style scoped>
-.formatted {
-  white-space: pre-wrap;
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.center {
-  margin: auto;
+.entry {
+  padding: 0.75rem 0.85rem 0.4rem;
+  text-align: left;
 }
 
-.div-entry-center {
-  border: 1px solid black;
-  margin: auto;
-  width: 400px;
-}
-
-@media only screen and (max-width: 393px) {
-  .div-entry-center {
-    width: 100%;
-    text-align: center;
-  }
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  margin: 0.4rem -0.4rem 0 0;
 }
 </style>

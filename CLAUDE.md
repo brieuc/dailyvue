@@ -33,14 +33,14 @@ The architecture follows the sibling project `cashvue`. `COMPONENTS.md` maps the
 - `src/types/entries.ts`: discriminated `DayEntry` union and type guards
 - `src/utils/dates.ts`: calendar-day helpers
 - `src/views/`: `HomeView`, `LoginView`
-- `src/components/`: `periods/`, `days/`, `entries/`, `models/`
+- `src/components/`: `periods/`, `days/`, `entries/`
 
 ### Composables
 
 Composables call `@/api/generated` directly. There is no service layer. Naming: `fetchX`, `addX`, `editX`, `removeX`.
 
-- Reference data lives at module level with a `loaded` flag: `useModels`, `usePeriods`. It has a `reset` function, called when `HomeView` unmounts.
-- Contextual data is local to each call: `useEntries` (one per day), `useSummary`.
+- Reference data shared between components lives at module level: `useModels`. It has a `reset` function, called when `HomeView` unmounts.
+- Other data is local to each call: `useEntries` (one per day), `useSummary`, `usePeriods` (`HomeView` only). `useEntries` keeps `entries` up to date from the DTOs returned by writes, without reloading.
 - `useNotification` is a module-level singleton feeding the `ErrorView` banner.
 
 ### Conventions
@@ -48,6 +48,8 @@ Composables call `@/api/generated` directly. There is no service layer. Naming: 
 - `customFetch` throws `ApiError` on any non-ok response. A 401 or 403 outside `/auth/login` clears the session and redirects to login. The backend also answers 403 to a rejected login.
 - Composables catch errors and notify. Mutations return the DTO, or `undefined` on failure, so components use `if (saved) ...` without try/catch.
 - Forms take an optional `:entry` (absent means create) and emit `@submit`. The parent calls the composable.
+- `DayView` owns every entry write and the open/closed state of entry input. Creation happens in a `ModalDialog` opened by the day's "+" button; it contains `CategorySelection`, which renders `FoodEntryPicker` or `EntryForm` and only relays their events. Lists such as `EntryList` only display and emit: the edit form is injected through the `#edit` slot, never imported by the list.
+- Styling: design tokens and shared primitives (`.card`, `.btn-*`, `.field`, `.input`, `.segmented`, `.stat`) live in `src/assets/main.css`, after cashvue's light theme. Components use those and `var(--…)` only, with `<style scoped>` for local tweaks; no inline styles. UI text is in French.
 - API dates are `YYYY-MM-DD` calendar days. Compute them with `utils/dates.ts`, never with local `Date` arithmetic followed by `toISOString()`, which shifts days across daylight saving changes.
 
 ### Environment

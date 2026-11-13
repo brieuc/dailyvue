@@ -1,17 +1,41 @@
 <template>
-  <h4 style="color: blueviolet;">Du {{ fromDate }} au {{ toDate }}</h4>
-  <div class="flex-summary">
-    <div class="summary-item">Activités sportives {{ summary.sportDuration }} min</div>
-    <div class="summary-item">Calories ingérées {{ summary.ingestedKcal }} kcal</div>
-    <div class="summary-item">Calories dépensées {{ summary.spentKcal }} kcal</div>
-    <div class="summary-item">Alcalories {{ summary.drinkingBeer }} kcal</div>
-    <div class="summary-item">Aerobic {{ round(summary.aerobic) }}</div>
-    <div class="summary-item">Anaerobic {{ round(summary.anaerobic) }}</div>
+  <div class="period-summary">
+    <h2 class="title">
+      <span class="eyebrow">Semaine</span>
+      <span>{{ shortDate(fromDate) }} – {{ shortDate(toDate) }}</span>
+    </h2>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">Sport</span>
+        <span class="stat-value">{{ summary.sportDuration }}<small>min</small></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Ingérées</span>
+        <span class="stat-value">{{ summary.ingestedKcal }}<small>kcal</small></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Dépensées</span>
+        <span class="stat-value">{{ summary.spentKcal }}<small>kcal</small></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Alcalories</span>
+        <span class="stat-value">{{ summary.drinkingBeer }}<small>kcal</small></span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Aérobie</span>
+        <span class="stat-value">{{ round(summary.aerobic) }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Anaérobie</span>
+        <span class="stat-value">{{ round(summary.anaerobic) }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { SummaryInfoDto } from '@/api/generated'
+import { shortDate } from '@/utils/dates'
 
 defineProps<{
   fromDate: string
@@ -23,23 +47,20 @@ const round = (value: number) => Math.round(value * 100) / 100
 </script>
 
 <style scoped>
-.flex-summary {
+.period-summary {
   display: flex;
-  justify-content: space-evenly;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-.summary-item {
-  background-color: rgba(240, 240, 240, 0.3);
-  border-radius: 4px;
-  padding: 5px 10px;
-  margin: 2px;
-  border: 1px solid rgba(220, 220, 220, 0.2);
-  font-size: 0.8rem;
-  text-align: center;
-  min-width: 120px;
-  color: #666;
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+}
+
+.stats {
+  grid-template-columns: repeat(3, 1fr);
 }
 </style>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, elapsedDaysDescending, today, weekDayName } from '@/utils/dates'
+import { addDays, elapsedDaysDescending, shortDate, today, weekDayName } from '@/utils/dates'
 
 describe('addDays', () => {
   it('reste sur le bon jour à travers le passage à l’heure d’été', () => {
@@ -19,6 +19,14 @@ describe('addDays', () => {
   it('passe les fins de mois et d’année', () => {
     expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
     expect(addDays('2028-02-28', 1)).toBe('2028-02-29')
+  })
+})
+
+describe('shortDate', () => {
+  it('donne le jour et le mois abrégé, sans décalage de fuseau', () => {
+    expect(shortDate('2026-01-05')).toBe('5 janv.')
+    expect(shortDate('2026-03-29')).toBe('29 mars')
+    expect(shortDate('2026-12-31')).toBe('31 déc.')
   })
 })
 

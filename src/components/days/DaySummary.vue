@@ -1,9 +1,21 @@
 <template>
-  <div class="flex-summary-day">
-    <div>⛹️‍♂️ {{ summary.sportDuration }} min</div>
-    <div>🏋🏻‍♂️{{ summary.spentKcal }}</div>
-    <div>🍕 {{ summary.ingestedKcal }}</div>
-    <div>🍺 {{ summary.drinkingBeer }}</div>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-label">Sport</span>
+      <span class="stat-value">{{ summary.sportDuration }}<small>min</small></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Dépensées</span>
+      <span class="stat-value">{{ summary.spentKcal }}<small>kcal</small></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Ingérées</span>
+      <span class="stat-value">{{ summary.ingestedKcal }}<small>kcal</small></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Alcalories</span>
+      <span class="stat-value">{{ summary.drinkingBeer }}<small>kcal</small></span>
+    </div>
   </div>
 </template>
 
@@ -14,14 +26,13 @@ defineProps<{ summary: Required<SummaryInfoDto> }>()
 </script>
 
 <style scoped>
-.flex-summary-day {
-  display: flex;
-  justify-content: space-evenly;
-  flex-wrap: wrap;
-  gap: 0.1rem;
-  height: fit-content;
-  background-color: rebeccapurple;
-  color: beige;
-  font-size: 1rem;
+.stats {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 393px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

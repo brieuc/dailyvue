@@ -3,8 +3,9 @@ import * as api from '@/api/generated'
 import { useEntries } from '@/composables/useEntries'
 import { useModels } from '@/composables/useModels'
 import { useNotification } from '@/composables/useNotification'
-import { PERIOD_DAYS, usePeriods } from '@/composables/usePeriods'
+import { usePeriods } from '@/composables/usePeriods'
 import { useSummary } from '@/composables/useSummary'
+import { PERIOD_DAYS } from '@/utils/dates'
 
 vi.mock('@/api/generated', () => ({
   createEntry: vi.fn(),
@@ -31,16 +32,13 @@ const mockModels = () => {
 beforeEach(() => {
   vi.clearAllMocks()
   useModels().resetModels()
-  usePeriods().resetPeriods()
   useNotification().clear()
 })
 
 describe('useModels', () => {
-  it('ne charge les modèles qu’une fois et partage l’état', async () => {
+  it('partage l’état entre les appels', async () => {
     mockModels()
     await useModels().fetchModels()
-    await useModels().fetchModels()
-    expect(api.getFoodModels).toHaveBeenCalledTimes(1)
     expect(useModels().foodModels.value).toHaveLength(1)
   })
 
@@ -93,9 +91,10 @@ describe('usePeriods', () => {
 
   it('charge les 4 premières périodes seulement', async () => {
     mockDates(['a', 'b', 'c', 'd', 'e'])
-    await usePeriods().fetchPeriods()
+    const { periods, fetchPeriods } = usePeriods()
+    await fetchPeriods()
     expect(api.getRelevantDates).toHaveBeenCalledWith('2026-01-05', { numberOfDays: PERIOD_DAYS })
-    expect(usePeriods().periods.value.map((period) => period.loaded)).toEqual([
+    expect(periods.value.map((period) => period.loaded)).toEqual([
       true,
       true,
       true,
@@ -104,32 +103,28 @@ describe('usePeriods', () => {
     ])
   })
 
-  it('ne recharge pas une seconde fois', async () => {
+  it('a un état propre à chaque appel', async () => {
     mockDates(['a'])
-    await usePeriods().fetchPeriods()
-    await usePeriods().fetchPeriods()
-    expect(api.getFirstDate).toHaveBeenCalledTimes(1)
+    const first = usePeriods()
+    await first.fetchPeriods()
+    expect(first.periods.value).toHaveLength(1)
+    expect(usePeriods().periods.value).toEqual([])
   })
 
   it('gère un compte sans entrée', async () => {
     vi.mocked(api.getFirstDate).mockResolvedValue(ok([]))
-    await usePeriods().fetchPeriods()
+    const { periods, fetchPeriods } = usePeriods()
+    await fetchPeriods()
     expect(api.getRelevantDates).not.toHaveBeenCalled()
-    expect(usePeriods().periods.value).toEqual([])
+    expect(periods.value).toEqual([])
   })
 
   it('peut tout marquer comme chargé', async () => {
     mockDates(['a', 'b', 'c', 'd', 'e'])
-    await usePeriods().fetchPeriods()
-    usePeriods().loadAllPeriods()
-    expect(usePeriods().periods.value.every((period) => period.loaded)).toBe(true)
-  })
-
-  it('vide les périodes au reset', async () => {
-    mockDates(['a'])
-    await usePeriods().fetchPeriods()
-    usePeriods().resetPeriods()
-    expect(usePeriods().periods.value).toEqual([])
+    const { periods, fetchPeriods, loadAllPeriods } = usePeriods()
+    await fetchPeriods()
+    loadAllPeriods()
+    expect(periods.value.every((period) => period.loaded)).toBe(true)
   })
 })
 
@@ -145,16 +140,57 @@ describe('useEntries', () => {
     expect(second.entries.value).toEqual([])
   })
 
-  it('garde la réponse la plus récente quand deux chargements se croisent', async () => {
-    let resolveSlow: (value: never) => void = () => {}
-    vi.mocked(api.getEntries)
-      .mockReturnValueOnce(new Promise((resolve) => { resolveSlow = resolve as never }))
-      .mockResolvedValueOnce(ok([entry]))
-    const { entries, fetchEntries } = useEntries()
-    const slow = fetchEntries('d')
+  it('indique que les entrées sont chargées seulement après un succès', async () => {
+    vi.mocked(api.getEntries).mockRejectedValueOnce(new Error('boom'))
+    vi.mocked(api.getEntries).mockResolvedValueOnce(ok([entry]))
+    const { loaded, fetchEntries } = useEntries()
     await fetchEntries('d')
-    resolveSlow(ok([]))
-    await slow
+    expect(loaded.value).toBe(false)
+    await fetchEntries('d')
+    expect(loaded.value).toBe(true)
+  })
+
+  it('ajoute l’entrée créée à la liste', async () => {
+    vi.mocked(api.createEntry).mockResolvedValue(ok({ ...entry, id: '1' }))
+    const { entries, addEntry } = useEntries()
+    await addEntry(entry)
+    expect(entries.value.map((item) => item.id)).toEqual(['1'])
+  })
+
+  it('remplace l’entrée modifiée par la réponse de l’API', async () => {
+    vi.mocked(api.getEntries).mockResolvedValue(
+      ok([
+        { ...entry, id: '1', version: 0 },
+        { ...entry, id: '2', version: 0 },
+      ]),
+    )
+    vi.mocked(api.updateEntry).mockResolvedValue(ok({ ...entry, id: '1', version: 1 }))
+    const { entries, fetchEntries, editEntry } = useEntries()
+    await fetchEntries('d')
+    await editEntry('1', { ...entry, id: '1', version: 0 })
+    expect(entries.value.map((item) => [item.id, item.version])).toEqual([
+      ['1', 1],
+      ['2', 0],
+    ])
+  })
+
+  it('retire l’entrée supprimée de la liste', async () => {
+    vi.mocked(api.getEntries).mockResolvedValue(ok([{ ...entry, id: '1' }]))
+    vi.mocked(api.deleteEntry).mockResolvedValue(ok(undefined))
+    const { entries, fetchEntries, removeEntry } = useEntries()
+    await fetchEntries('d')
+    await removeEntry('1')
+    expect(entries.value).toEqual([])
+  })
+
+  it('laisse la liste intacte quand une écriture échoue', async () => {
+    vi.mocked(api.getEntries).mockResolvedValue(ok([{ ...entry, id: '1' }]))
+    vi.mocked(api.updateEntry).mockRejectedValue(new Error('HTTP 409: Conflict'))
+    vi.mocked(api.deleteEntry).mockRejectedValue(new Error('nope'))
+    const { entries, fetchEntries, editEntry, removeEntry } = useEntries()
+    await fetchEntries('d')
+    await editEntry('1', entry)
+    await removeEntry('1')
     expect(entries.value).toHaveLength(1)
   })
 

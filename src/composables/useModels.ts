@@ -16,7 +16,6 @@ const LOAD_ERROR = 'Erreur lors du chargement des données'
 const foodModels = ref<ModelFoodDto[]>([])
 const sportModels = ref<ModelSportDto[]>([])
 const freeModels = ref<ModelFreeDto[]>([])
-const loaded = ref(false)
 // Incrémenté au reset : une réponse arrivée après une déconnexion est ignorée.
 let session = 0
 
@@ -26,7 +25,6 @@ export function useModels() {
   const { notify, notifyError, clear } = useNotification()
 
   const fetchModels = async () => {
-    if (loaded.value) return
     const currentSession = session
     try {
       const [food, sport, free] = await Promise.all([
@@ -38,9 +36,8 @@ export function useModels() {
       foodModels.value = food.data as ModelFoodDto[]
       sportModels.value = sport.data as ModelSportDto[]
       freeModels.value = free.data as ModelFreeDto[]
-      loaded.value = true
     } catch {
-      notify(LOAD_ERROR)
+      notify(LOAD_ERROR, 'error')
     }
   }
 
@@ -68,7 +65,6 @@ export function useModels() {
     foodModels.value = []
     sportModels.value = []
     freeModels.value = []
-    loaded.value = false
   }
 
   return { foodModels, sportModels, freeModels, fetchModels, addFoodModelFromEntry, resetModels }
