@@ -4,46 +4,32 @@
       <span class="eyebrow">Semaine</span>
       <span>{{ shortDate(fromDate) }} – {{ shortDate(toDate) }}</span>
     </h2>
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-label">Sport</span>
-        <span class="stat-value">{{ summary.sportDuration }}<small>min</small></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Ingérées</span>
-        <span class="stat-value">{{ summary.ingestedKcal }}<small>kcal</small></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Dépensées</span>
-        <span class="stat-value">{{ summary.spentKcal }}<small>kcal</small></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Alcalories</span>
-        <span class="stat-value">{{ summary.drinkingBeer }}<small>kcal</small></span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Aérobie</span>
-        <span class="stat-value">{{ round(summary.aerobic) }}</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Anaérobie</span>
-        <span class="stat-value">{{ round(summary.anaerobic) }}</span>
-      </div>
-    </div>
+    <StatGrid class="period-stats" :stats="stats" />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { SummaryInfoDto } from '@/api/generated'
+import { computed } from 'vue'
+import StatGrid from '@/components/StatGrid.vue'
+import type { Summary } from '@/composables/useSummary'
 import { shortDate } from '@/utils/dates'
 
-defineProps<{
+const props = defineProps<{
   fromDate: string
   toDate: string
-  summary: Required<SummaryInfoDto>
+  summary: Summary
 }>()
 
 const round = (value: number) => Math.round(value * 100) / 100
+
+const stats = computed(() => [
+  { label: 'Sport', value: props.summary.sportDuration, unit: 'min' },
+  { label: 'Ingérées', value: props.summary.ingestedKcal, unit: 'kcal' },
+  { label: 'Dépensées', value: props.summary.spentKcal, unit: 'kcal' },
+  { label: 'Alcalories', value: props.summary.drinkingBeer, unit: 'kcal' },
+  { label: 'Aérobie', value: round(props.summary.aerobic) },
+  { label: 'Anaérobie', value: round(props.summary.anaerobic) },
+])
 </script>
 
 <style scoped>
@@ -60,7 +46,7 @@ const round = (value: number) => Math.round(value * 100) / 100
   font-size: 1.05rem;
 }
 
-.stats {
+.period-stats {
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

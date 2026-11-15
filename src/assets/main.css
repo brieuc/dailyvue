@@ -28,6 +28,8 @@
   --c-accent-2: #6a5cf0;
   --c-accent-dim: rgba(12, 135, 170, 0.1);
   --c-accent-line: rgba(12, 135, 170, 0.34);
+  /* Fond teinté d'un panneau ouvert (détail d'un jour). */
+  --c-tint: #e6f2f7;
   --gradient: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
 
   /* États */

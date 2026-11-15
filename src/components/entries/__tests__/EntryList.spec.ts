@@ -42,16 +42,4 @@ describe('EntryList', () => {
 
     expect(buttons(wrapper, 'Modifier')).toHaveLength(2)
   })
-
-  it('affiche le slot edit à la place de l’entrée modifiée', () => {
-    const wrapper = mount(EntryList, {
-      props: { entries, editingEntryId: 'f1' },
-      slots: { edit: '<template #edit="{ entry }"><p class="form">{{ entry.title }}</p></template>' },
-    })
-
-    expect(wrapper.get('.form').text()).toBe('Notes')
-    expect(wrapper.findComponent(FreeEntryCard).exists()).toBe(false)
-    expect(wrapper.text()).toContain('Vélo')
-    expect(buttons(wrapper, 'Créer un modèle')).toHaveLength(0)
-  })
 })

@@ -1,41 +1,27 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import {
   createEntry,
   deleteEntry,
   getEntries,
   updateEntry,
   type CreateEntryBody,
-  type UpdateEntryBody,
+  type ModelFoodDto,
 } from '@/api/generated'
-import { useNotification } from '@/composables/useNotification'
-import type { DayEntry } from '@/types/entries'
+import { LOAD_ERROR, useNotification } from '@/composables/useNotification'
+import { isFoodEntry, type DayEntry, type EntryInput, type FoodEntry } from '@/types/entries'
 
-export function useEntries() {
-  const { notify, notifyError, clear } = useNotification()
+/** Entrées d'un jour. Le composant appelant est indexé par sa date, qui ne change donc pas. */
+export function useEntries(date: string) {
+  const { run } = useNotification()
 
   const entries = ref<DayEntry[]>([])
   const loaded = ref(false)
 
-  const fetchEntries = async (date: string) => {
-    try {
-      const { data } = await getEntries(date)
-      entries.value = data as DayEntry[]
-      loaded.value = true
-    } catch (error) {
-      notifyError(error)
-    }
-  }
-
-  const mutate = async <T>(call: () => Promise<T>, successMessage: string) => {
-    clear()
-    try {
-      const result = await call()
-      notify(successMessage)
-      return result
-    } catch (error) {
-      notifyError(error)
-      return undefined
-    }
+  const fetchEntries = async () => {
+    const response = await run(() => getEntries(date), { error: LOAD_ERROR })
+    if (!response) return
+    entries.value = response.data as DayEntry[]
+    loaded.value = true
   }
 
   // Le DTO renvoyé porte la nouvelle `version` : la liste reste à jour sans rechargement.
@@ -46,26 +32,58 @@ export function useEntries() {
       : [...entries.value, saved]
   }
 
-  const addEntry = async (entry: CreateEntryBody) => {
-    const response = await mutate(() => createEntry(entry), 'Entrée créée !')
-    const saved = response?.data as DayEntry | undefined
-    if (saved) storeEntry(saved)
-    return saved
-  }
-
-  const editEntry = async (id: string, entry: UpdateEntryBody) => {
-    const response = await mutate(() => updateEntry(id, entry), 'Entrée mise à jour !')
+  /** Sans id, crée l'entrée ; avec id, la met à jour. */
+  const saveEntry = async (input: EntryInput) => {
+    const body = { ...input, date } as CreateEntryBody
+    const id = input.id
+    const response = id
+      ? await run(() => updateEntry(id, body), { success: 'Entrée mise à jour !' })
+      : await run(() => createEntry(body), { success: 'Entrée créée !' })
     const saved = response?.data as DayEntry | undefined
     if (saved) storeEntry(saved)
     return saved
   }
 
   const removeEntry = async (id: string) => {
-    const response = await mutate(() => deleteEntry(id), 'Entrée supprimée !')
-    if (response === undefined) return false
+    const response = await run(() => deleteEntry(id), { success: 'Entrée supprimée !' })
+    if (!response) return false
     entries.value = entries.value.filter((entry) => entry.id !== id)
     return true
   }
 
-  return { entries, loaded, fetchEntries, addEntry, editEntry, removeEntry }
+  // Une entrée food par modèle : sa quantité se règle au lieu d'en créer une autre.
+  const foodEntriesByModel = computed(
+    () =>
+      new Map<string, FoodEntry>(
+        entries.value.filter(isFoodEntry).map((entry) => [entry.model?.id ?? entry.modelId, entry]),
+      ),
+  )
+
+  const foodQuantities = computed(
+    () => new Map([...foodEntriesByModel.value].map(([modelId, entry]) => [modelId, entry.quantity])),
+  )
+
+  const setFoodQuantity = (model: ModelFoodDto, quantity: number) => {
+    if (!model.id) return Promise.resolve(undefined)
+    const active = foodEntriesByModel.value.get(model.id)
+    const source = active ?? model
+    return saveEntry({
+      ...(active && { id: active.id, version: active.version }),
+      title: source.title ?? '',
+      description: source.description,
+      quantity,
+      modelId: model.id,
+      type: 'FOOD',
+    })
+  }
+
+  return {
+    entries,
+    loaded,
+    foodQuantities,
+    fetchEntries,
+    saveEntry,
+    removeEntry,
+    setFoodQuantity,
+  }
 }

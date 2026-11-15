@@ -41,31 +41,22 @@
 
     <div class="field">
       <span class="field-label">Bénéfice</span>
-      <ChoiceChips v-model="benefit" label="Bénéfice" :options="BENEFITS" />
+      <ChoiceChips v-model="benefit" label="Bénéfice" :options="BENEFIT_OPTIONS" />
     </div>
 
-    <button type="submit" class="btn btn-primary btn-block">{{ entry ? 'Enregistrer' : 'Ajouter' }}</button>
+    <button type="submit" class="btn btn-primary btn-block" :disabled="!modelId">{{ entry ? 'Enregistrer' : 'Ajouter' }}</button>
   </form>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { EntrySportDto, EntrySportDtoAllOfBenefit } from '@/api/generated'
 import ChoiceChips from '@/components/ChoiceChips.vue'
 import IntensitySlider from '@/components/entries/IntensitySlider.vue'
 import { useModels } from '@/composables/useModels'
-import { BENEFIT_LABELS, type SportEntry } from '@/types/entries'
+import { BENEFIT_OPTIONS, type EntryInput, type SportEntry } from '@/types/entries'
 
-const BENEFITS = (Object.keys(BENEFIT_LABELS) as EntrySportDtoAllOfBenefit[]).map((value) => ({
-  value,
-  label: BENEFIT_LABELS[value],
-}))
-
-const props = defineProps<{
-  date: string
-  entry?: SportEntry
-}>()
-const emit = defineEmits<{ submit: [entry: EntrySportDto] }>()
+const props = defineProps<{ entry?: SportEntry }>()
+const emit = defineEmits<{ submit: [entry: EntryInput] }>()
 
 const { sportModels } = useModels()
 
@@ -79,12 +70,13 @@ const anaerobic = ref(props.entry?.anaerobic)
 const benefit = ref(props.entry?.benefit)
 
 const submit = () => {
+  if (!modelId.value) return
+
   // Les champs vides partent tels quels : la validation reste celle du backend.
   emit('submit', {
     ...(props.entry && { id: props.entry.id, version: props.entry.version }),
     title: title.value,
     description: description.value,
-    date: props.date,
     kcal: kcal.value,
     duration: duration.value,
     aerobic: aerobic.value,
@@ -92,6 +84,6 @@ const submit = () => {
     benefit: benefit.value,
     modelId: modelId.value,
     type: 'SPORT',
-  } as EntrySportDto)
+  } as EntryInput)
 }
 </script>

@@ -1,36 +1,31 @@
 <template>
   <ul class="entry-list">
     <li v-for="entry in entries" :key="entry.id" class="entry card">
-      <!-- Le parent fournit le formulaire : la liste ne fait qu'afficher. -->
-      <slot v-if="isEditableEntry(entry) && entry.id === editingEntryId" name="edit" :entry="entry" />
+      <SportEntryCard v-if="isSportEntry(entry)" :entry="entry" />
+      <FreeEntryCard v-else-if="isFreeEntry(entry)" :entry="entry" />
+      <FoodEntryCard v-else-if="isFoodEntry(entry)" :entry="entry" />
 
-      <template v-else>
-        <SportEntryCard v-if="isSportEntry(entry)" :entry="entry" />
-        <FreeEntryCard v-else-if="isFreeEntry(entry)" :entry="entry" />
-        <FoodEntryCard v-else-if="isFoodEntry(entry)" :entry="entry" />
-
-        <div class="actions">
-          <button
-            v-if="isFreeEntry(entry)"
-            type="button"
-            class="btn btn-ghost btn-sm"
-            @click="emit('createModel', entry)"
-          >
-            Créer un modèle
-          </button>
-          <button
-            v-if="isEditableEntry(entry)"
-            type="button"
-            class="btn btn-ghost btn-sm"
-            @click="emit('edit', entry)"
-          >
-            Modifier
-          </button>
-          <button type="button" class="btn btn-ghost btn-danger btn-sm" @click="emit('delete', entry)">
-            Supprimer
-          </button>
-        </div>
-      </template>
+      <div class="actions">
+        <button
+          v-if="isFreeEntry(entry)"
+          type="button"
+          class="btn btn-ghost btn-sm"
+          @click="emit('createModel', entry)"
+        >
+          Créer un modèle
+        </button>
+        <button
+          v-if="isEditableEntry(entry)"
+          type="button"
+          class="btn btn-ghost btn-sm"
+          @click="emit('edit', entry)"
+        >
+          Modifier
+        </button>
+        <button type="button" class="btn btn-ghost btn-danger btn-sm" @click="emit('delete', entry)">
+          Supprimer
+        </button>
+      </div>
     </li>
   </ul>
 </template>
@@ -49,16 +44,13 @@ import {
   type FreeEntry,
 } from '@/types/entries'
 
-defineProps<{
-  entries: DayEntry[]
-  editingEntryId?: string | null
-}>()
+// Affichage seul : les actions sont émises, DayView les exécute.
+defineProps<{ entries: DayEntry[] }>()
 const emit = defineEmits<{
   edit: [entry: EditableEntry]
   delete: [entry: DayEntry]
   createModel: [entry: FreeEntry]
 }>()
-defineSlots<{ edit(props: { entry: EditableEntry }): unknown }>()
 </script>
 
 <style scoped>

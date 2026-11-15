@@ -9,7 +9,7 @@
           <span class="mono">{{ freeModels.length }}</span> free
         </p>
       </div>
-      <button type="button" class="btn btn-ghost btn-sm" @click="handleLogout">Déconnexion</button>
+      <button type="button" class="btn btn-ghost btn-sm" @click="logout">Déconnexion</button>
     </header>
 
     <main class="periods">
@@ -17,7 +17,7 @@
         v-for="period in periods"
         :key="period.startDate"
         :start-date="period.startDate"
-        :loaded="period.loaded"
+        v-model:loaded="period.loaded"
       />
     </main>
 
@@ -31,14 +31,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
 import PeriodView from '@/components/periods/PeriodView.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useModels } from '@/composables/useModels'
 import { useNotification } from '@/composables/useNotification'
 import { usePeriods } from '@/composables/usePeriods'
 
-const router = useRouter()
 const { logout } = useAuth()
 const { clear } = useNotification()
 const { foodModels, sportModels, freeModels, fetchModels, resetModels } = useModels()
@@ -54,11 +52,6 @@ onMounted(() => {
 
 // Seule route protégée : la quitter signifie déconnexion ou session expirée.
 onUnmounted(resetModels)
-
-const handleLogout = () => {
-  logout()
-  router.push({ name: 'login' })
-}
 </script>
 
 <style scoped>

@@ -9,9 +9,7 @@ import {
   type ModelFreeDto,
   type ModelSportDto,
 } from '@/api/generated'
-import { useNotification } from '@/composables/useNotification'
-
-const LOAD_ERROR = 'Erreur lors du chargement des données'
+import { LOAD_ERROR, useNotification } from '@/composables/useNotification'
 
 const foodModels = ref<ModelFoodDto[]>([])
 const sportModels = ref<ModelSportDto[]>([])
@@ -22,42 +20,36 @@ let session = 0
 type FoodModelSource = Pick<EntryFreeFoodDto, 'title' | 'description' | 'kcal' | 'foodType'>
 
 export function useModels() {
-  const { notify, notifyError, clear } = useNotification()
+  const { run } = useNotification()
 
   const fetchModels = async () => {
     const currentSession = session
-    try {
-      const [food, sport, free] = await Promise.all([
-        getFoodModels(),
-        getSportModels(),
-        getFreeModels(),
-      ])
-      if (currentSession !== session) return
-      foodModels.value = food.data as ModelFoodDto[]
-      sportModels.value = sport.data as ModelSportDto[]
-      freeModels.value = free.data as ModelFreeDto[]
-    } catch {
-      notify(LOAD_ERROR, 'error')
-    }
+    const responses = await run(
+      () => Promise.all([getFoodModels(), getSportModels(), getFreeModels()]),
+      { error: LOAD_ERROR },
+    )
+    if (!responses || currentSession !== session) return
+    const [food, sport, free] = responses
+    foodModels.value = food.data as ModelFoodDto[]
+    sportModels.value = sport.data as ModelSportDto[]
+    freeModels.value = free.data as ModelFreeDto[]
   }
 
   const addFoodModelFromEntry = async (entry: FoodModelSource) => {
-    clear()
-    try {
-      const { data } = await createModel({
-        title: entry.title,
-        description: entry.description,
-        kcal: entry.kcal,
-        foodType: entry.foodType,
-        type: 'FOOD',
-      })
-      foodModels.value.push(data as ModelFoodDto)
-      notify('Modèle créé !')
-      return data as ModelFoodDto
-    } catch (error) {
-      notifyError(error)
-      return undefined
-    }
+    const response = await run(
+      () =>
+        createModel({
+          title: entry.title,
+          description: entry.description,
+          kcal: entry.kcal,
+          foodType: entry.foodType,
+          type: 'FOOD',
+        }),
+      { success: 'Modèle créé !' },
+    )
+    const model = response?.data as ModelFoodDto | undefined
+    if (model) foodModels.value.push(model)
+    return model
   }
 
   const resetModels = () => {

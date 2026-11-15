@@ -14,10 +14,12 @@
 </template>
 
 <script setup lang="ts" generic="T extends string">
+import type { ChoiceOption } from '@/types/entries'
+
 // Choix unique parmi quelques valeurs. Un second clic désélectionne.
 defineProps<{
   label: string
-  options: { value: T; label: string }[]
+  options: ChoiceOption<T>[]
 }>()
 const selected = defineModel<T | undefined>()
 
