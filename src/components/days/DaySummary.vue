@@ -1,37 +1,29 @@
 <template>
-  <div class="stats">
-    <div class="stat">
-      <span class="stat-label">Sport</span>
-      <span class="stat-value">{{ summary.sportDuration }}<small>min</small></span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Dépensées</span>
-      <span class="stat-value">{{ summary.spentKcal }}<small>kcal</small></span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Ingérées</span>
-      <span class="stat-value">{{ summary.ingestedKcal }}<small>kcal</small></span>
-    </div>
-    <div class="stat">
-      <span class="stat-label">Alcalories</span>
-      <span class="stat-value">{{ summary.drinkingBeer }}<small>kcal</small></span>
-    </div>
-  </div>
+  <StatGrid class="day-stats" :stats="stats" />
 </template>
 
 <script setup lang="ts">
-import type { SummaryInfoDto } from '@/api/generated'
+import { computed } from 'vue'
+import StatGrid from '@/components/StatGrid.vue'
+import type { Summary } from '@/composables/useSummary'
 
-defineProps<{ summary: Required<SummaryInfoDto> }>()
+const props = defineProps<{ summary: Summary }>()
+
+const stats = computed(() => [
+  { label: 'Sport', value: props.summary.sportDuration, unit: 'min' },
+  { label: 'Dépensées', value: props.summary.spentKcal, unit: 'kcal' },
+  { label: 'Ingérées', value: props.summary.ingestedKcal, unit: 'kcal' },
+  { label: 'Alcalories', value: props.summary.drinkingBeer, unit: 'kcal' },
+])
 </script>
 
 <style scoped>
-.stats {
+.day-stats {
   grid-template-columns: repeat(4, 1fr);
 }
 
 @media (max-width: 393px) {
-  .stats {
+  .day-stats {
     grid-template-columns: repeat(2, 1fr);
   }
 }

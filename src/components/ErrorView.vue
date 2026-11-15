@@ -8,22 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, watch } from 'vue'
 import { useNotification } from '@/composables/useNotification'
 
-const SUCCESS_DURATION_MS = 2500
-
+// Affichage seul : la durée de vie du message est gérée par useNotification.
 const { message, tone, clear } = useNotification()
-
-// Un succès disparaît seul ; une erreur reste jusqu'à ce qu'on la ferme.
-let timer: ReturnType<typeof setTimeout> | undefined
-watch([message, tone], ([text, kind]) => {
-  clearTimeout(timer)
-  if (text && kind === 'success') {
-    timer = setTimeout(clear, SUCCESS_DURATION_MS)
-  }
-})
-onUnmounted(() => clearTimeout(timer))
 </script>
 
 <style scoped>

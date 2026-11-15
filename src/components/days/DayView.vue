@@ -12,7 +12,7 @@
         type="button"
         class="add btn btn-primary btn-icon"
         aria-label="Ajouter une entrée"
-        @click="creating = true"
+        @click="dialog = {}"
       >
         +
       </button>
@@ -28,29 +28,22 @@
     <p v-else-if="entriesLoaded" class="empty muted">Aucune entrée</p>
 
     <div v-if="expanded" class="details">
-      <DaySummary :summary="summary" />
+      <DaySummary v-if="summaryLoaded" :summary="summary" />
       <EntryList
         :entries="entries"
-        :editing-entry-id="editingEntryId"
-        @edit="editingEntryId = $event.id"
+        @edit="dialog = { entry: $event }"
         @delete="deleteEntry"
         @create-model="addFoodModelFromEntry"
-      >
-        <template #edit="{ entry }">
-          <EntryForm :date="entry.date" :entry="entry" @submit="submitEditedEntry" />
-          <button type="button" class="btn btn-ghost btn-block" @click="editingEntryId = null">
-            Annuler
-          </button>
-        </template>
-      </EntryList>
+      />
     </div>
 
-    <ModalDialog v-if="creating" :title="`${dayName} ${shortDate(date)}`" @close="creating = false">
+    <!-- Création (« + ») et modification passent par le même modal. -->
+    <ModalDialog v-if="dialog" :title="`${dayName} ${shortDate(date)}`" @close="dialog = null">
       <CategorySelection
-        :date="date"
-        :entries="entries"
-        @set-quantity="persistEntry"
-        @submit="submitNewEntry"
+        :entry="dialog.entry"
+        :food-quantities="foodQuantities"
+        @set-food-quantity="setFoodQuantity"
+        @submit="submitEntry"
       />
     </ModalDialog>
   </article>
@@ -58,18 +51,24 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import type { CreateEntryBody } from '@/api/generated'
+import type { ModelFoodDto } from '@/api/generated'
 import DaySummary from '@/components/days/DaySummary.vue'
 import CategorySelection from '@/components/entries/CategorySelection.vue'
-import EntryForm from '@/components/entries/EntryForm.vue'
 import EntryList from '@/components/entries/EntryList.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import { useEntries } from '@/composables/useEntries'
 import { useModels } from '@/composables/useModels'
 import { useSummary } from '@/composables/useSummary'
-import { entryCategory, isFoodEntry, type DayEntry } from '@/types/entries'
+import {
+  entryCategory,
+  isFoodEntry,
+  type DayEntry,
+  type EditableEntry,
+  type EntryInput,
+} from '@/types/entries'
 import { shortDate, weekDayName } from '@/utils/dates'
 
+// PeriodView indexe ses jours par date : `date` ne change pas pendant la vie du composant.
 const props = defineProps<{ date: string }>()
 const emit = defineEmits<{ entriesChanged: [] }>()
 // Détail du jour (résumé et liste). PeriodView n'en garde qu'un d'ouvert par semaine.
@@ -78,75 +77,49 @@ const expanded = defineModel<boolean>('expanded', { default: false })
 const {
   entries,
   loaded: entriesLoaded,
+  foodQuantities,
   fetchEntries,
-  addEntry,
-  editEntry,
+  saveEntry,
   removeEntry,
-} = useEntries()
-const { summary, fetchSummary } = useSummary()
+  setFoodQuantity: saveFoodQuantity,
+} = useEntries(props.date)
+const { summary, loaded: summaryLoaded, fetchSummary } = useSummary(props.date, props.date)
 const { addFoodModelFromEntry } = useModels()
 
-const creating = ref(false)
-const editingEntryId = ref<string | null>(null)
+// Modal de saisie : fermé (null), création ({}) ou modification ({ entry }).
+const dialog = ref<{ entry?: EditableEntry } | null>(null)
 const dayName = computed(() => weekDayName(props.date))
 
 const quantityLabel = (entry: DayEntry) =>
   isFoodEntry(entry) && entry.quantity > 1 ? `×${entry.quantity}` : ''
 
-const loadDaySummary = () => fetchSummary(props.date, props.date)
-
-const toggleExpanded = async () => {
-  if (expanded.value) {
-    expanded.value = false
-    return
-  }
-  await loadDaySummary()
-  expanded.value = true
+const toggleExpanded = () => {
+  expanded.value = !expanded.value
 }
 
-const onEntriesChanged = async () => {
-  emit('entriesChanged')
-  if (expanded.value) {
-    await loadDaySummary()
-  }
-}
-
-const persistEntry = async (entry: CreateEntryBody) => {
-  const saved = entry.id ? await editEntry(entry.id, entry) : await addEntry(entry)
+// Le résumé n'est chargé que pour un jour déplié, et rechargé après chaque écriture.
+const afterWrite = <T,>(saved: T) => {
   if (saved) {
-    await onEntriesChanged()
+    emit('entriesChanged')
+    if (expanded.value) fetchSummary()
   }
   return saved
 }
 
+// La saisie food enregistre à chaque clic et garde le modal ouvert.
+const setFoodQuantity = async (model: ModelFoodDto, quantity: number) =>
+  afterWrite(await saveFoodQuantity(model, quantity))
+
 // Un formulaire ne se ferme qu'après un enregistrement réussi : en cas d'échec, la saisie reste.
-// La saisie food passe directement par persistEntry et garde le modal ouvert.
-const submitNewEntry = async (entry: CreateEntryBody) => {
-  if (await persistEntry(entry)) {
-    creating.value = false
-  }
+const submitEntry = async (entry: EntryInput) => {
+  if (afterWrite(await saveEntry(entry))) dialog.value = null
 }
 
-const submitEditedEntry = async (entry: CreateEntryBody) => {
-  if (await persistEntry(entry)) {
-    editingEntryId.value = null
-  }
-}
+const deleteEntry = async (entry: DayEntry) => afterWrite(await removeEntry(entry.id))
 
-const deleteEntry = async (entry: DayEntry) => {
-  if (await removeEntry(entry.id)) {
-    await onEntriesChanged()
-  }
-}
+watch(expanded, (value) => value && fetchSummary(), { immediate: true })
 
-// Refermer le détail abandonne une modification en cours.
-watch(expanded, (value) => {
-  if (!value) {
-    editingEntryId.value = null
-  }
-})
-
-onMounted(() => fetchEntries(props.date))
+onMounted(fetchEntries)
 </script>
 
 <style scoped>
@@ -155,10 +128,14 @@ onMounted(() => fetchEntries(props.date))
   transition: box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.day:hover,
-.day.expanded {
+.day:hover {
   border-color: var(--line-strong);
   box-shadow: 0 6px 18px -10px rgba(23, 32, 64, 0.28);
+}
+
+.day.expanded {
+  border-color: var(--c-accent-line);
+  box-shadow: 0 10px 26px -12px rgba(12, 135, 170, 0.45);
 }
 
 .head {
@@ -254,7 +231,12 @@ onMounted(() => fetchEntries(props.date))
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.75rem;
-  border-top: 1px solid var(--line);
-  background: var(--c-bg);
+  border-top: 1px solid var(--c-accent-line);
+  background: var(--c-tint);
+}
+
+/* Sur le fond teinté, les statistiques passent en blanc comme les cartes d'entrée. */
+.details :deep(.stat) {
+  background: var(--c-raised);
 }
 </style>

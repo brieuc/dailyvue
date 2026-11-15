@@ -40,15 +40,16 @@ The architecture follows the sibling project `cashvue`. `COMPONENTS.md` maps the
 Composables call `@/api/generated` directly. There is no service layer. Naming: `fetchX`, `addX`, `editX`, `removeX`.
 
 - Reference data shared between components lives at module level: `useModels`. It has a `reset` function, called when `HomeView` unmounts.
-- Other data is local to each call: `useEntries` (one per day), `useSummary`, `usePeriods` (`HomeView` only). `useEntries` keeps `entries` up to date from the DTOs returned by writes, without reloading.
-- `useNotification` is a module-level singleton feeding the `ErrorView` banner.
+- Other data is local to each call: `useEntries(date)` (one per day), `useSummary(from, to)`, `usePeriods` (`HomeView` only). Their dates are fixed at creation: callers are keyed by date. `useEntries` keeps `entries` up to date from the DTOs returned by writes, without reloading, and owns the food logic (`foodQuantities`, `setFoodQuantity`).
+- `useNotification` is a module-level singleton feeding the `ErrorView` toast, success timeout included. Its `run(call, { success?, error? })` wraps every API call made by a composable.
 
 ### Conventions
 
 - `customFetch` throws `ApiError` on any non-ok response. A 401 or 403 outside `/auth/login` clears the session and redirects to login. The backend also answers 403 to a rejected login.
-- Composables catch errors and notify. Mutations return the DTO, or `undefined` on failure, so components use `if (saved) ...` without try/catch.
-- Forms take an optional `:entry` (absent means create) and emit `@submit`. The parent calls the composable.
-- `DayView` owns every entry write and the open/closed state of entry input. Creation happens in a `ModalDialog` opened by the day's "+" button; it contains `CategorySelection`, which renders `FoodEntryPicker` or `EntryForm` and only relays their events. Lists such as `EntryList` only display and emit: the edit form is injected through the `#edit` slot, never imported by the list.
+- Composables catch errors and notify through `run`: loads show `LOAD_ERROR`, writes show the error message. Mutations return the DTO, or `undefined` on failure, so components use `if (saved) ...` without try/catch. `useAuth.doLogin` returns a boolean and never throws.
+- Forms take an optional `:entry` (absent means create) and emit `@submit` with an `EntryInput`, which has no date: `useEntries` adds it. Entry components never receive the day's date or entries.
+- `DayView` owns every entry write and the single `dialog` state. Creation ("+") and editing ("Modifier") share one `ModalDialog` containing `CategorySelection`, which renders `FoodEntryPicker`, `SportEntryForm` or `FreeEntryForm` (tabs hidden when editing) and only relays their events. Lists such as `EntryList` only display and emit.
+- Shared state has one owner, bound with `v-model` (`v-model:loaded` for periods, `v-model:expanded` for days), never mirrored in a local ref.
 - Styling: design tokens and shared primitives (`.card`, `.btn-*`, `.field`, `.input`, `.segmented`, `.stat`) live in `src/assets/main.css`, after cashvue's light theme. Components use those and `var(--…)` only, with `<style scoped>` for local tweaks; no inline styles. UI text is in French.
 - API dates are `YYYY-MM-DD` calendar days. Compute them with `utils/dates.ts`, never with local `Date` arithmetic followed by `toISOString()`, which shifts days across daylight saving changes.
 

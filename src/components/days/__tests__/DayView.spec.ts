@@ -7,7 +7,6 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import { useModels } from '@/composables/useModels'
 
 vi.mock('@/api/generated', () => ({
-  EntryFreeFoodDtoAllOfFoodType: {},
   createEntry: vi.fn(),
   deleteEntry: vi.fn(),
   getEntries: vi.fn(),
@@ -61,6 +60,9 @@ const clickFoodPlus = async (wrapper: ReturnType<typeof mount>) => {
   await flushPromises()
 }
 
+const hasButton = (wrapper: ReturnType<typeof mount>, label: string) =>
+  wrapper.findAll('button').some((item) => item.text() === label)
+
 const clickButton = async (wrapper: ReturnType<typeof mount>, label: string) => {
   const button = wrapper.findAll('button').find((item) => item.text() === label)
   await button?.trigger('click')
@@ -77,6 +79,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   useModels().resetModels()
   useModels().foodModels.value = [{ id: 'm1', title: 'Pizza', kcal: 800 } as never]
+  useModels().sportModels.value = [{ id: 'sm1', title: 'Vélo' } as never]
   vi.mocked(api.getSummaryInfo).mockResolvedValue(ok({}))
 })
 
@@ -150,44 +153,71 @@ describe('DayView', () => {
     expect(wrapper.emitted('entriesChanged')).toBeUndefined()
   })
 
-  it('ouvre le formulaire de modification à la place de l’entrée', async () => {
+  it('ouvre la modification dans le modal, sans onglets de catégorie', async () => {
     vi.mocked(api.getEntries).mockResolvedValue(ok([sportEntry(2, 'Vélo')]))
     const wrapper = await openEditForm()
 
-    expect(wrapper.find('input[type="text"]').exists()).toBe(true)
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Enregistrer')).toBe(true)
+    expect(wrapper.findComponent(ModalDialog).exists()).toBe(true)
+    expect(wrapper.find('[role="tab"]').exists()).toBe(false)
+    expect(wrapper.get<HTMLInputElement>('input[type="text"]').element.value).toBe('Vélo')
+    expect(hasButton(wrapper, 'Enregistrer')).toBe(true)
   })
 
-  it('referme le formulaire de modification après un enregistrement réussi', async () => {
+  it('ferme le modal après une modification réussie', async () => {
     vi.mocked(api.getEntries).mockResolvedValue(ok([sportEntry(2, 'Vélo')]))
     vi.mocked(api.updateEntry).mockResolvedValue(ok(sportEntry(3, 'Vélo')))
     const wrapper = await openEditForm()
 
     await submitForm(wrapper)
 
-    expect(api.updateEntry).toHaveBeenCalledWith('s1', expect.objectContaining({ version: 2 }))
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Enregistrer')).toBe(false)
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Modifier')).toBe(true)
+    expect(api.updateEntry).toHaveBeenCalledWith(
+      's1',
+      expect.objectContaining({ version: 2, date: DATE }),
+    )
+    expect(wrapper.findComponent(ModalDialog).exists()).toBe(false)
   })
 
-  it('garde le formulaire de modification ouvert quand l’écriture échoue', async () => {
+  it('garde le modal de modification ouvert quand l’écriture échoue', async () => {
     vi.mocked(api.getEntries).mockResolvedValue(ok([sportEntry(2, 'Vélo')]))
     vi.mocked(api.updateEntry).mockRejectedValue(new Error('boom'))
     const wrapper = await openEditForm()
 
     await submitForm(wrapper)
 
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Enregistrer')).toBe(true)
+    expect(hasButton(wrapper, 'Enregistrer')).toBe(true)
   })
 
-  it('abandonne la modification quand on referme le détail', async () => {
+  it('abandonne une modification en fermant le modal', async () => {
     vi.mocked(api.getEntries).mockResolvedValue(ok([sportEntry(2, 'Vélo')]))
     const wrapper = await openEditForm()
 
-    await wrapper.setProps({ expanded: false })
-    await wrapper.setProps({ expanded: true })
+    await wrapper.get('[aria-label="Fermer"]').trigger('click')
 
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Enregistrer')).toBe(false)
+    expect(api.updateEntry).not.toHaveBeenCalled()
+    expect(wrapper.findComponent(ModalDialog).exists()).toBe(false)
+  })
+
+  it('ne charge le résumé que pour un jour déplié', async () => {
+    vi.mocked(api.getEntries).mockResolvedValue(ok([]))
+    const wrapper = mountDay()
+    await flushPromises()
+    expect(api.getSummaryInfo).not.toHaveBeenCalled()
+
+    await wrapper.setProps({ expanded: true })
+    await flushPromises()
+    expect(api.getSummaryInfo).toHaveBeenCalledWith({ fromDate: DATE, toDate: DATE })
+  })
+
+  it('recharge le résumé du jour déplié après une écriture', async () => {
+    vi.mocked(api.getEntries).mockResolvedValue(ok([]))
+    vi.mocked(api.createEntry).mockResolvedValue(ok(foodEntry(0, 1)))
+    const wrapper = mountDay({ expanded: true })
+    await flushPromises()
+    await wrapper.get('.add').trigger('click')
+
+    await clickFoodPlus(wrapper)
+
+    expect(api.getSummaryInfo).toHaveBeenCalledTimes(2)
   })
 
   it('ouvre le modal sur la saisie food', async () => {
@@ -243,15 +273,5 @@ describe('DayView', () => {
     const wrapper = await openModal()
 
     expect(wrapper.getComponent(FoodModelRow).props('quantity')).toBe(2)
-  })
-
-  it('annule une modification sans rien enregistrer', async () => {
-    vi.mocked(api.getEntries).mockResolvedValue(ok([sportEntry(2, 'Vélo')]))
-    const wrapper = await openEditForm()
-
-    await clickButton(wrapper, 'Annuler')
-
-    expect(api.updateEntry).not.toHaveBeenCalled()
-    expect(wrapper.findAll('button').some((item) => item.text() === 'Modifier')).toBe(true)
   })
 })

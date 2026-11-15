@@ -13,9 +13,8 @@
         v-for="model in visibleModels"
         :key="model.id"
         :model="model"
-        :quantity="quantityOf(model)"
-        @add="increment(model)"
-        @sub="decrement(model)"
+        :quantity="quantities.get(model.id ?? '') ?? 0"
+        @update:quantity="emit('setQuantity', model, $event)"
       />
       <p v-if="!visibleModels.length" class="empty muted">Aucun aliment</p>
     </div>
@@ -24,18 +23,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { CreateEntryBody, ModelFoodDto } from '@/api/generated'
+import type { ModelFoodDto } from '@/api/generated'
 import FoodModelRow from '@/components/entries/FoodModelRow.vue'
 import { useModels } from '@/composables/useModels'
-import { isFoodEntry, type DayEntry, type FoodEntry } from '@/types/entries'
-
-const props = defineProps<{
-  date: string
-  entries: DayEntry[]
-}>()
-const emit = defineEmits<{ setQuantity: [entry: CreateEntryBody] }>()
 
 const SEARCH_THRESHOLD = 8
+
+// Quantités par id de modèle. L'enregistrement revient au parent (useEntries.setFoodQuantity).
+defineProps<{ quantities: Map<string, number> }>()
+const emit = defineEmits<{ setQuantity: [model: ModelFoodDto, quantity: number] }>()
 
 const { foodModels } = useModels()
 
@@ -47,56 +43,6 @@ const visibleModels = computed(() => {
     ? foodModels.value.filter((model) => model.title?.toLowerCase().includes(search))
     : foodModels.value
 })
-
-const entriesByModelId = computed(
-  () =>
-    new Map<string, FoodEntry>(
-      props.entries.filter(isFoodEntry).map((entry) => [entry.model?.id ?? entry.modelId, entry]),
-    ),
-)
-
-const quantityOf = (model: ModelFoodDto) =>
-  (model.id && entriesByModelId.value.get(model.id)?.quantity) || 0
-
-const setQuantity = (model: ModelFoodDto, modelId: string, quantity: number) => {
-  const active = entriesByModelId.value.get(modelId)
-  emit(
-    'setQuantity',
-    active
-      ? {
-          id: active.id,
-          version: active.version,
-          title: active.title,
-          description: active.description,
-          quantity,
-          modelId,
-          date: active.date,
-          type: 'FOOD',
-        }
-      : {
-          quantity,
-          modelId,
-          date: props.date,
-          title: model.title as string,
-          description: model.description,
-          type: 'FOOD',
-        },
-  )
-}
-
-const increment = (model: ModelFoodDto) => {
-  if (!model.id) return
-  const quantity = entriesByModelId.value.get(model.id)?.quantity ?? 0
-  setQuantity(model, model.id, quantity + 1)
-}
-
-const decrement = (model: ModelFoodDto) => {
-  if (!model.id) return
-  const active = entriesByModelId.value.get(model.id)
-  if (active) {
-    setQuantity(model, model.id, active.quantity - 1)
-  }
-}
 </script>
 
 <style scoped>

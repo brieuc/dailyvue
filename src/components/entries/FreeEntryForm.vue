@@ -20,7 +20,7 @@
     <template v-if="isFreeFood">
       <div class="field">
         <span class="field-label">Type d'aliment</span>
-        <ChoiceChips v-model="foodType" label="Type d'aliment" :options="FOOD_TYPES" />
+        <ChoiceChips v-model="foodType" label="Type d'aliment" :options="FOOD_TYPE_OPTIONS" />
       </div>
       <label class="field">
         <span class="field-label">Calories</span>
@@ -31,28 +31,20 @@
       </label>
     </template>
 
-    <button type="submit" class="btn btn-primary btn-block">{{ entry ? 'Enregistrer' : 'Ajouter' }}</button>
+    <button type="submit" class="btn btn-primary btn-block" :disabled="!modelId">{{ entry ? 'Enregistrer' : 'Ajouter' }}</button>
   </form>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { EntryFreeFoodDtoAllOfFoodType, type EntryFreeFoodDto } from '@/api/generated'
 import ChoiceChips from '@/components/ChoiceChips.vue'
 import { useModels } from '@/composables/useModels'
-import { FOOD_TYPE_LABELS, type FreeEntry } from '@/types/entries'
+import { FOOD_TYPE_OPTIONS, type EntryInput, type FreeEntry } from '@/types/entries'
 
 const FREE_FOOD_MODEL_TITLE = 'Free Food'
-const FOOD_TYPES = (Object.keys(FOOD_TYPE_LABELS) as EntryFreeFoodDtoAllOfFoodType[]).map((value) => ({
-  value,
-  label: FOOD_TYPE_LABELS[value],
-}))
 
-const props = defineProps<{
-  date: string
-  entry?: FreeEntry
-}>()
-const emit = defineEmits<{ submit: [entry: EntryFreeFoodDto] }>()
+const props = defineProps<{ entry?: FreeEntry }>()
+const emit = defineEmits<{ submit: [entry: EntryInput] }>()
 
 const { freeModels } = useModels()
 
@@ -74,10 +66,9 @@ const submit = () => {
     ...(props.entry && { id: props.entry.id, version: props.entry.version }),
     title: title.value,
     description: description.value,
-    date: props.date,
     modelId: modelId.value,
     type: isFreeFood.value ? 'FREE_FOOD' : 'FREE',
     ...(isFreeFood.value && { foodType: foodType.value, kcal: kcal.value }),
-  } as EntryFreeFoodDto)
+  } as EntryInput)
 }
 </script>

@@ -20,8 +20,11 @@ export type EditableEntry = SportEntry | FreeEntry
 
 export type ModelCategory = 'food' | 'sport' | 'free'
 
-/** Catégorie saisie par formulaire. */
-export type FormCategory = Exclude<ModelCategory, 'food'>
+/** Entrée prête à enregistrer, sans date : useEntries y ajoute celle de son jour. */
+export type EntryInput =
+  | Omit<EntryFoodDto, 'date'>
+  | Omit<EntrySportDto, 'date'>
+  | Omit<EntryFreeFoodDto, 'date'>
 
 export const isFoodEntry = (entry: DayEntry): entry is FoodEntry => entry.type === 'FOOD'
 
@@ -65,3 +68,14 @@ export const SPORT_LABELS: Record<ModelSportDtoAllOfSport, string> = {
   SQUASH: 'Squash',
   FREE: 'Libre',
 }
+
+export interface ChoiceOption<T extends string> {
+  value: T
+  label: string
+}
+
+const toOptions = <T extends string>(labels: Record<T, string>): ChoiceOption<T>[] =>
+  (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
+
+export const FOOD_TYPE_OPTIONS = toOptions(FOOD_TYPE_LABELS)
+export const BENEFIT_OPTIONS = toOptions(BENEFIT_LABELS)

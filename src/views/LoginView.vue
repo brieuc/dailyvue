@@ -53,18 +53,14 @@ const credentials = reactive({
 const handleLogin = async () => {
   error.value = ''
   loading.value = true
-  try {
-    if (await doLogin(credentials)) {
-      const redirect = route.query.redirect
-      router.push(typeof redirect === 'string' ? redirect : '/')
-    } else {
-      error.value = 'Identifiants refusés'
-    }
-  } catch {
+  const success = await doLogin(credentials)
+  loading.value = false
+  if (!success) {
     error.value = 'Identifiants refusés'
-  } finally {
-    loading.value = false
+    return
   }
+  const redirect = route.query.redirect
+  router.push(typeof redirect === 'string' ? redirect : '/')
 }
 </script>
 

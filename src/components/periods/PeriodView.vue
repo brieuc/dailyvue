@@ -2,8 +2,8 @@
   <section class="period">
     <PeriodSummary :from-date="startDate" :to-date="endDate" :summary="summary" />
 
-    <div v-if="!showDays" class="load">
-      <button type="button" class="btn btn-secondary btn-sm" @click="daysRequested = true">
+    <div v-if="!loaded" class="load">
+      <button type="button" class="btn btn-secondary btn-sm" @click="loaded = true">
         Charger les données
       </button>
     </div>
@@ -15,37 +15,33 @@
         :date="day"
         :expanded="expandedDay === day"
         @update:expanded="(expanded) => (expandedDay = expanded ? day : null)"
-        @entries-changed="loadSummary"
+        @entries-changed="fetchSummary"
       />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import DayView from '@/components/days/DayView.vue'
 import PeriodSummary from '@/components/periods/PeriodSummary.vue'
 import { useSummary } from '@/composables/useSummary'
 import { addDays, elapsedDaysDescending, PERIOD_DAYS } from '@/utils/dates'
 
-const props = defineProps<{
-  startDate: string
-  loaded: boolean
-}>()
+// HomeView indexe ses périodes par date de début : `startDate` ne change pas.
+const props = defineProps<{ startDate: string }>()
+// Jours affichés. L'état vit dans usePeriods, HomeView le lie par v-model.
+const loaded = defineModel<boolean>('loaded', { required: true })
 
-const { summary, fetchSummary } = useSummary()
+const endDate = addDays(props.startDate, PERIOD_DAYS - 1)
+const days = elapsedDaysDescending(props.startDate, PERIOD_DAYS)
 
-const daysRequested = ref(false)
+const { summary, fetchSummary } = useSummary(props.startDate, endDate)
+
 // Un seul jour déplié à la fois dans la période.
 const expandedDay = ref<string | null>(null)
 
-const showDays = computed(() => props.loaded || daysRequested.value)
-const endDate = computed(() => addDays(props.startDate, PERIOD_DAYS - 1))
-const days = computed(() => elapsedDaysDescending(props.startDate, PERIOD_DAYS))
-
-const loadSummary = () => fetchSummary(props.startDate, endDate.value)
-
-onMounted(loadSummary)
+onMounted(fetchSummary)
 </script>
 
 <style scoped>

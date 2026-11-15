@@ -10,12 +10,12 @@
         class="btn btn-secondary btn-icon"
         aria-label="Retirer"
         :disabled="quantity === 0"
-        @click="emit('sub')"
+        @click="quantity--"
       >
         −
       </button>
       <span class="quantity mono" aria-live="polite">{{ quantity }}</span>
-      <button type="button" class="btn btn-secondary btn-icon" aria-label="Ajouter" @click="emit('add')">
+      <button type="button" class="btn btn-secondary btn-icon" aria-label="Ajouter" @click="quantity++">
         +
       </button>
     </div>
@@ -25,11 +25,9 @@
 <script setup lang="ts">
 import type { ModelFoodDto } from '@/api/generated'
 
-defineProps<{
-  model: ModelFoodDto
-  quantity: number
-}>()
-const emit = defineEmits<{ add: []; sub: [] }>()
+defineProps<{ model: ModelFoodDto }>()
+// Le parent enregistre la nouvelle quantité ; la ligne ne fait que la proposer.
+const quantity = defineModel<number>('quantity', { required: true })
 </script>
 
 <style scoped>
