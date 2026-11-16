@@ -1,12 +1,15 @@
-const CACHE_NAME = 'dailymon-v2';
-const STATIC_CACHE = 'dailymon-static-v2';
-const API_CACHE = 'dailymon-api-v2';
+const CACHE_NAME = 'dailymon-v3';
+const STATIC_CACHE = 'dailymon-static-v3';
+const API_CACHE = 'dailymon-api-v3';
+
+// Chemin de base de l'app (ex. /dailymon/), déduit du scope du service worker
+const BASE = new URL(self.registration.scope).pathname;
 
 // Assets statiques à pré-cacher
 const staticUrlsToCache = [
-  '/',
-  '/manifest.json',
-  '/favicon.ico'
+  BASE,
+  BASE + 'manifest.json',
+  BASE + 'favicon.ico'
   // Les JS/CSS avec hash seront cachés automatiquement lors du fetch
 ];
 
@@ -301,9 +304,9 @@ async function networkFirst(request, cacheName) {
 
 function isStaticAsset(pathname) {
   return pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/) ||
-         pathname === '/' ||
-         pathname === '/manifest.json' ||
-         pathname === '/favicon.ico';
+         pathname === BASE ||
+         pathname === BASE + 'manifest.json' ||
+         pathname === BASE + 'favicon.ico';
 }
 
 function isApiRequest(pathname) {
